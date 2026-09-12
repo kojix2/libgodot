@@ -463,3 +463,65 @@ test_script_first_class "Editor script linking, ClassRegistry script_path, and g
   TestFramework.assert_eq c_invalid, ""
   LibSystemIO.remove(fs_invalid_path.to_unsafe) if File.exists?(fs_invalid_path)
 end
+
+test_script_first_class "ScriptEditor save simulation: unsaved script without path, set_path, and save via ResourceSaver" do
+  rs_ptr = Godot::Bridge.get_singleton("ResourceSaver")
+  rl_ptr = Godot::Bridge.get_singleton("ResourceLoader")
+  TestFramework.assert_true !rs_ptr.null?, "ResourceSaver singleton must exist"
+  TestFramework.assert_true !rl_ptr.null?, "ResourceLoader singleton must exist"
+
+  r_saver = Godot::ResourceSaver.new(rs_ptr)
+  r_loader = Godot::ResourceLoader.new(rl_ptr)
+
+  # Create a fresh script with no path set initially (mimicking File -> New Script in Editor)
+  new_script = Godot.create(Godot::CrystalScript)
+  TestFramework.assert_true !new_script.nil?, "Fresh CrystalScript instance must be created"
+
+  if sc = new_script
+    test_path = "user://test_script_editor_unsaved_flow.cr"
+    fs_path = Godot::ResourceFormatSaverCrystal.resolve_save_path(test_path)
+
+    code = <<-CRYSTAL
+    require "libgodot"
+
+    node UnsavedToSavedNode < Node2D do
+      @[Export]
+      property greeting : String = "Hello from ScriptEditor!"
+
+      def _ready : Void
+        Godot.print(greeting)
+      end
+    end
+    CRYSTAL
+
+    begin
+      sc.source_code = code
+      # Script initially has no path
+      TestFramework.assert_eq sc.script_path, ""
+
+      # User chooses destination in Save Dialog: script.script_path = test_path
+      sc.script_path = test_path
+
+      # Save via ResourceSaver.save(script, path)
+      save_ret = r_saver.call_i64("save", sc, test_path)
+      TestFramework.assert_eq save_ret, 0_i64, "Saving via ResourceSaver with target path should return OK (0)"
+      TestFramework.assert_true Godot::SystemIO.file_exists?(fs_path), "File should be created on disk"
+
+      # Also test saving with empty path string (ResourceSaver should resolve path from script itself)
+      save_ret_empty = r_saver.call_i64("save", sc, "")
+      TestFramework.assert_eq save_ret_empty, 0_i64, "Saving via ResourceSaver with empty path should resolve resource path and return OK (0)"
+
+      # Reload and verify
+      loaded = r_loader.call_obj("load", test_path)
+      TestFramework.assert_true !loaded.nil? && !loaded.pointer.null?, "Script should be loadable"
+      if l_obj = loaded
+        src = l_obj.call_str("get_source_code")
+        TestFramework.assert_true src.includes?("UnsavedToSavedNode"), "Loaded source must contain class name"
+        TestFramework.assert_true src.includes?("Hello from ScriptEditor!"), "Loaded source must contain greeting"
+      end
+    ensure
+      LibSystemIO.remove(fs_path.to_unsafe) if !fs_path.empty? && Godot::SystemIO.file_exists?(fs_path)
+    end
+  end
+end
+

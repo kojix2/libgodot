@@ -40,7 +40,12 @@ module Godot
     @doc_comments : Hash(String, String) = {} of String => String
 
     def script_path : String; @script_path; end
-    def script_path=(v : String); @script_path = v; end
+    def script_path=(v : String)
+      @script_path = v
+      if !@pointer.null? && !v.empty?
+        call("set_path", v) rescue nil
+      end
+    end
 
     def source_code : String; @source_code; end
     def source_code=(v : String)
@@ -91,6 +96,9 @@ module Godot
 
     def set_script_path(p : String) : Void
       @script_path = p
+      if !@pointer.null? && !p.empty?
+        call("set_path", p) rescue nil
+      end
     end
 
     def set_source_code(code : String) : Void

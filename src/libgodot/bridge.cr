@@ -159,6 +159,8 @@ module Godot
       register_gc_module : (BridgeGCModule* -> Void)
       ref_get_object : (Void* -> Void*)
       script_get_source_code : (Void* -> LibC::Char*)
+      resource_get_path : (Void* -> LibC::Char*)
+      object_is_class : (Void*, LibC::Char* -> Bool)
     end
   end
 
@@ -1172,6 +1174,17 @@ module Godot
       return "" if script_obj.null? || @@api.null? || @@api.value.script_get_source_code.pointer.null?
       ptr = @@api.value.script_get_source_code.call(script_obj)
       ptr.null? ? "" : String.new(ptr)
+    end
+
+    def self.resource_get_path(res_obj : Void*) : String
+      return "" if res_obj.null? || @@api.null? || @@api.value.resource_get_path.pointer.null?
+      ptr = @@api.value.resource_get_path.call(res_obj)
+      ptr.null? ? "" : String.new(ptr)
+    end
+
+    def self.object_is_class(obj : Void*, class_name : String) : Bool
+      return false if obj.null? || @@api.null? || @@api.value.object_is_class.pointer.null?
+      @@api.value.object_is_class.call(obj, class_name.to_unsafe)
     end
   end
 end

@@ -1023,6 +1023,59 @@ inline void bridge_ret_variant_nil(void *r_ret) {
     memset(r_ret, 0, 24);
 }
 
+inline bool has_cr_extension(const char *path) {
+    if (!path) return false;
+    size_t len = strlen(path);
+    if (len >= 3 && (path[len - 3] == '.' && (path[len - 2] == 'c' || path[len - 2] == 'C') && (path[len - 1] == 'r' || path[len - 1] == 'R'))) {
+        return true;
+    }
+    return false;
+}
+
+static GDExtensionMethodBindPtr mb_resource_get_path = nullptr;
+inline const char* bridge_resource_get_path(GDExtensionObjectPtr res) {
+    static thread_local std::string s_path_buf;
+    s_path_buf.clear();
+    if (!res || !gd_classdb_get_method_bind || !gd_object_method_bind_ptrcall) return "";
+    if (!mb_resource_get_path) {
+        void *sn_res = make_string_name("Resource");
+        void *sn_gp = make_string_name("get_path");
+        mb_resource_get_path = gd_classdb_get_method_bind(sn_res, sn_gp, 201670096ULL);
+        free_string_name(sn_res); free_string_name(sn_gp);
+    }
+    if (!mb_resource_get_path) return "";
+
+    alignas(void*) char gd_str[8] = {0};
+    gd_object_method_bind_ptrcall(mb_resource_get_path, res, nullptr, gd_str);
+    if (gd_string_to_utf8_chars) {
+        int64_t len = gd_string_to_utf8_chars(gd_str, nullptr, 0);
+        if (len > 0) {
+            s_path_buf.resize((size_t)len);
+            gd_string_to_utf8_chars(gd_str, &s_path_buf[0], len);
+        }
+    }
+    if (gd_string_destroy) gd_string_destroy(gd_str);
+    return s_path_buf.c_str();
+}
+
+inline bool bridge_object_is_class(GDExtensionObjectPtr obj, const char *class_name) {
+    if (!obj || !class_name || !gd_classdb_get_method_bind || !gd_object_method_bind_ptrcall) return false;
+    if (!mb_object_is_class) {
+        void *sn_obj = make_string_name("Object");
+        void *sn_ic = make_string_name("is_class");
+        mb_object_is_class = gd_classdb_get_method_bind(sn_obj, sn_ic, 2619796661ULL);
+        free_string_name(sn_obj); free_string_name(sn_ic);
+    }
+    if (!mb_object_is_class) return false;
+
+    void *sn_cls = make_string_name(class_name);
+    const void *args[1] = { sn_cls };
+    uint8_t ret_val = 0;
+    gd_object_method_bind_ptrcall(mb_object_is_class, obj, (const GDExtensionConstTypePtr*)args, &ret_val);
+    free_string_name(sn_cls);
+    return ret_val != 0;
+}
+
 inline void* bridge_ref_get_object(const void *ref_ptr) {
     if (!ref_ptr) return nullptr;
     if (gd_ref_get_object) {
@@ -1042,8 +1095,7 @@ inline const char* bridge_script_get_source_code(GDExtensionObjectPtr script_obj
         if (deref) target = (GDExtensionObjectPtr)deref;
     }
 
-    const char *cls = bridge_object_call_ret_string(target, "get_class");
-    if (!cls || (strcmp(cls, "CrystalScript") != 0 && strcmp(cls, "Script") != 0 && strcmp(cls, "GDScript") != 0)) {
+    if (!bridge_object_is_class(target, "Script")) {
         return "";
     }
 

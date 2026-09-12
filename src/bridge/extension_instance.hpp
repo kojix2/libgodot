@@ -69,6 +69,28 @@ inline bool is_refcounted_desc(const CrystalClassDesc *desc) {
     return false;
 }
 
+static std::unordered_map<void*, GenericExtensionInstance*> s_object_to_extension_instance;
+static std::mutex s_object_to_ext_mutex;
+
+inline void register_extension_instance(void *obj, GenericExtensionInstance *inst) {
+    if (!obj || !inst) return;
+    std::lock_guard<std::mutex> lock(s_object_to_ext_mutex);
+    s_object_to_extension_instance[obj] = inst;
+}
+
+inline void unregister_extension_instance(void *obj) {
+    if (!obj) return;
+    std::lock_guard<std::mutex> lock(s_object_to_ext_mutex);
+    s_object_to_extension_instance.erase(obj);
+}
+
+inline GenericExtensionInstance* find_extension_instance(void *obj) {
+    if (!obj) return nullptr;
+    std::lock_guard<std::mutex> lock(s_object_to_ext_mutex);
+    auto it = s_object_to_extension_instance.find(obj);
+    return it != s_object_to_extension_instance.end() ? it->second : nullptr;
+}
+
 /**
  * Instantiates a new Godot Object for a registered Crystal class.
  *
@@ -120,6 +142,7 @@ inline GDExtensionObjectPtr generic_class_create(void *p_class_userdata, GDExten
     }
 
     gd_object_set_instance(obj, class_sn, (GDExtensionClassInstancePtr)inst);
+    register_extension_instance(obj, inst);
 
     bool allow_processing = !is_editor_active() || is_tool_desc(desc);
 
@@ -159,6 +182,8 @@ inline GDExtensionClassInstancePtr generic_class_recreate(void *p_class_userdata
         inst->crystal_instance = nullptr;
     }
 
+    register_extension_instance(p_object, inst);
+
     bool allow_processing = !is_editor_active() || is_tool_desc(desc);
 
     // Auto-enable physics process if requested
@@ -186,6 +211,9 @@ inline void generic_class_free(void *p_class_userdata, GDExtensionClassInstanceP
     ensure_gc_thread_registered();
     GenericExtensionInstance *inst = (GenericExtensionInstance*)p_instance;
     if (inst) {
+        if (inst->godot_object) {
+            unregister_extension_instance(inst->godot_object);
+        }
         if (inst->desc && inst->desc->free_instance && inst->crystal_instance) {
             inst->desc->free_instance(inst->crystal_instance);
         }
@@ -656,10 +684,110 @@ inline void generic_class_call_virtual_with_data(
                 bridge_ret_packed_string_array(r_ret, exts, 1);
                 return;
             }
+            if (strcmp(method_name, "_handles_type") == 0 || strcmp(method_name, "handles_type") == 0) {
+                bool ok = false;
+                if (p_args && p_args[0]) {
+                    char type_buf[128] = {0};
+                    bridge_arg_to_string_name(p_args[0], type_buf, sizeof(type_buf));
+                    if (type_buf[0] == '\0') bridge_arg_to_string(p_args[0], type_buf, sizeof(type_buf));
+                    if (type_buf[0] == '\0' || strcmp(type_buf, "Script") == 0 || strcmp(type_buf, "CrystalScript") == 0 || strcmp(type_buf, "Resource") == 0) {
+                        ok = true;
+                    }
+                }
+                if (r_ret) *(uint8_t*)r_ret = ok ? 1 : 0;
+                return;
+            }
+            if (strcmp(method_name, "_recognize_path") == 0 || strcmp(method_name, "recognize_path") == 0) {
+                bool ok = false;
+                if (p_args && p_args[0]) {
+                    char path_buf[512] = {0};
+                    bridge_arg_to_string(p_args[0], path_buf, sizeof(path_buf));
+                    if (has_cr_extension(path_buf)) {
+                        ok = true;
+                    }
+                }
+                if (r_ret) *(uint8_t*)r_ret = ok ? 1 : 0;
+                return;
+            }
         } else if (strcmp(inst->desc->name, "ResourceFormatSaverCrystal") == 0) {
             if (strcmp(method_name, "_get_recognized_extensions") == 0 || strcmp(method_name, "get_recognized_extensions") == 0) {
                 const char *exts[] = { "cr" };
                 bridge_ret_packed_string_array(r_ret, exts, 1);
+                return;
+            }
+            if (strcmp(method_name, "_recognize") == 0 || strcmp(method_name, "recognize") == 0) {
+                bool ok = false;
+                if (p_args && p_args[0]) {
+                    void *res_obj = bridge_ref_get_object(p_args[0]);
+                    void *raw_obj = *(void**)p_args[0];
+                    void *candidates[2] = { res_obj, raw_obj };
+                    for (int i = 0; i < 2; i++) {
+                        void *o = candidates[i];
+                        if (!o) continue;
+                        GenericExtensionInstance *ext = find_extension_instance(o);
+                        if (ext && ext->desc && strcmp(ext->desc->name, "CrystalScript") == 0) {
+                            ok = true;
+                            break;
+                        }
+                        const char *path = bridge_resource_get_path(o);
+                        if (has_cr_extension(path)) {
+                            ok = true;
+                            break;
+                        }
+                        if (bridge_object_is_class(o, "Script") || bridge_object_is_class(o, "ScriptExtension") || bridge_object_is_class(o, "CrystalScript")) {
+                            ok = true;
+                            break;
+                        }
+                    }
+                }
+                if (r_ret) *(uint8_t*)r_ret = ok ? 1 : 0;
+                return;
+            }
+            if (strcmp(method_name, "_recognize_path") == 0 || strcmp(method_name, "recognize_path") == 0) {
+                bool ok = false;
+                // Check path string in p_args[1]
+                if (p_args && p_args[1]) {
+                    char path_buf[512] = {0};
+                    bridge_arg_to_string(p_args[1], path_buf, sizeof(path_buf));
+                    if (path_buf[0] == '\0') bridge_arg_to_string_name(p_args[1], path_buf, sizeof(path_buf));
+                    if (has_cr_extension(path_buf)) {
+                        ok = true;
+                    }
+                }
+                // Check path string in p_args[0] defensively
+                if (!ok && p_args && p_args[0]) {
+                    char path_buf[512] = {0};
+                    bridge_arg_to_string(p_args[0], path_buf, sizeof(path_buf));
+                    if (path_buf[0] == '\0') bridge_arg_to_string_name(p_args[0], path_buf, sizeof(path_buf));
+                    if (has_cr_extension(path_buf)) {
+                        ok = true;
+                    }
+                }
+                // Check resource object in p_args[0]
+                if (!ok && p_args && p_args[0]) {
+                    void *res_obj = bridge_ref_get_object(p_args[0]);
+                    void *raw_obj = *(void**)p_args[0];
+                    void *candidates[2] = { res_obj, raw_obj };
+                    for (int i = 0; i < 2; i++) {
+                        void *o = candidates[i];
+                        if (!o) continue;
+                        GenericExtensionInstance *ext = find_extension_instance(o);
+                        if (ext && ext->desc && strcmp(ext->desc->name, "CrystalScript") == 0) {
+                            ok = true;
+                            break;
+                        }
+                        const char *path = bridge_resource_get_path(o);
+                        if (has_cr_extension(path)) {
+                            ok = true;
+                            break;
+                        }
+                        if (bridge_object_is_class(o, "Script") || bridge_object_is_class(o, "ScriptExtension") || bridge_object_is_class(o, "CrystalScript")) {
+                            ok = true;
+                            break;
+                        }
+                    }
+                }
+                if (r_ret) *(uint8_t*)r_ret = ok ? 1 : 0;
                 return;
             }
         }

@@ -313,43 +313,41 @@ module Godot
             recognize = inst.is_a?(CrystalScript)
           end
           unless recognize
-            c_name = Bridge.object_call_ret_string(res_ptr, "get_class")
-            recognize = (c_name == "CrystalScript")
-          end
-          unless recognize
-            path = Bridge.object_call_ret_string(res_ptr, "get_path")
+            path = Bridge.resource_get_path(res_ptr)
             recognize = path.downcase.ends_with?(".cr")
           end
           unless recognize
-            lang_ptr = Bridge.object_call_ret_object(res_ptr, "get_language")
-            if !lang_ptr.null?
-              l_name = Bridge.object_call_ret_string(lang_ptr, "get_name")
-              recognize = (l_name == "Crystal")
-            end
+            recognize = Bridge.object_is_class(res_ptr, "CrystalScript") ||
+                        Bridge.object_is_class(res_ptr, "ScriptExtension") ||
+                        Bridge.object_is_class(res_ptr, "Script")
           end
         end
         ret.as(UInt8*).value = recognize ? 1_u8 : 0_u8
       when "_recognize_path"
-        res_ptr = Pointer(Void).null
-        if !args.null? && !args[0].null?
+        path = (!args.null? && !args[1].null?) ? Bridge.arg_to_string(args[1]) : ""
+        recognize = path.downcase.ends_with?(".cr")
+        if !recognize && !args.null? && !args[0].null?
+          p0_str = (Bridge.arg_to_string(args[0]) rescue "")
+          recognize = p0_str.downcase.ends_with?(".cr")
+        end
+        if !recognize && !args.null? && !args[0].null?
           res_ptr = Bridge.ref_get_object(args[0])
           if res_ptr.null?
             res_ptr = args[0].as(Void**).value rescue Pointer(Void).null
           end
-        end
-        path = (!args.null? && !args[1].null?) ? Bridge.arg_to_string(args[1]) : ""
-        recognize = path.downcase.ends_with?(".cr")
-        if !recognize && !res_ptr.null?
-          if inst = Bridge.find_alive_instance(res_ptr)
-            recognize = inst.is_a?(CrystalScript)
-          end
-          unless recognize
-            c_name = Bridge.object_call_ret_string(res_ptr, "get_class")
-            recognize = (c_name == "CrystalScript")
-          end
-          unless recognize
-            r_path = Bridge.object_call_ret_string(res_ptr, "get_path")
-            recognize = r_path.downcase.ends_with?(".cr")
+          if !res_ptr.null?
+            if inst = Bridge.find_alive_instance(res_ptr)
+              recognize = inst.is_a?(CrystalScript)
+            end
+            unless recognize
+              r_path = Bridge.resource_get_path(res_ptr)
+              recognize = r_path.downcase.ends_with?(".cr")
+            end
+            unless recognize
+              recognize = Bridge.object_is_class(res_ptr, "CrystalScript") ||
+                          Bridge.object_is_class(res_ptr, "ScriptExtension") ||
+                          Bridge.object_is_class(res_ptr, "Script")
+            end
           end
         end
         ret.as(UInt8*).value = recognize ? 1_u8 : 0_u8
@@ -373,6 +371,12 @@ module Godot
         end
 
         path = (!args.null? && !args[1].null?) ? Bridge.arg_to_string(args[1]) : ""
+        if path.empty? && !res_ptr.null?
+          path = Bridge.resource_get_path(res_ptr)
+        end
+        if path.empty? && inst.is_a?(CrystalScript)
+          path = inst.as(CrystalScript).script_path
+        end
         fs_path = ResourceFormatSaverCrystal.resolve_save_path(path)
 
         code = ""

@@ -117,13 +117,62 @@ func _run_in_editor_tool_tests():
 		else:
 			print("[CrystalToolTester]   ✔ %s registered as EditorPlugin" % cls)
 
-	# 4. Open a .cr script in the editor to verify Script tab integration
-	print("[CrystalToolTester] Testing Script Tab: Loading and editing res://src/main.cr...")
+	# 4. Open a .cr script in the editor to verify Script tab integration and saving
+	print("[CrystalToolTester] Testing Script Tab: Loading, editing, and saving res://src/main.cr...")
 	var cr_script = load("res://src/main.cr")
 	if cr_script:
 		print("[CrystalToolTester]   ✔ Loaded %s as %s" % [cr_script.resource_path, cr_script.get_class()])
 		EditorInterface.edit_script(cr_script, -1, 0, false)
 		print("[CrystalToolTester]   ✔ Successfully opened %s in EditorInterface.edit_script!" % cr_script.resource_path)
+		
+		var script_editor = EditorInterface.get_script_editor()
+		if script_editor:
+			var current_script = script_editor.get_current_script()
+			if current_script:
+				print("[CrystalToolTester]   ✔ ScriptEditor current script verified: %s (%s)" % [current_script.resource_path, current_script.get_class()])
+			else:
+				print("[CrystalToolTester]   ⚠ Note: ScriptEditor.get_current_script() returned null in headless batch mode")
+		
+		# Test saving the existing script via ResourceSaver
+		var save_err = ResourceSaver.save(cr_script, cr_script.resource_path)
+		if save_err != OK:
+			var msg = "[CrystalToolTester] Failed to save %s via ResourceSaver (error code: %d)!" % [cr_script.resource_path, save_err]
+			printerr(msg)
+			error_messages.append(msg)
+			errors += 1
+		else:
+			print("[CrystalToolTester]   ✔ Successfully saved %s via ResourceSaver (OK)!" % cr_script.resource_path)
+
+		# Test creating, saving, and reloading a new CrystalScript
+		print("[CrystalToolTester] Testing creation and saving of new CrystalScript resource...")
+		var new_script = ClassDB.instantiate("CrystalScript")
+		if new_script:
+			var test_save_path = "res://bin/test_editor_created_script.cr"
+			var test_source = "require \"libgodot\"\n\nnode EditorSavedNode < Node do\n  def _ready : Void\n  end\nend\n"
+			new_script.set("source_code", test_source)
+			new_script.resource_path = test_save_path
+			var new_save_err = ResourceSaver.save(new_script, test_save_path)
+			if new_save_err != OK:
+				var msg = "[CrystalToolTester] Failed to save new CrystalScript to %s (error code: %d)!" % [test_save_path, new_save_err]
+				printerr(msg)
+				error_messages.append(msg)
+				errors += 1
+			else:
+				print("[CrystalToolTester]   ✔ Successfully saved new CrystalScript to %s" % test_save_path)
+				var reloaded = load(test_save_path)
+				if reloaded and reloaded.get("source_code").contains("EditorSavedNode"):
+					print("[CrystalToolTester]   ✔ Successfully reloaded and verified source of %s" % test_save_path)
+				else:
+					var msg = "[CrystalToolTester] Reloaded CrystalScript from %s has invalid content!" % test_save_path
+					printerr(msg)
+					error_messages.append(msg)
+					errors += 1
+				DirAccess.remove_absolute(test_save_path)
+		else:
+			var msg = "[CrystalToolTester] Failed to instantiate CrystalScript from ClassDB!"
+			printerr(msg)
+			error_messages.append(msg)
+			errors += 1
 	else:
 		var msg = "[CrystalToolTester] Failed to load CrystalScript resource"
 		printerr(msg)

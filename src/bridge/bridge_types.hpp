@@ -285,6 +285,8 @@ struct BridgeAPI {
     void (*register_gc_module)(const struct BridgeGCModule *mod);
     void* (*ref_get_object)(const void *ref_ptr);
     const char* (*script_get_source_code)(GDExtensionObjectPtr script_obj);
+    const char* (*resource_get_path)(GDExtensionObjectPtr res_obj);
+    bool (*object_is_class)(GDExtensionObjectPtr obj, const char *class_name);
 };
 
 struct BridgeGCModule {

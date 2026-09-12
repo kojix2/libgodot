@@ -1090,9 +1090,12 @@ inline const char* bridge_script_get_source_code(GDExtensionObjectPtr script_obj
     if (!script_obj) return "";
 
     GDExtensionObjectPtr target = script_obj;
-    if (gd_ref_get_object) {
+    // Only attempt dereferencing if script_obj is not already a Script Object
+    if (!bridge_object_is_class(target, "Script") && gd_ref_get_object) {
         void *deref = gd_ref_get_object((GDExtensionConstRefPtr)script_obj);
-        if (deref) target = (GDExtensionObjectPtr)deref;
+        if (deref && bridge_object_is_class((GDExtensionObjectPtr)deref, "Script")) {
+            target = (GDExtensionObjectPtr)deref;
+        }
     }
 
     if (!bridge_object_is_class(target, "Script")) {
@@ -1118,6 +1121,75 @@ inline const char* bridge_script_get_source_code(GDExtensionObjectPtr script_obj
         return s_src_storage.c_str();
     }
     return "";
+}
+
+inline std::string bridge_globalize_path(const char *path) {
+    if (!path || path[0] == '\0') return "";
+    if (strncmp(path, "res://", 6) != 0 && strncmp(path, "user://", 7) != 0) {
+        return std::string(path);
+    }
+    static GDExtensionMethodBindPtr mb_globalize = nullptr;
+    static GDExtensionObjectPtr s_project_settings = nullptr;
+    if (!mb_globalize) {
+        void *sn_ps = make_string_name("ProjectSettings");
+        void *sn_gp = make_string_name("globalize_path");
+        mb_globalize = gd_classdb_get_method_bind(sn_ps, sn_gp, 3135753539ULL);
+        if (gd_global_get_singleton) {
+            s_project_settings = gd_global_get_singleton(sn_ps);
+        }
+        free_string_name(sn_ps); free_string_name(sn_gp);
+    }
+    if (mb_globalize && s_project_settings && gd_object_method_bind_ptrcall && gd_string_to_utf8_chars) {
+        void *path_str = make_string(path);
+        const void *args[1] = { path_str };
+        alignas(void*) char gd_ret[8] = {0};
+        gd_object_method_bind_ptrcall(mb_globalize, s_project_settings, (const GDExtensionConstTypePtr*)args, gd_ret);
+        free_string(path_str);
+        int64_t len = gd_string_to_utf8_chars(gd_ret, nullptr, 0);
+        std::string res;
+        if (len > 0) {
+            res.resize((size_t)len);
+            gd_string_to_utf8_chars(gd_ret, &res[0], len);
+        }
+        if (gd_string_destroy) gd_string_destroy(gd_ret);
+        if (!res.empty()) return res;
+    }
+    return std::string(path + (strncmp(path, "res://", 6) == 0 ? 6 : 7));
+}
+
+inline void bridge_ensure_directory_for_file(const char *file_path) {
+    if (!file_path || file_path[0] == '\0') return;
+    std::string dir = file_path;
+    size_t slash = dir.find_last_of("/\\");
+    if (slash == std::string::npos) return;
+    std::string dir_path = dir.substr(0, slash);
+
+#if defined(_WIN32) || defined(_WIN64)
+    char temp[1024];
+    strncpy(temp, dir_path.c_str(), sizeof(temp) - 1);
+    temp[sizeof(temp) - 1] = '\0';
+    for (char *p = temp + 1; *p; p++) {
+        if (*p == '/' || *p == '\\') {
+            char c = *p;
+            *p = '\0';
+            CreateDirectoryA(temp, NULL);
+            *p = c;
+        }
+    }
+    CreateDirectoryA(temp, NULL);
+#else
+    char temp[1024];
+    strncpy(temp, dir_path.c_str(), sizeof(temp) - 1);
+    temp[sizeof(temp) - 1] = '\0';
+    for (char *p = temp + 1; *p; p++) {
+        if (*p == '/') {
+            *p = '\0';
+            mkdir(temp, 0755);
+            *p = '/';
+        }
+    }
+    mkdir(temp, 0755);
+#endif
 }
 
 inline void bridge_highlighter_add_span(void *r_color_map, int64_t col, float r, float g, float b, float a) {

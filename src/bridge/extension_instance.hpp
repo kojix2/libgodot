@@ -435,7 +435,8 @@ inline void* generic_class_get_virtual_call_data(void *p_class_userdata, GDExten
             if (strcmp(norm_name, "_get_recognized_extensions") == 0 ||
                 strcmp(norm_name, "_recognize") == 0 ||
                 strcmp(norm_name, "_recognize_path") == 0 ||
-                strcmp(norm_name, "_save") == 0) {
+                strcmp(norm_name, "_save") == 0 ||
+                strcmp(norm_name, "_set_uid") == 0) {
                 return (void*)intern_virtual_method(norm_name);
             }
         } else if (strcmp(desc->name, "CrystalHighlighter") == 0) {
@@ -788,6 +789,103 @@ inline void generic_class_call_virtual_with_data(
                     }
                 }
                 if (r_ret) *(uint8_t*)r_ret = ok ? 1 : 0;
+                return;
+            }
+            if (strcmp(method_name, "_save") == 0 || strcmp(method_name, "save") == 0) {
+                // 1. Resolve resource object
+                void *res_obj = nullptr;
+                if (p_args && p_args[0]) {
+                    res_obj = bridge_ref_get_object(p_args[0]);
+                    if (!res_obj) res_obj = *(void**)p_args[0];
+                }
+
+                // 2. Resolve target path
+                char path_buf[1024] = {0};
+                if (p_args && p_args[1]) {
+                    bridge_arg_to_string(p_args[1], path_buf, sizeof(path_buf));
+                    if (path_buf[0] == '\0') bridge_arg_to_string_name(p_args[1], path_buf, sizeof(path_buf));
+                }
+                if (path_buf[0] == '\0' && res_obj) {
+                    const char *rpath = bridge_resource_get_path(res_obj);
+                    if (rpath && rpath[0] != '\0') {
+                        strncpy(path_buf, rpath, sizeof(path_buf) - 1);
+                    }
+                }
+
+                // 3. Resolve source code
+                std::string code;
+                if (res_obj) {
+                    // Fast path: if res_obj is a CrystalScript, query the Crystal instance directly
+                    GenericExtensionInstance *ext = find_extension_instance(res_obj);
+                    if (ext && ext->crystal_instance && ext->desc && ext->desc->call_virtual_with_data) {
+                        alignas(void*) char ret_str[8] = {0};
+                        ext->desc->call_virtual_with_data(ext->crystal_instance, "_get_source_code", nullptr, ret_str);
+                        if (gd_string_to_utf8_chars) {
+                            int64_t len = gd_string_to_utf8_chars(ret_str, nullptr, 0);
+                            if (len > 0) {
+                                code.resize((size_t)len);
+                                gd_string_to_utf8_chars(ret_str, &code[0], len);
+                            }
+                        }
+                        if (gd_string_destroy) gd_string_destroy(ret_str);
+                    }
+                    if (code.empty()) {
+                        const char *src = bridge_script_get_source_code(res_obj);
+                        if (src && src[0] != '\0') code = src;
+                    }
+                }
+
+                // 4. Globalize path
+                std::string fs_path = bridge_globalize_path(path_buf);
+
+                // 5. Truncation guard: do not overwrite existing file with empty code
+                if (code.empty() && !fs_path.empty() && bridge_file_exists(fs_path.c_str())) {
+                    godot_log_print("[ResourceFormatSaverCrystal] Refusing to overwrite file with empty source code");
+                    if (r_ret) {
+                        memset(r_ret, 0, 8);
+                        *(int32_t*)r_ret = 1; // ERR_FILE_CANT_WRITE
+                    }
+                    return;
+                }
+
+                // 6. Ensure directory and write file
+                bool write_ok = false;
+                if (!fs_path.empty()) {
+                    bridge_ensure_directory_for_file(fs_path.c_str());
+                    FILE *f = fopen(fs_path.c_str(), "wb");
+                    if (f) {
+                        if (!code.empty()) {
+                            fwrite(code.data(), 1, code.size(), f);
+                        }
+                        fclose(f);
+                        write_ok = true;
+                    }
+                }
+
+                if (write_ok) {
+                    char log_msg[512];
+                    snprintf(log_msg, sizeof(log_msg), "[ResourceFormatSaverCrystal] Successfully saved %s (%zu bytes) -> %s", path_buf, code.size(), fs_path.c_str());
+                    godot_log_print(log_msg);
+                    if (r_ret) {
+                        memset(r_ret, 0, 8); // OK (0)
+                        *(int32_t*)r_ret = 0; // OK (0)
+                    }
+                } else {
+                    char log_msg[512];
+                    snprintf(log_msg, sizeof(log_msg), "[ResourceFormatSaverCrystal] Failed to save %s -> %s", path_buf, fs_path.c_str());
+                    godot_log_print(log_msg);
+                    if (r_ret) {
+                        memset(r_ret, 0, 8);
+                        *(int32_t*)r_ret = 1; // ERR_FILE_CANT_WRITE
+                    }
+                }
+                return;
+            }
+            if (strcmp(method_name, "_set_uid") == 0 || strcmp(method_name, "set_uid") == 0) {
+                if (r_ret) {
+                    memset(r_ret, 0, 8);
+                    *(int32_t*)r_ret = 0; // OK (0)
+                }
                 return;
             }
         }

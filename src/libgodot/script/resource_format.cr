@@ -421,10 +421,10 @@ module Godot
 
         if !fs_path.empty? && Godot::SystemIO.write_file(fs_path, code)
           Godot.print("[ResourceFormatSaverCrystal] Successfully saved #{path} (#{code.bytesize} bytes) -> #{fs_path}")
-          ret.as(Int32*).value = 0_i32 # OK
+          ret.as(Int64*).value = 0_i64 # OK
         else
           Godot.printerr("[ResourceFormatSaverCrystal] Failed to save #{path}")
-          ret.as(Int32*).value = 1_i32 # ERR_FILE_CANT_WRITE
+          ret.as(Int64*).value = 1_i64 # ERR_FILE_CANT_WRITE
         end
       else
         super

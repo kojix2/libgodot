@@ -15,14 +15,6 @@
  * ==============================================================================
  */
 
-/** Checks if a file exists on disk at the specified path */
-inline bool bridge_file_exists(const char *path) {
-#ifdef _WIN32
-    return GetFileAttributesA(path) != INVALID_FILE_ATTRIBUTES;
-#else
-    return access(path, F_OK) == 0;
-#endif
-}
 
 /**
  * Copies a binary file from src to dst.

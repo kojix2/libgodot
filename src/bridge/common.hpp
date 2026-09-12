@@ -110,3 +110,13 @@ static LONG WINAPI custom_crash_handler(PEXCEPTION_POINTERS pExceptionInfo) {
     return EXCEPTION_CONTINUE_SEARCH;
 }
 #endif
+
+/** Checks if a file exists on disk at the specified path */
+inline bool bridge_file_exists(const char *path) {
+    if (!path || path[0] == '\0') return false;
+#ifdef _WIN32
+    return GetFileAttributesA(path) != INVALID_FILE_ATTRIBUTES;
+#else
+    return access(path, F_OK) == 0;
+#endif
+}

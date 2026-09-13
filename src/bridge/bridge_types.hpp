@@ -286,4 +286,16 @@ struct BridgeAPI {
     const char* (*script_get_source_code)(GDExtensionObjectPtr script_obj);
     const char* (*resource_get_path)(GDExtensionObjectPtr res_obj);
     bool (*object_is_class)(GDExtensionObjectPtr obj, const char *class_name);
+    void (*register_gc_functions)(const struct BridgeGCFunctions *funcs);
+};
+
+struct BridgeGCFunctions {
+    void (*init)();
+    int (*register_my_thread)(const void *sb);
+    void (*unregister_my_thread)();
+    int (*thread_is_registered)();
+    void (*allow_register_threads)();
+    int (*get_stack_base)(void *sb);
+    int (*get_suspend_signal)();
+    int (*get_thr_restart_signal)();
 };

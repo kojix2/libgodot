@@ -34,6 +34,28 @@ inline bool is_editor_active() {
     return s_cached == 1;
 }
 
+inline bool is_headless_display() {
+    static int s_cached = -1;
+    if (s_cached != -1) return s_cached == 1;
+    if (!gd_global_get_singleton || !gd_classdb_get_method_bind || !gd_object_method_bind_ptrcall) return false;
+    void *sn_ds = make_string_name("DisplayServer");
+    GDExtensionObjectPtr ds = gd_global_get_singleton(sn_ds);
+    if (!ds) { free_string_name(sn_ds); return false; }
+    void *sn_get_name = make_string_name("get_name");
+    GDExtensionMethodBindPtr mb = gd_classdb_get_method_bind(sn_ds, sn_get_name, 201670096);
+    free_string_name(sn_ds); free_string_name(sn_get_name);
+    if (!mb) return false;
+    alignas(void*) char ret_str[8] = {0};
+    gd_object_method_bind_ptrcall(mb, ds, nullptr, ret_str);
+    char name_buf[64] = {0};
+    if (gd_string_to_utf8_chars) {
+        gd_string_to_utf8_chars(ret_str, name_buf, sizeof(name_buf) - 1);
+    }
+    if (gd_string_destroy) gd_string_destroy(ret_str);
+    s_cached = (strcmp(name_buf, "headless") == 0) ? 1 : 0;
+    return s_cached == 1;
+}
+
 inline bool is_editor_class_name(const char *name) {
     if (!name) return false;
     return (strncmp(name, "Editor", 6) == 0);
@@ -583,6 +605,12 @@ inline void generic_class_call_virtual_with_data(
     if (strcmp(method_name, "_complete_code") == 0 || strcmp(method_name, "complete_code") == 0) {
         bridge_ret_dictionary_complete_code(r_ret);
         return;
+    }
+    if (strcmp(method_name, "_get_plugin_icon") == 0 || strcmp(method_name, "get_plugin_icon") == 0) {
+        if (is_headless_display()) {
+            bridge_ret_ref(r_ret, nullptr);
+            return;
+        }
     }
 
     // Fast-path virtual dispatches for Crystal script integration classes

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "bridge_types.hpp"
 
 #include <vector>
 #include <mutex>
@@ -62,6 +63,28 @@ static void init_gc_cleanup_key() {
     pthread_key_create(&s_gc_thread_cleanup_key, gc_thread_cleanup_destructor);
 }
 #endif
+
+inline void bridge_register_gc_functions(const BridgeGCFunctions *funcs) {
+    if (!funcs) return;
+    std::lock_guard<std::recursive_mutex> lock(g_gc_modules_mutex);
+    for (const auto &m : g_gc_modules) {
+        if (funcs->register_my_thread && m.register_my_thread == (GCRegisterMyThreadFn)funcs->register_my_thread) {
+            return;
+        }
+    }
+    GCModuleEntry entry;
+    entry.init = funcs->init;
+    entry.register_my_thread = (GCRegisterMyThreadFn)funcs->register_my_thread;
+    entry.unregister_my_thread = (GCUnregisterMyThreadFn)funcs->unregister_my_thread;
+    entry.thread_is_registered = (GCThreadIsRegisteredFn)funcs->thread_is_registered;
+    entry.allow_register_threads = (GCAllowRegisterThreadsFn)funcs->allow_register_threads;
+    entry.get_stack_base = (GCGetStackBaseFn)funcs->get_stack_base;
+    entry.get_suspend_signal = (GCGetSuspendSignalFn)funcs->get_suspend_signal;
+    entry.get_thr_restart_signal = (GCGetThrRestartSignalFn)funcs->get_thr_restart_signal;
+
+    if (entry.allow_register_threads) entry.allow_register_threads();
+    g_gc_modules.push_back(entry);
+}
 
 inline void init_gc_library(void *game_module_handle = nullptr) {
     std::lock_guard<std::recursive_mutex> lock(g_gc_modules_mutex);

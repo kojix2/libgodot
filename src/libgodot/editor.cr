@@ -498,6 +498,13 @@ module Godot
       return cached if !cached.pointer.null?
     end
 
+    if !Godot::DisplayServer.singleton_ptr.null?
+      ds = Godot::DisplayServer.new(Godot::DisplayServer.singleton_ptr)
+      if ds.call_str("get_name") == "headless"
+        return nil
+      end
+    end
+
     icon_tex : Godot::Texture2D? = nil
     img = Godot.create(Godot::Image)
     if img && !img.pointer.null?

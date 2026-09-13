@@ -150,6 +150,18 @@ module Godot
       script_get_source_code : (Void* -> LibC::Char*)
       resource_get_path : (Void* -> LibC::Char*)
       object_is_class : (Void*, LibC::Char* -> Bool)
+      register_gc_functions : (BridgeGCFunctions* -> Void)
+    end
+
+    struct BridgeGCFunctions
+      gc_init : (-> Void)
+      register_my_thread : (Void* -> LibC::Int)
+      unregister_my_thread : (-> Void)
+      thread_is_registered : (-> LibC::Int)
+      allow_register_threads : (-> Void)
+      get_stack_base : (Void* -> LibC::Int)
+      get_suspend_signal : (-> LibC::Int)
+      get_thr_restart_signal : (-> LibC::Int)
     end
   end
 
@@ -1203,8 +1215,35 @@ lib LibCrystalMain
   fun __crystal_main(argc : Int32, argv : UInt8**) : Void
 end
 
+lib LibGCBridge
+  fun init = GC_init : Void
+  fun allow_register_threads = GC_allow_register_threads : Void
+  fun register_my_thread = GC_register_my_thread(sb : Void*) : LibC::Int
+  fun unregister_my_thread = GC_unregister_my_thread : Void
+  fun get_stack_base = GC_get_stack_base(sb : Void*) : LibC::Int
+  fun thread_is_registered = GC_thread_is_registered : LibC::Int
+  {% unless flag?(:win32) %}
+    fun get_suspend_signal = GC_get_suspend_signal : LibC::Int
+    fun get_thr_restart_signal = GC_get_thr_restart_signal : LibC::Int
+  {% end %}
+end
+
 # C ABI Entry point called by crystal_bridge when game library is loaded
 fun crystal_godot_init(api : Godot::LibBridge::BridgeAPI*) : Void
+  if !api.null? && !api.value.register_gc_functions.pointer.null?
+    gc_funcs = Godot::LibBridge::BridgeGCFunctions.new
+    gc_funcs.gc_init = ->LibGCBridge.init
+    gc_funcs.register_my_thread = ->LibGCBridge.register_my_thread(Void*)
+    gc_funcs.unregister_my_thread = ->LibGCBridge.unregister_my_thread
+    gc_funcs.thread_is_registered = ->LibGCBridge.thread_is_registered
+    gc_funcs.allow_register_threads = ->LibGCBridge.allow_register_threads
+    gc_funcs.get_stack_base = ->LibGCBridge.get_stack_base(Void*)
+    {% unless flag?(:win32) %}
+      gc_funcs.get_suspend_signal = ->LibGCBridge.get_suspend_signal
+      gc_funcs.get_thr_restart_signal = ->LibGCBridge.get_thr_restart_signal
+    {% end %}
+    api.value.register_gc_functions.call(pointerof(gc_funcs))
+  end
   GC.init
   Crystal.init_runtime
   dummy_arg = "game".to_unsafe

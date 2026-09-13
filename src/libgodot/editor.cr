@@ -1170,6 +1170,50 @@ module Godot
     self.class.execute_crystal_build
   end
 
+  # Automatically generates project bindings for custom GDScript nodes if present
+  def self.ensure_project_bindings : Void
+    begin
+      gd_files = [] of String
+      if Dir.exists?("src")
+        Dir.glob("src/**/*.gd").each { |f| gd_files << f }
+      end
+      return if gd_files.empty?
+
+      dump_script = ["scripts/dump_project_nodes.gd", "tools/api_generator/dump_project_nodes.gd", "../tools/api_generator/dump_project_nodes.gd"].find { |p| File.exists?(p) }
+      gen_script = ["scripts/generate_project_bindings.cr", "tools/api_generator/generate_project_bindings.cr", "../tools/api_generator/generate_project_bindings.cr"].find { |p| File.exists?(p) }
+      return unless dump_script && gen_script
+
+      target_dump = "scripts/dump_project_nodes.gd"
+      if !File.exists?(target_dump)
+        Dir.mkdir_p("scripts") unless Dir.exists?("scripts")
+        File.copy(dump_script, target_dump)
+      end
+
+      godot_exe = {% if flag?(:windows) %}
+        ["./godot.exe", "../godot.exe", "../../godot.exe"].find { |p| File.exists?(p) } || "godot.exe"
+      {% else %}
+        ["./godot", "../godot", "../../godot"].find { |p| File.exists?(p) } || "godot"
+      {% end %}
+
+      Godot.print("[CrystalIntegrationPlugin] Updating project GDScript bindings for #{gd_files.size} script(s)...")
+      out_json = "src/generated/project_nodes.json"
+      out_dir = "src/generated/project_nodes"
+      Dir.mkdir_p("src/generated") unless Dir.exists?("src/generated")
+
+      Process.run(godot_exe, ["--headless", "-s", "res://scripts/dump_project_nodes.gd", "--", "--output", out_json], output: Process::Redirect::Close, error: Process::Redirect::Close) rescue nil
+
+      if File.exists?(out_json)
+        c_io = IO::Memory.new
+        c_status = Process.run("crystal", ["run", gen_script, "--", out_json, out_dir], output: c_io, error: c_io) rescue nil
+        if c_status && c_status.success?
+          Godot.print("[CrystalIntegrationPlugin] Successfully generated project node bindings in #{out_dir}")
+        end
+      end
+    rescue ex
+      Godot.printerr("[CrystalIntegrationPlugin] Notice during ensure_project_bindings: #{ex.message}")
+    end
+  end
+
   # Compiles project Crystal code with optional release optimizations
   def self.execute_crystal_build_with_options(is_release : Bool = false) : Bool
     entry_file = "src/main.cr"
@@ -1183,6 +1227,8 @@ module Godot
       report_build_failure("Crystal build", "", "Entry file not found: #{entry_file}", 1)
       return false
     end
+
+    ensure_project_bindings
 
     out_dll = {% if flag?(:windows) %}
       "bin/game.dll"

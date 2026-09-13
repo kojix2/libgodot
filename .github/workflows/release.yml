@@ -14,6 +14,10 @@ on:
         required: false
         default: ''
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -49,7 +53,7 @@ jobs:
           echo "release_title=$TITLE" >> "$GITHUB_OUTPUT"
 
   build-windows:
-    name: Build & Release Windows (x86_64)
+    name: Build Windows (x86_64)
     needs: [init-release]
     runs-on: windows-latest
 
@@ -61,6 +65,14 @@ jobs:
         uses: crystal-lang/install-crystal@v1
         with:
           crystal: latest
+
+      - name: Cache Crystal Build Cache
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\crystal\cache
+          key: crystal-cache-windows-${{ runner.os }}-${{ hashFiles('shard.yml', 'shard.lock') }}
+          restore-keys: |
+            crystal-cache-windows-${{ runner.os }}-
 
       - name: Verify Crystal & g++ Toolchain
         run: |
@@ -114,6 +126,14 @@ jobs:
             Copy-Item $foundExe ./godot.exe -Force
             Remove-Item "godot.zip", "godot_temp" -Recurse -Force
           }
+
+      - name: Cache Godot Export Templates
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Roaming\Godot\export_templates
+          key: godot-export-templates-4.8-dev4-win
+          restore-keys: |
+            godot-export-templates-4.8-dev4-
 
       - name: Ensure Godot Export Templates
         shell: pwsh
@@ -219,19 +239,6 @@ jobs:
             if (Test-Path "bin/$dll") { Copy-Item "bin/$dll" "$winBin/" -Force }
           }
 
-      - name: Publish Windows Assets to Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ needs.init-release.outputs.tag_name }}
-          name: ${{ needs.init-release.outputs.release_title }}
-          files: |
-            bin/windows/examples-windows-x86_64.zip
-            bin/windows/libgodot-crystal-windows-x86_64-${{ needs.init-release.outputs.tag_name }}.zip
-            bin/windows/godot-crystal-export-templates-4.8-dev4.zip
-            bin/windows/perf-windows.zip
-            bin/windows/test-suite-windows.zip
-          fail_on_unmatched_files: false
-
       - name: Upload Windows Staging Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -239,7 +246,7 @@ jobs:
           path: bin/windows/
 
   build-linux:
-    name: Build & Release Linux (x86_64)
+    name: Build Linux (x86_64)
     needs: [init-release]
     runs-on: ubuntu-latest
     env:
@@ -253,6 +260,14 @@ jobs:
         uses: crystal-lang/install-crystal@v1
         with:
           crystal: latest
+
+      - name: Cache Crystal Build Cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/crystal
+          key: crystal-cache-linux-${{ runner.os }}-${{ hashFiles('shard.yml', 'shard.lock') }}
+          restore-keys: |
+            crystal-cache-linux-${{ runner.os }}-
 
       - name: Install Linux Build Dependencies
         run: |
@@ -293,6 +308,14 @@ jobs:
           fi
           ./godot --version
 
+      - name: Cache Godot Export Templates
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot/export_templates
+          key: godot-export-templates-4.8-dev4-linux
+          restore-keys: |
+            godot-export-templates-4.8-dev4-
+
       - name: Ensure Godot Export Templates
         shell: pwsh
         run: |
@@ -301,7 +324,7 @@ jobs:
       - name: Compile Release Binaries & Run Test Suite
         shell: bash
         run: |
-          xvfb-run -a make all RELEASE=1
+          make all RELEASE=1
 
       - name: Upload Test Status Report & Artifacts
         if: always()
@@ -382,18 +405,6 @@ jobs:
           if [ -f "template/bin/game.so" ]; then cp "template/bin/game.so" "$LINUX_BIN/"; fi
           if [ -f "bin/libgodot.so" ]; then cp "bin/libgodot.so" "$LINUX_BIN/"; fi
 
-      - name: Publish Linux Assets to Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ needs.init-release.outputs.tag_name }}
-          name: ${{ needs.init-release.outputs.release_title }}
-          files: |
-            bin/linux/examples-linux-x86_64.zip
-            bin/linux/libgodot-crystal-linux-x86_64-${{ needs.init-release.outputs.tag_name }}.zip
-            bin/linux/perf-linux.zip
-            bin/linux/test-suite-linux.zip
-          fail_on_unmatched_files: false
-
       - name: Upload Linux Staging Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -401,7 +412,7 @@ jobs:
           path: bin/linux/
 
   build-android:
-    name: Build & Release Android (arm64-v8a)
+    name: Build Android (arm64-v8a)
     needs: [init-release]
     runs-on: ubuntu-latest
 
@@ -413,6 +424,14 @@ jobs:
         uses: crystal-lang/install-crystal@v1
         with:
           crystal: latest
+
+      - name: Cache Crystal Build Cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/crystal
+          key: crystal-cache-android-${{ runner.os }}-${{ hashFiles('shard.yml', 'shard.lock') }}
+          restore-keys: |
+            crystal-cache-android-${{ runner.os }}-
 
       - name: Setup Java (for apksigner & keytool)
         uses: actions/setup-java@v4
@@ -461,15 +480,38 @@ jobs:
             fi
           fi
 
+      - name: Cache Godot Export Templates
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot/export_templates
+          key: godot-export-templates-4.8-dev4-android
+          restore-keys: |
+            godot-export-templates-4.8-dev4-
+
       - name: Ensure Godot Export Templates
         shell: pwsh
         run: |
           & pwsh -NoProfile -File scripts/ensure_export_templates.ps1
 
-      - name: Compile Release Binaries & Template APK
+      - name: Cross-Compile Android Native Libraries (arm64-v8a)
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -File scripts/build_android.ps1 -ProjectPath template -Release 1
+
+      - name: Package Android Starter Template APK (template.apk)
         shell: pwsh
         run: |
           & pwsh -NoProfile -File scripts/package_android.ps1 -ProjectPath template -Name template -Release
+
+      - name: Package Android Test Suite APK (test-suite-android.apk)
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -File scripts/package_android.ps1 -ProjectPath test -Name test-suite-android -Release
+
+      - name: Package Android Performance Benchmark APK (perf-android.apk)
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -File scripts/package_android.ps1 -ProjectPath performance -Name perf-android -Release
 
       - name: Package Android Examples to APKs
         shell: pwsh
@@ -507,24 +549,6 @@ jobs:
             bin/android/android_audit_report.txt
           if-no-files-found: ignore
 
-      - name: Package Android Test Suite APK (test-suite-android.zip)
-        shell: pwsh
-        run: |
-          & pwsh -NoProfile -File scripts/package_android.ps1 -ProjectPath test -Name test-suite-android -Release
-          Compress-Archive -Path "bin/android/test-suite-android.apk" -DestinationPath "bin/android/test-suite-android.zip" -Force
-
-      - name: Publish Android Assets to Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ needs.init-release.outputs.tag_name }}
-          name: ${{ needs.init-release.outputs.release_title }}
-          files: |
-            bin/android/examples-android-arm64.zip
-            bin/android/template.apk
-            bin/android/test-suite-android.apk
-            bin/android/test-suite-android.zip
-          fail_on_unmatched_files: false
-
       - name: Upload Android Staging Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -532,7 +556,7 @@ jobs:
           path: bin/android/
 
   build-macos:
-    name: Build & Release macOS
+    name: Build macOS
     needs: [init-release]
     runs-on: macos-latest
 
@@ -544,6 +568,14 @@ jobs:
         uses: crystal-lang/install-crystal@v1
         with:
           crystal: latest
+
+      - name: Cache Crystal Build Cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/crystal
+          key: crystal-cache-macos-${{ runner.os }}-${{ hashFiles('shard.yml', 'shard.lock') }}
+          restore-keys: |
+            crystal-cache-macos-${{ runner.os }}-
 
       - name: Verify Crystal & Toolchain
         run: |
@@ -590,6 +622,14 @@ jobs:
 
           ./godot --version
 
+      - name: Cache Godot Export Templates
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Application Support/Godot/export_templates
+          key: godot-export-templates-4.8-dev4-macos
+          restore-keys: |
+            godot-export-templates-4.8-dev4-
+
       - name: Ensure Godot Export Templates
         shell: pwsh
         run: |
@@ -626,7 +666,7 @@ jobs:
 
           if (Test-Path "examples") {
             foreach ($ex in Get-ChildItem -Path "examples" -Directory) {
-              Write-Host "Packaging standalone playable macOS example for $($ex.Name)..." -ForegroundColor Cyan
+              Write-Host "Packaging standalone playable example for $($ex.Name)..." -ForegroundColor Cyan
               & pwsh -NoProfile -File scripts/package_game.ps1 -ProjectPath $ex.FullName -Name $ex.Name -TargetDir $examplesDir -Release 1
             }
           }
@@ -681,18 +721,6 @@ jobs:
           if [ -f "template/bin/game.dylib" ]; then cp "template/bin/game.dylib" "$MAC_BIN/"; fi
           if [ -f "bin/libgodot.dylib" ]; then cp "bin/libgodot.dylib" "$MAC_BIN/"; fi
 
-      - name: Publish macOS Assets to Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ needs.init-release.outputs.tag_name }}
-          name: ${{ needs.init-release.outputs.release_title }}
-          files: |
-            bin/macos/examples-macos.zip
-            bin/macos/libgodot-crystal-macos-${{ needs.init-release.outputs.tag_name }}.zip
-            bin/macos/perf-macos.zip
-            bin/macos/test-suite-macos.zip
-          fail_on_unmatched_files: false
-
       - name: Upload macOS Staging Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -700,7 +728,7 @@ jobs:
           path: bin/macos/
 
   finalize-release:
-    name: Finalize Universal Packages & Release Notes
+    name: Finalize & Publish Unified Release
     needs: [init-release, build-windows, build-linux, build-android, build-macos]
     if: always() && !cancelled() && (needs.build-windows.result == 'success' || needs.build-linux.result == 'success' || needs.build-android.result == 'success' || needs.build-macos.result == 'success')
     runs-on: ubuntu-latest
@@ -708,6 +736,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Download Windows Artifacts
         continue-on-error: true
@@ -775,7 +805,7 @@ jobs:
             [ -f "$MAC_DIR/libgodot.dylib" ] && cp "$MAC_DIR/libgodot.dylib" "$ADDON_BIN/"
           fi
 
-          # Locate Android shared objects
+          # Locate Android native libraries
           ANDROID_ARM="staging/android/arm64-v8a"
           [ -d "staging/android/bin/android/arm64-v8a" ] && ANDROID_ARM="staging/android/bin/android/arm64-v8a"
           if [ -d "$ANDROID_ARM" ]; then
@@ -783,6 +813,7 @@ jobs:
             cp -r "$ANDROID_ARM"/* "$ADDON_BIN/android/arm64-v8a/"
           fi
 
+          mkdir -p "$ROOT_DIR/bin"
           (cd "$ADDON_DIST" && zip -r "$ROOT_DIR/bin/godot-crystal-addon.zip" addons)
 
       - name: Package Universal Starter Template (template-project.zip)
@@ -791,12 +822,13 @@ jobs:
           ROOT_DIR="$(pwd)"
           TEMPLATE_DIST="$ROOT_DIR/bin/template_dist"
           rm -rf "$TEMPLATE_DIST"
-          mkdir -p "$TEMPLATE_DIST/bin"
+          mkdir -p "$TEMPLATE_DIST"
 
           cp -r template/. "$TEMPLATE_DIST/"
-          rm -rf "$TEMPLATE_DIST/.godot" "$TEMPLATE_DIST/bin"
+          rm -rf "$TEMPLATE_DIST/.godot" "$TEMPLATE_DIST/lib" "$TEMPLATE_DIST/bin"
           mkdir -p "$TEMPLATE_DIST/bin"
 
+          # Embed crystal_integration addon if not present
           if [ ! -d "$TEMPLATE_DIST/addons/crystal_integration" ]; then
             mkdir -p "$TEMPLATE_DIST/addons"
             cp -r addons/crystal_integration "$TEMPLATE_DIST/addons/"
@@ -914,26 +946,62 @@ jobs:
 
           (cd "$TEMPLATE_ADDON_DIST" && zip -r "$ROOT_DIR/bin/template-addon-project.zip" ./*)
 
-      - name: Prepare Final Universal Assets & Checksums
+      - name: Collect & Stage All Release Files
         shell: bash
         run: |
           ROOT_DIR="$(pwd)"
-          mkdir -p "$ROOT_DIR/bin/release_assets"
+          DIST_DIR="$ROOT_DIR/bin/release_dist"
+          rm -rf "$DIST_DIR"
+          mkdir -p "$DIST_DIR"
+
+          # 1. Universal packages
+          [ -f "$ROOT_DIR/bin/godot-crystal-addon.zip" ] && cp "$ROOT_DIR/bin/godot-crystal-addon.zip" "$DIST_DIR/"
+          [ -f "$ROOT_DIR/bin/template-project.zip" ] && cp "$ROOT_DIR/bin/template-project.zip" "$DIST_DIR/"
+          [ -f "$ROOT_DIR/bin/template-addon-project.zip" ] && cp "$ROOT_DIR/bin/template-addon-project.zip" "$DIST_DIR/"
+
+          # 2. Windows artifacts (zip files only)
+          if [ -d "staging/windows" ]; then
+            find staging/windows -maxdepth 1 -name "*.zip" -exec cp {} "$DIST_DIR/" \;
+          fi
+
+          # 3. Linux artifacts (zip files only)
+          if [ -d "staging/linux" ]; then
+            find staging/linux -maxdepth 1 -name "*.zip" -exec cp {} "$DIST_DIR/" \;
+          fi
+
+          # 4. macOS artifacts (zip files only)
+          if [ -d "staging/macos" ]; then
+            find staging/macos -maxdepth 1 -name "*.zip" -exec cp {} "$DIST_DIR/" \;
+          fi
+
+          # 5. Android artifacts: examples stay a zip, single APKs remain raw APKs!
+          if [ -d "staging/android" ]; then
+            [ -f "staging/android/examples-android-arm64.zip" ] && cp "staging/android/examples-android-arm64.zip" "$DIST_DIR/"
+            [ -f "staging/android/template.apk" ] && cp "staging/android/template.apk" "$DIST_DIR/"
+            [ -f "staging/android/test-suite-android.apk" ] && cp "staging/android/test-suite-android.apk" "$DIST_DIR/"
+            [ -f "staging/android/perf-android.apk" ] && cp "staging/android/perf-android.apk" "$DIST_DIR/"
+          fi
+
+          # 6. Generate cryptographic checksums
+          echo "Release Files Prepared:"
+          ls -la "$DIST_DIR"
+          (cd "$DIST_DIR" && sha256sum * > checksums.txt)
+          cat "$DIST_DIR/checksums.txt"
+
+      - name: Clean Previous Release & Refresh Latest Tag
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
           TAG="${{ needs.init-release.outputs.tag_name }}"
-
-          [ -f "$ROOT_DIR/bin/godot-crystal-addon.zip" ] && cp "$ROOT_DIR/bin/godot-crystal-addon.zip" "$ROOT_DIR/bin/release_assets/"
-          [ -f "$ROOT_DIR/bin/template-project.zip" ] && cp "$ROOT_DIR/bin/template-project.zip" "$ROOT_DIR/bin/release_assets/"
-          [ -f "$ROOT_DIR/bin/template-addon-project.zip" ] && cp "$ROOT_DIR/bin/template-addon-project.zip" "$ROOT_DIR/bin/release_assets/"
-
-          # Copy all platform archives and APKs to compute unified checksums
-          for d in staging/*; do
-            if [ -d "$d" ]; then
-              find "$d" -maxdepth 2 -type f \( -name "*.zip" -o -name "*.apk" \) -exec cp {} "$ROOT_DIR/bin/release_assets/" \;
-            fi
-          done
-
-          (cd "$ROOT_DIR/bin/release_assets" && sha256sum *.zip *.apk 2>/dev/null > checksums.txt || sha256sum *.zip > checksums.txt)
-          cat "$ROOT_DIR/bin/release_assets/checksums.txt"
+          if [ "$TAG" = "latest" ]; then
+            echo "Purging old 'latest' release and updating tag to advance publication date..."
+            gh release delete latest --yes --cleanup-tag 2>/dev/null || true
+            git tag -d latest 2>/dev/null || true
+            git push origin :refs/tags/latest 2>/dev/null || true
+            git tag latest "${{ github.sha }}"
+            git push origin latest --force
+          fi
 
       - name: Generate Descriptive Release Notes
         id: notes
@@ -947,7 +1015,7 @@ jobs:
           - **`godot-crystal-addon.zip`**:
             The official Godot editor addon (`addons/crystal_integration`) with pre-compiled GDExtension loader bridge binaries for **Windows** (`crystal_bridge.dll`), **macOS** (`crystal_bridge.dylib`), **Linux** (`crystal_bridge.so`), and **Android** (`arm64-v8a/libcrystal_bridge.so`). Drop the `addons/` folder directly into your existing Godot 4.8+ project to enable Crystal node authoring, inspector properties, and hot-reload.
           - **`template-project.zip`**:
-            A clean, ready-to-use Godot project skeleton powered by Crystal. Contains pre-configured scenes, sample 3D nodes (`src/main.cr`), automated specifications (`spec/main_spec.cr`), GDExtension configuration, multi-platform export presets (Windows, macOS, Linux, Android), and pre-wired **GitHub Actions CI/CD workflows** (`.github/workflows/`) for automated testing (`crystal spec`) and multi-platform release deployment.
+            A clean, ready-to-use Godot project skeleton powered by Crystal. Contains pre-configured scenes, sample nodes (`src/main.cr`), automated specifications (`spec/main_spec.cr`), GDExtension configuration, multi-platform export presets (Windows, macOS, Linux, Android), and pre-wired **GitHub Actions CI/CD workflows** (`.github/workflows/`) for automated testing (`crystal spec`) and multi-platform release deployment.
           - **`template-addon-project.zip`**:
             A complete starter template for building and packaging redistributable GDExtension addons and editor plugins in Crystal (`template-addon`). Pre-configured with dual-plugin architecture (`crystal_addon` and embedded `crystal_integration`), pre-compiled bridge binaries, and packaging scripts to export distributable addon zips for vanilla Godot users.
 
@@ -956,50 +1024,60 @@ jobs:
             Official Godot 4.8-dev4 export templates package ready for Crystal standalone game project distribution across Windows, macOS, and Linux.
 
           ### 📦 Standalone Toolchain Distributions
-          - **`libgodot-crystal-windows-x86_64.zip`**:
+          - **`libgodot-crystal-windows-x86_64-${TAG}.zip`**:
             Complete LibGodot Crystal package for **Windows (x86_64)**. Contains the full Crystal bindings library source (`src/`), GDExtension bridge DLL (`crystal_bridge.dll`), and Windows runtime dependencies (`libgodot.dll`, `gc.dll`, `iconv-2.dll`, `pcre2-8.dll`).
+          - **`libgodot-crystal-linux-x86_64-${TAG}.zip`**:
+            Complete LibGodot Crystal package for **Linux (x86_64)**. Contains the full Crystal bindings library source (`src/`), GDExtension bridge shared object (`crystal_bridge.so`), and Linux GDExtension configurations for native Linux exports and development.
           - **`libgodot-crystal-macos-${TAG}.zip`**:
             Complete LibGodot Crystal package for **macOS**. Contains the full Crystal bindings library source (`src/`), GDExtension bridge dylib (`crystal_bridge.dylib`), and macOS GDExtension configurations.
-          - **`libgodot-crystal-linux-x86_64.zip`**:
-            Complete LibGodot Crystal package for **Linux (x86_64)**. Contains the full Crystal bindings library source (`src/`), GDExtension bridge shared object (`crystal_bridge.so`), and Linux GDExtension configurations for native Linux exports and development.
 
-          ### 🧪 Standalone Test Suites
-          - **`test-suite-linux.zip`**:
-            Standalone Godot test suite package for **Linux (x86_64)**. Bundles the complete verification test project, GDExtension bridge (`crystal_bridge.so`), compiled game logic (`game.so`), and runtime libraries (`libgodot.so`). Ready to extract and run headless or in Godot on Linux.
+          ### 🧪 Standalone Test Suites & Benchmarks
           - **`test-suite-windows.zip`**:
-            Standalone Godot test suite package for **Windows (x86_64)**. Bundles the complete verification test project with all runtime DLLs (`game.dll`, `crystal_bridge.dll`, `libgodot.dll`, `gc.dll`, `iconv-2.dll`, `pcre2-8.dll`). Ready to extract and run on Windows.
+            Standalone Godot test suite package for **Windows (x86_64)**. Bundles the complete verification test project with all runtime DLLs (`game.dll`, `crystal_bridge.dll`, `libgodot.dll`, `gc.dll`, `iconv-2.dll`, `pcre2-8.dll`).
+          - **`test-suite-linux.zip`**:
+            Standalone Godot test suite package for **Linux (x86_64)**. Bundles the complete verification test project, GDExtension bridge (`crystal_bridge.so`), compiled game logic (`game.so`), and runtime libraries (`libgodot.so`).
           - **`test-suite-macos.zip`**:
             Standalone Godot test suite package for **macOS**. Bundles the complete verification test project with all dylibs (`game.dylib`, `crystal_bridge.dylib`, `libgodot.dylib`).
-          - **`test-suite-android.zip`** / **`test-suite-android.apk`**:
-            Standalone Godot test suite packaged and signed for **Android (arm64-v8a)**. Ready to install on Android devices or emulators via `adb install -r test-suite-android.apk`.
+          - **`perf-windows.zip`**:
+            Standalone performance stress benchmark for **Windows (x86_64)**.
+          - **`perf-linux.zip`**:
+            Standalone performance stress benchmark for **Linux (x86_64)**.
+          - **`perf-macos.zip`**:
+            Standalone performance stress benchmark for **macOS**.
 
-          ### 🎮 Pre-Compiled Example Games & Standalone Packages
+          ### 📱 Android APKs (arm64-v8a)
+          - **`template.apk`**:
+            Single standalone APK for the starter template project, signed with debug keystore. Install directly via `adb install -r template.apk`.
+          - **`test-suite-android.apk`**:
+            Single standalone APK for the complete LibGodot test suite. Install directly via `adb install -r test-suite-android.apk`.
+          - **`perf-android.apk`**:
+            Single standalone APK for the performance stress benchmark. Install directly via `adb install -r perf-android.apk`.
           - **`examples-android-arm64.zip`**:
-            Collection of all pre-compiled example game APKs packaged for Android (`arm64-v8a`), including the `basic_demo` 3D showcase APK. Ready to extract and install via `adb install -r <name>.apk`.
+            Archive of all pre-compiled example showcase game APKs packaged for Android (`arm64-v8a`), including `basic_demo.apk`.
+
+          ### 🎮 Pre-Compiled Desktop Examples
           - **`examples-windows-x86_64.zip`**:
-            Standalone compiled game executables for all examples on **Windows (x86_64)**, bundled with all required runtime DLLs (`libgodot.dll`, `crystal_bridge.dll`, `gc.dll`, `iconv-2.dll`, `pcre2-8.dll`). Ready to extract and run immediately without needing compiler setup.
+            Standalone compiled game executables for all examples on **Windows (x86_64)**.
+          - **`examples-linux-x86_64.zip`**:
+            Standalone compiled game executables and shared libraries for all examples on **Linux (x86_64)**.
           - **`examples-macos.zip`**:
             Standalone compiled game packages and dynamic libraries for all examples on **macOS**.
-          - **`examples-linux-x86_64.zip`**:
-            Standalone compiled game executables and shared libraries for all examples on **Linux (x86_64)**. Ready to extract and execute on Linux distributions.
 
           ### 🔒 Integrity
           - **`checksums.txt`**:
-            SHA-256 cryptographic hashes for each release archive to verify download integrity.
+            SHA-256 cryptographic hashes for every release file to verify download integrity.
           EOF
 
-      - name: Publish Universal Assets & Release Notes
+      - name: Publish All Release Assets Once
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.init-release.outputs.tag_name }}
           name: ${{ needs.init-release.outputs.release_title }}
           body_path: release_body.md
-          files: |
-            bin/release_assets/godot-crystal-addon.zip
-            bin/release_assets/template-project.zip
-            bin/release_assets/template-addon-project.zip
-            bin/release_assets/checksums.txt
+          files: bin/release_dist/*
           generate_release_notes: false
           draft: false
           prerelease: false
           make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

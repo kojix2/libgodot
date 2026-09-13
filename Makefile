@@ -226,9 +226,8 @@ generate:
 
 # Generate typed Crystal bindings for project custom GDScript and plugin nodes
 project_bindings:
-	@echo [API] Dumping project custom GDScript and plugin nodes...
-	$(GODOT) --headless --path $(or $(PROJECT),test) -s ../tools/api_generator/dump_project_nodes.gd -- --output src/generated/project_nodes.json
-	$(CRYSTAL) run tools/api_generator/generate_project_bindings.cr -- $(or $(PROJECT),test)/src/generated/project_nodes.json $(or $(PROJECT),test)/src/generated/project_nodes
+	@echo [API] Dumping and generating typed bindings for project custom GDScript and plugin nodes...
+	@$(PWSH_FILE) scripts/generate_project_bindings.ps1 -Project $(or $(PROJECT),template)
 
 # Copy Crystal runtime dependencies and libgodot to all bin dirs
 deps: dirs

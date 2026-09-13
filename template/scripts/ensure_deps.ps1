@@ -1,0 +1,158 @@
+param(
+    [string]$TargetBin = ""
+)
+
+$RootDir = Split-Path -Parent $PSScriptRoot
+$binDirs = [System.Collections.Generic.List[string]]::new()
+$binDirs.Add((Join-Path $RootDir "bin"))
+$binDirs.Add((Join-Path $RootDir "addons/crystal_integration/bin"))
+$binDirs.Add((Join-Path $RootDir "test/bin"))
+$binDirs.Add((Join-Path $RootDir "test/addons/crystal_integration/bin"))
+$binDirs.Add((Join-Path $RootDir "template/bin"))
+$binDirs.Add((Join-Path $RootDir "template/addons/crystal_integration/bin"))
+$binDirs.Add((Join-Path $RootDir "template-addon/addons/crystal_addon/bin"))
+
+if (-not [string]::IsNullOrWhiteSpace($TargetBin)) {
+    $resolved = (Resolve-Path $TargetBin -ErrorAction SilentlyContinue)
+    if ($resolved) {
+        $binDirs.Add($resolved.Path)
+    } else {
+        $binDirs.Add($TargetBin)
+    }
+}
+
+# Add all existing examples/*/bin and examples/*/addons/crystal_integration/bin directories
+$examplesDir = Join-Path $RootDir "examples"
+if (Test-Path $examplesDir) {
+    Get-ChildItem -Path $examplesDir -Directory | ForEach-Object {
+        $exBin = Join-Path $_.FullName "bin"
+        if (Test-Path $exBin) {
+            $binDirs.Add($exBin)
+        }
+        $exAddonBin = Join-Path $_.FullName "addons/crystal_integration/bin"
+        $binDirs.Add($exAddonBin)
+    }
+}
+
+$onWindows = ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';')
+$isMac = $false
+try {
+    if ($IsMacOS -or [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::OSX)) {
+        $isMac = $true
+    }
+} catch {}
+if (-not $isMac -and -not $onWindows) {
+    if ((Get-Command uname -ErrorAction SilentlyContinue) -and ((& uname) -eq "Darwin")) { $isMac = $true }
+}
+
+# 1. Windows Crystal runtime dependencies (gc.dll, iconv-2.dll, pcre2-8.dll)
+if ($onWindows) {
+    $crystalCmd = Get-Command crystal -ErrorAction SilentlyContinue
+    if ($crystalCmd) {
+        $crystalBin = Split-Path $crystalCmd.Source
+        foreach ($dll in @('gc.dll', 'iconv-2.dll', 'pcre2-8.dll')) {
+            $src = Join-Path $crystalBin $dll
+            if (Test-Path $src) {
+                foreach ($d in $binDirs) {
+                    if (Test-Path $d) {
+                        $dst = Join-Path $d $dll
+                        if (-not (Test-Path $dst)) {
+                            Copy-Item $src $dst -Force -ErrorAction SilentlyContinue
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    # Windows LibGodot engine DLL
+    $godotSrcDll = Join-Path $RootDir "godot-src/bin/godot.windows.template_debug.x86_64.dll"
+    $binLibgodot = Join-Path $RootDir "bin/libgodot.dll"
+    if ((Test-Path $godotSrcDll) -and (-not (Test-Path $binLibgodot))) {
+        Copy-Item $godotSrcDll $binLibgodot -Force -ErrorAction SilentlyContinue
+    }
+
+    if (Test-Path $binLibgodot) {
+        foreach ($d in $binDirs) {
+            if (Test-Path $d) {
+                $dst = Join-Path $d "libgodot.dll"
+                if (-not (Test-Path $dst)) {
+                    Copy-Item $binLibgodot $dst -Force -ErrorAction SilentlyContinue
+                }
+            }
+        }
+    }
+} elseif (-not $isMac) {
+    # 2. Linux LibGodot shared object (.so)
+    $godotSrcSo = Join-Path $RootDir "godot-src/bin/godot.linuxbsd.template_debug.x86_64.so"
+    $binLibgodotSo = Join-Path $RootDir "bin/libgodot.so"
+    if ((Test-Path $godotSrcSo) -and (-not (Test-Path $binLibgodotSo))) {
+        Copy-Item $godotSrcSo $binLibgodotSo -Force -ErrorAction SilentlyContinue
+    }
+
+    if (Test-Path $binLibgodotSo) {
+        foreach ($d in $binDirs) {
+            if (Test-Path $d) {
+                $dst = Join-Path $d "libgodot.so"
+                if (-not (Test-Path $dst)) {
+                    Copy-Item $binLibgodotSo $dst -Force -ErrorAction SilentlyContinue
+                }
+            }
+        }
+    }
+} else {
+    # 3. macOS LibGodot dynamic library (.dylib)
+    $godotSrcDylibCandidates = @(
+        (Join-Path $RootDir "godot-src/bin/godot.macos.template_debug.universal.dylib"),
+        (Join-Path $RootDir "godot-src/bin/godot.macos.template_debug.arm64.dylib"),
+        (Join-Path $RootDir "godot-src/bin/godot.macos.template_debug.x86_64.dylib")
+    )
+    $binLibgodotDylib = Join-Path $RootDir "bin/libgodot.dylib"
+    foreach ($cand in $godotSrcDylibCandidates) {
+        if ((Test-Path $cand) -and (-not (Test-Path $binLibgodotDylib))) {
+            Copy-Item $cand $binLibgodotDylib -Force -ErrorAction SilentlyContinue
+            break
+        }
+    }
+
+    if (Test-Path $binLibgodotDylib) {
+        foreach ($d in $binDirs) {
+            if (Test-Path $d) {
+                $dst = Join-Path $d "libgodot.dylib"
+                if (-not (Test-Path $dst)) {
+                    Copy-Item $binLibgodotDylib $dst -Force -ErrorAction SilentlyContinue
+                }
+            }
+        }
+    }
+}
+
+# 4. Ensure shard dependencies are installed for projects with shard.yml missing lib/
+$shardsCmd = Get-Command shards -ErrorAction SilentlyContinue
+if ($shardsCmd) {
+    $shardProjects = [System.Collections.Generic.List[string]]::new()
+    $shardProjects.Add((Join-Path $RootDir "template"))
+    $shardProjects.Add((Join-Path $RootDir "test"))
+    $shardProjects.Add((Join-Path $RootDir "template-addon"))
+    if (Test-Path (Join-Path $RootDir "examples")) {
+        Get-ChildItem -Path (Join-Path $RootDir "examples") -Directory | ForEach-Object {
+            $shardProjects.Add($_.FullName)
+        }
+    }
+
+    foreach ($proj in $shardProjects) {
+        $shardYml = Join-Path $proj "shard.yml"
+        $libDir = Join-Path $proj "lib"
+        if ((Test-Path $shardYml) -and (-not (Test-Path $libDir))) {
+            Push-Location $proj
+            try {
+                & $shardsCmd.Source install --skip-postinstall --skip-executables 2>&1 | Out-Null
+            } catch {}
+            finally {
+                Pop-Location
+            }
+        }
+    }
+}
+
+exit 0

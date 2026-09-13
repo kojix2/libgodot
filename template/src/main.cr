@@ -23,6 +23,6 @@ node MainNode < Node3D do
   def say
 	  each_child {|c| Godot.print(c.name)}
 	
-	  #Godot.print(get_node("MyGDNode").as(MyGDNode).my_var)
+	  Godot.print get_node_as(MyCrystalNode, "MyCrystalNode").my_var
   end
 end

@@ -296,4 +296,34 @@ if (Test-Path $syncAddonsScript) {
     & $syncAddonsScript
 }
 
+# Synchronize support scripts to template and template-addon
+$templateScriptsDir = Join-Path $RootDir "template/scripts"
+$templateAddonScriptsDir = Join-Path $RootDir "template-addon/scripts"
+if (-not (Test-Path $templateScriptsDir)) { New-Item -ItemType Directory -Force -Path $templateScriptsDir | Out-Null }
+if (-not (Test-Path $templateAddonScriptsDir)) { New-Item -ItemType Directory -Force -Path $templateAddonScriptsDir | Out-Null }
+
+$commonScripts = @(
+    (Join-Path $RootDir "scripts/build_crystal.ps1"),
+    (Join-Path $RootDir "scripts/ensure_deps.ps1"),
+    (Join-Path $RootDir "scripts/ensure_extension_list.ps1"),
+    (Join-Path $RootDir "scripts/sync_addons.ps1"),
+    (Join-Path $RootDir "scripts/generate_project_bindings.ps1"),
+    (Join-Path $RootDir "tools/api_generator/dump_project_nodes.gd"),
+    (Join-Path $RootDir "tools/api_generator/generate_project_bindings.cr")
+)
+
+foreach ($cs in $commonScripts) {
+    if (Test-Path $cs) {
+        Copy-Item $cs $templateScriptsDir -Force
+        Copy-Item $cs $templateAddonScriptsDir -Force
+    }
+}
+
+if (Test-Path (Join-Path $RootDir "scripts/package_game.ps1")) {
+    Copy-Item (Join-Path $RootDir "scripts/package_game.ps1") $templateScriptsDir -Force
+}
+if (Test-Path (Join-Path $RootDir "template-addon/package.ps1")) {
+    Copy-Item (Join-Path $RootDir "template-addon/package.ps1") $templateAddonScriptsDir -Force
+}
+
 exit 0

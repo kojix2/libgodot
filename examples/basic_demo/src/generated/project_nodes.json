@@ -1,0 +1,114 @@
+{
+	"gdscript_classes": [
+		{
+			"constants": {},
+			"inherits": "Node",
+			"language": "GDScript",
+			"methods": [
+				{
+					"args": [
+						{
+							"class_name": "",
+							"name": "score",
+							"type": 2,
+							"type_name": "int"
+						}
+					],
+					"flags": 1,
+					"name": "calculate_bonus",
+					"return_class_name": "",
+					"return_type": 2,
+					"return_type_name": "int"
+				},
+				{
+					"args": [],
+					"flags": 33,
+					"name": "get_system_status",
+					"return_class_name": "",
+					"return_type": 4,
+					"return_type_name": "String"
+				},
+				{
+					"args": [
+						{
+							"class_name": "",
+							"name": "current_score",
+							"type": 2,
+							"type_name": "int"
+						}
+					],
+					"flags": 1,
+					"name": "cheer",
+					"return_class_name": "",
+					"return_type": 4,
+					"return_type_name": "String"
+				},
+				{
+					"args": [
+						{
+							"class_name": "",
+							"name": "player_name",
+							"type": 4,
+							"type_name": "String"
+						}
+					],
+					"flags": 1,
+					"name": "praise_player",
+					"return_class_name": "",
+					"return_type": 4,
+					"return_type_name": "String"
+				}
+			],
+			"name": "CompanionBot",
+			"path": "res://scripts/companion.gd",
+			"properties": [
+				{
+					"class_name": "",
+					"hint": 0,
+					"hint_string": "",
+					"name": "companion_name",
+					"type": 4,
+					"type_name": "String"
+				},
+				{
+					"class_name": "",
+					"hint": 0,
+					"hint_string": "",
+					"name": "bonus_multiplier",
+					"type": 3,
+					"type_name": "float"
+				},
+				{
+					"class_name": "",
+					"hint": 0,
+					"hint_string": "",
+					"name": "interaction_count",
+					"type": 2,
+					"type_name": "int"
+				}
+			],
+			"signals": []
+		}
+	],
+	"plugin_classes": [
+		{
+			"constants": {},
+			"inherits": "Node",
+			"is_instantiable": true,
+			"methods": [],
+			"name": "DemoScene",
+			"properties": [],
+			"signals": []
+		},
+		{
+			"constants": {},
+			"inherits": "Node3D",
+			"is_instantiable": true,
+			"methods": [],
+			"name": "ModifierNode",
+			"properties": [],
+			"signals": []
+		}
+	],
+	"project_name": "Crystal LibGodot Demo"
+}

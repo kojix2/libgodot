@@ -9,9 +9,13 @@ on:
     branches: [master, main]
   workflow_dispatch:
 
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
-    name: Run Test Suite
+    name: Run Test Suite (Windows)
     runs-on: windows-latest
 
     steps:
@@ -22,6 +26,14 @@ jobs:
         uses: crystal-lang/install-crystal@v1
         with:
           crystal: latest
+
+      - name: Cache Crystal Build Cache
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\crystal\cache
+          key: crystal-cache-windows-${{ runner.os }}-${{ hashFiles('shard.yml', 'shard.lock') }}
+          restore-keys: |
+            crystal-cache-windows-${{ runner.os }}-
 
       - name: Verify Crystal & g++ Toolchain
         run: |
@@ -87,6 +99,19 @@ jobs:
           }
           Write-Host "Godot binary verified at ./godot.exe"
 
+      - name: Cache Godot Export Templates
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Roaming\Godot\export_templates
+          key: godot-export-templates-4.8-dev4-win
+          restore-keys: |
+            godot-export-templates-4.8-dev4-
+
+      - name: Ensure Godot Export Templates
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -File scripts/ensure_export_templates.ps1
+
       - name: Run Crystal Unit Specifications
         shell: pwsh
         run: crystal spec test/spec
@@ -140,10 +165,18 @@ jobs:
         with:
           crystal: latest
 
+      - name: Cache Crystal Build Cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/crystal
+          key: crystal-cache-linux-${{ runner.os }}-${{ hashFiles('shard.yml', 'shard.lock') }}
+          restore-keys: |
+            crystal-cache-linux-${{ runner.os }}-
+
       - name: Install Linux Build Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y lld libgc-dev
+          sudo apt-get install -y lld libgc-dev xvfb
 
       - name: Verify Crystal & Toolchain
         run: |
@@ -179,6 +212,19 @@ jobs:
             rm godot.zip
           fi
           ./godot --version
+
+      - name: Cache Godot Export Templates
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot/export_templates
+          key: godot-export-templates-4.8-dev4-linux
+          restore-keys: |
+            godot-export-templates-4.8-dev4-
+
+      - name: Ensure Godot Export Templates
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -File scripts/ensure_export_templates.ps1
 
       - name: Run Crystal Unit Specifications
         shell: bash
@@ -229,6 +275,14 @@ jobs:
         with:
           crystal: latest
 
+      - name: Cache Crystal Build Cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/crystal
+          key: crystal-cache-macos-${{ runner.os }}-${{ hashFiles('shard.yml', 'shard.lock') }}
+          restore-keys: |
+            crystal-cache-macos-${{ runner.os }}-
+
       - name: Verify Crystal & Toolchain
         run: |
           crystal -v
@@ -273,6 +327,19 @@ jobs:
           xattr -d com.apple.quarantine ./godot 2>/dev/null || true
 
           ./godot --version
+
+      - name: Cache Godot Export Templates
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Application Support/Godot/export_templates
+          key: godot-export-templates-4.8-dev4-macos
+          restore-keys: |
+            godot-export-templates-4.8-dev4-
+
+      - name: Ensure Godot Export Templates
+        shell: pwsh
+        run: |
+          & pwsh -NoProfile -File scripts/ensure_export_templates.ps1
 
       - name: Run Crystal Unit Specifications
         shell: bash
@@ -323,6 +390,14 @@ jobs:
         with:
           crystal: latest
 
+      - name: Cache Crystal Build Cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/crystal
+          key: crystal-cache-android-${{ runner.os }}-${{ hashFiles('shard.yml', 'shard.lock') }}
+          restore-keys: |
+            crystal-cache-android-${{ runner.os }}-
+
       - name: Setup Java (for apksigner & keytool)
         uses: actions/setup-java@v4
         with:
@@ -369,6 +444,14 @@ jobs:
               ln -s "$ANDROID_HOME/cmake/$first_cmake" "$ANDROID_HOME/cmake/3.22.1" || true
             fi
           fi
+
+      - name: Cache Godot Export Templates
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot/export_templates
+          key: godot-export-templates-4.8-dev4-android
+          restore-keys: |
+            godot-export-templates-4.8-dev4-
 
       - name: Ensure Godot Export Templates
         shell: pwsh
@@ -430,4 +513,3 @@ jobs:
             bin/android/test_report.json
             bin/android/android_audit_report.txt
           if-no-files-found: ignore
-

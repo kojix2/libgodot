@@ -4,9 +4,15 @@ module Godot
   node ResourceFormatLoaderCrystal < ResourceFormatLoader do
     @@instance : ResourceFormatLoaderCrystal? = nil
     @@registered : Bool = false
+    @@created_by_us : Bool = false
 
     def self.ensure_registered : Void
       return if @@registered
+      if Bridge.is_loader_registered?
+        @@registered = true
+        @@created_by_us = false
+        return
+      end
       rl_ptr = Bridge.get_singleton("ResourceLoader")
       if rl_ptr.null?
         Godot.printerr("[ResourceFormatLoaderCrystal.ensure_registered] ResourceLoader singleton is NULL!")
@@ -17,10 +23,12 @@ module Godot
       if current_type == "CrystalScript"
         Bridge.set_loader_registered(true)
         @@registered = true
+        @@created_by_us = false
         return
       end
       if loader = Godot.create(Godot::ResourceFormatLoaderCrystal)
         @@instance = loader
+        @@created_by_us = true
         r_loader.call("add_resource_format_loader", loader, true)
         Bridge.set_loader_registered(true)
         @@registered = true
@@ -31,7 +39,16 @@ module Godot
 
     def self.unregister : Void
       return unless @@registered
-      return unless (loader = @@instance) && !loader.pointer.null?
+      was_creator = @@created_by_us
+      loader = @@instance
+      @@instance = nil
+      @@registered = false
+      @@created_by_us = false
+
+      return unless was_creator
+      Bridge.set_loader_registered(false)
+      return unless loader && !loader.pointer.null?
+
       rl_ptr = Bridge.get_singleton("ResourceLoader")
       unless rl_ptr.null?
         r_loader = Godot::ResourceLoader.new(rl_ptr)
@@ -40,9 +57,9 @@ module Godot
         rescue
         end
       end
-      Bridge.set_loader_registered(false)
-      @@instance = nil
-      @@registered = false
+      while loader.alive? && loader.get_reference_count > 0
+        break unless loader.unreference
+      end
     end
 
     def self.instance : ResourceFormatLoaderCrystal
@@ -171,7 +188,6 @@ module Godot
           script.set_source_code(code)
           script.call("set_path", target_path) rescue nil
           Bridge.ret_variant_object(ret, script.pointer)
-          script.unreference
         else
           Bridge.ret_variant_nil(ret)
         end
@@ -186,10 +202,13 @@ module Godot
   node ResourceFormatSaverCrystal < ResourceFormatSaver do
     @@instance : ResourceFormatSaverCrystal? = nil
     @@registered : Bool = false
+    @@created_by_us : Bool = false
 
     def self.ensure_registered : Void
       return if @@registered
       if Bridge.is_saver_registered?
+        @@registered = true
+        @@created_by_us = false
         return
       end
       rs_ptr = Bridge.get_singleton("ResourceSaver")
@@ -199,6 +218,7 @@ module Godot
       end
       if saver = Godot.create(Godot::ResourceFormatSaverCrystal)
         @@instance = saver
+        @@created_by_us = true
         r_saver = Godot::ResourceSaver.new(rs_ptr)
         r_saver.call("add_resource_format_saver", saver, true)
         Bridge.set_saver_registered(true)
@@ -210,7 +230,16 @@ module Godot
 
     def self.unregister : Void
       return unless @@registered
-      return unless (saver = @@instance) && !saver.pointer.null?
+      was_creator = @@created_by_us
+      saver = @@instance
+      @@instance = nil
+      @@registered = false
+      @@created_by_us = false
+
+      return unless was_creator
+      Bridge.set_saver_registered(false)
+      return unless saver && !saver.pointer.null?
+
       rs_ptr = Bridge.get_singleton("ResourceSaver")
       unless rs_ptr.null?
         r_saver = Godot::ResourceSaver.new(rs_ptr)
@@ -219,9 +248,9 @@ module Godot
         rescue
         end
       end
-      Bridge.set_saver_registered(false)
-      @@instance = nil
-      @@registered = false
+      while saver.alive? && saver.get_reference_count > 0
+        break unless saver.unreference
+      end
     end
 
     def self.instance : ResourceFormatSaverCrystal

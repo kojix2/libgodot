@@ -219,6 +219,7 @@ module Godot
     # Returns the count of children belonging to this node
     def get_child_count(include_internal : Bool = false) : Int64
       check_alive!
+      return 0_i64 if @pointer.null?
       if @@mb_node_get_child_count.null?
         @@mb_node_get_child_count = Bridge.get_method_bind("Node", "get_child_count", 894402480_i64)
       end
@@ -233,6 +234,7 @@ module Godot
     # Retrieves child at specified index
     def get_child(idx : Int, include_internal : Bool = false) : Node
       check_alive!
+      return Node.new(Pointer(Void).null) if @pointer.null?
       if @@mb_node_get_child.null?
         @@mb_node_get_child = Bridge.get_method_bind("Node", "get_child", 541253412_i64)
       end
@@ -249,8 +251,83 @@ module Godot
     # Retrieves child at specified index, or nil if not found
     def get_child?(idx : Int, include_internal : Bool = false) : Node?
       return nil unless alive?
+      return nil if @pointer.null?
       c = get_child(idx, include_internal)
       c.pointer.null? ? nil : c
+    end
+
+    # Retrieves child at specified index cast to type T, or nil if not found or not matching type
+    def get_child_as(type : T.class, idx : Int, include_internal : Bool = false) : T? forall T
+      if child = get_child?(idx, include_internal)
+        if !child.pointer.null? && (alive = Bridge.find_alive_instance(child.pointer))
+          if typed = alive.as?(T)
+            return typed
+          end
+        end
+        if child.is_a?(T)
+          return child
+        elsif !child.pointer.null? && Bridge.object_is_class(child.pointer, T.name.split("::").last)
+          return T.new(child.pointer)
+        end
+      end
+    end
+
+    # Returns an Array containing all child nodes belonging to this node.
+    def get_children(include_internal : Bool = false) : ::Array(Node)
+      check_alive!
+      return ::Array(Node).new if @pointer.null?
+      count = get_child_count(include_internal)
+      return ::Array(Node).new if count <= 0
+      children = ::Array(Node).new(count.to_i32)
+      0.upto(count - 1) do |i|
+        child = get_child(i, include_internal)
+        if !child.pointer.null? && (alive = Bridge.find_alive_instance(child.pointer))
+          if alive_node = alive.as?(Node)
+            children << alive_node
+            next
+          end
+        end
+        children << child
+      end
+      children
+    end
+
+    # Yields each child node without allocating an intermediate array.
+    def each_child(include_internal : Bool = false, &block : Node -> Void) : Void
+      check_alive!
+      return if @pointer.null?
+      count = get_child_count(include_internal)
+      0.upto(count - 1) do |i|
+        child = get_child(i, include_internal)
+        if !child.pointer.null? && (alive = Bridge.find_alive_instance(child.pointer))
+          if alive_node = alive.as?(Node)
+            yield alive_node
+            next
+          end
+        end
+        yield child
+      end
+    end
+
+    # Returns all children of this node matching or cast to type T.
+    def get_children_as(type : T.class, include_internal : Bool = false) : ::Array(T) forall T
+      check_alive!
+      res = ::Array(T).new
+      class_name = T.name.split("::").last
+      get_children(include_internal).each do |child|
+        if !child.pointer.null? && (alive = Bridge.find_alive_instance(child.pointer))
+          if typed = alive.as?(T)
+            res << typed
+            next
+          end
+        end
+        if child.is_a?(T)
+          res << child
+        elsif !child.pointer.null? && Bridge.object_is_class(child.pointer, class_name)
+          res << T.new(child.pointer)
+        end
+      end
+      res
     end
 
     # Queues this node for deletion at the end of the current frame
@@ -282,6 +359,22 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_node_is_inside_tree, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+  end
+
+  class TreeItem < Object
+    # Returns an Array containing all child TreeItems of this item.
+    def get_children : ::Array(TreeItem)
+      check_alive!
+      return ::Array(TreeItem).new if @pointer.null?
+      count = get_child_count
+      return ::Array(TreeItem).new if count <= 0
+      children = ::Array(TreeItem).new(count.to_i32)
+      0.upto(count - 1) do |i|
+        child = get_child(i)
+        children << child unless child.pointer.null?
+      end
+      children
     end
   end
 end

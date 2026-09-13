@@ -100,7 +100,7 @@ module Godot
 
     @store : ::Array(T)
 
-    def initialize
+    def initialize(ptr : Void* = Pointer(Void).null)
       @store = ::Array(T).new
     end
 

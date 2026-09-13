@@ -465,7 +465,23 @@ module Godot
       Godot::ResourceFormatSaverCrystal.ensure_registered
     end
 
+    @@shutdown_callbacks = [] of (-> Void)
+
+    def self.register_shutdown_callback(&block : -> Void)
+      @@shutdown_callbacks << block
+    end
+
     def self.deinit : Void
+      Godot.print("[Bridge.deinit] Cleaning up registered shutdown callbacks...")
+      @@shutdown_callbacks.each do |cb|
+        begin
+          cb.call
+        rescue ex
+          Godot.print("[Bridge.deinit] Error in shutdown callback: #{ex.message}")
+        end
+      end
+      @@shutdown_callbacks.clear
+
       Godot.print("[Bridge.deinit] Cleaning up script cache...")
       ClassRegistry.cleanup rescue nil
       Godot.print("[Bridge.deinit] Unregistering loader...")

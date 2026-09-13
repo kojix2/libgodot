@@ -17,6 +17,8 @@ test_3d "Camera3D projection, fov, clipping planes, and priority" do
 
   cam.set_current(true)
   TestFramework.assert_true cam.is_current
+  cam.clear_current(false)
+  TestFramework.assert_false cam.is_current
 
   cam.destroy
 end

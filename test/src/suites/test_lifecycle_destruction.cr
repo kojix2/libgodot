@@ -111,6 +111,54 @@ test_lifecycle "Node hierarchy lifecycle: add_child, reparent, remove_child, and
   parent.destroy
 end
 
+test_lifecycle "Node get_children, each_child, and get_children_as hierarchy traversal" do
+  parent = Godot.create(Godot::Node2D)
+  parent.name = "ParentNode"
+
+  child1 = Godot.create(Godot::Node2D)
+  child1.name = "ChildNode1"
+
+  child2 = Godot.create(Godot::Sprite2D)
+  child2.name = "ChildSprite2"
+
+  TestFramework.assert_true parent.get_children.empty?
+
+  parent.add_child(child1)
+  parent.add_child(child2)
+
+  TestFramework.assert_eq parent.get_child_count, 2_i64
+
+  children = parent.get_children
+  TestFramework.assert_eq children.size, 2
+  TestFramework.assert_eq children[0].name, "ChildNode1"
+  TestFramework.assert_eq children[1].name, "ChildSprite2"
+
+  children_no_args = parent.get_children(false)
+  TestFramework.assert_eq children_no_args.size, 2
+
+  # Test each_child zero-allocation streaming
+  names = [] of String
+  parent.each_child do |c|
+    names << c.name
+  end
+  TestFramework.assert_eq names, ["ChildNode1", "ChildSprite2"]
+
+  # Test get_children_as typed filtering
+  sprites = parent.get_children_as(Godot::Sprite2D)
+  TestFramework.assert_eq sprites.size, 1
+  TestFramework.assert_eq sprites[0].name, "ChildSprite2"
+
+  # Test get_child_as
+  as_sprite = parent.get_child_as(Godot::Sprite2D, 1)
+  TestFramework.assert_not_nil as_sprite
+  TestFramework.assert_eq as_sprite.not_nil!.name, "ChildSprite2"
+
+  # Clean up
+  child1.destroy
+  child2.destroy
+  parent.destroy
+end
+
 test_lifecycle "RefCounted atomic lifecycle: reference, unreference, and automated deallocation" do
   rc = Godot.create(Godot::RefCounted)
   rc_id = rc.instance_id

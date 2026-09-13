@@ -117,6 +117,8 @@ LibGodot supports two distinct execution paradigms designed for both rapid in-ed
 - `make docs`: Generates offline HTML API documentation into `docs/` using `crystal docs`.
 - `make run`: Launches the test project directly in Godot.
 - `make editor`: Opens the test project in the Godot Editor (`godot.exe --editor --path test`).
+- `make debug`: Runs the test project (or `PROJECT=<path>`) under LLDB debugger.
+- `make debug-editor`: Launches the Godot Editor under LLDB debugger.
 - `make clean`: Cleans build artifacts while safely preserving runtime DLLs (`libgodot.dll`, `gc.dll`).
 
 ---
@@ -233,6 +235,20 @@ end
 ### Quality Gate Requirements:
 - **Never add shortcuts, mock classes, or fake implementations** into `libgodot` solely to make a test pass. Features must be properly implemented through Godot's GDExtension C-API and the Crystal runtime bridge.
 - Before committing any changes, run `make all` and verify that `scripts/run_tests.ps1` completes with exit code 0.
+
+### LLDB Diagnostic Protocols:
+Whenever debugging segmentation faults (`0xC0000005`), dead pointers, memory corruption, or unexpected aborts:
+1. **Always Compile Bridge with Debug Symbols**:
+   - `crystal_bridge.dll` is compiled with `-g` in `Makefile` (`CXXFLAGS ?= -std=c++17 -O2 -g ...`).
+2. **Use LLDB Directly**:
+   - Run under LLDB via `make debug`, `make debug-editor`, or `.\scripts\lldb_run.ps1 -Path <project> [-Editor] [-Batch]`.
+   - Run with `-Batch` to automatically capture the full backtrace (`bt`) upon any uncaught exception.
+   - For interactive debugging or specific breakpoints:
+     `.\scripts\lldb_run.ps1 -Path template -Headless -Quit -Commands @("b extension_instance.hpp:815", "run", "bt")`
+3. **Hardware Watchpoints for Memory/Stack Corruption**:
+   - If memory addresses or pointers become corrupted across calls, set a hardware watchpoint at the allocation site:
+     `(lldb) watchpoint set expression -s 8 -- (void**)&variable`
+   - Continue execution (`c`) to have LLDB break immediately at the exact machine instruction performing the illegal write.
 
 ---
 

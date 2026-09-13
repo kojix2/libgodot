@@ -85,6 +85,15 @@ abort "Failed: get_node? should return nil for invalid path" unless test_node.ge
 abort "Failed: get_node_or_null should return nil for invalid path" unless test_node.get_node_or_null("non_existent_node").nil?
 abort "Failed: []? should return nil for invalid path" unless test_node["non_existent_node"]?.nil?
 
+# 5b. Test Node get_children, each_child, and get_children_as
+abort "Failed: get_children should return empty Array for orphan node" unless test_node.get_children.empty?
+abort "Failed: get_children(false) should return empty Array for orphan node" unless test_node.get_children(false).empty?
+abort "Failed: get_children(true) should return empty Array for orphan node" unless test_node.get_children(true).empty?
+abort "Failed: get_children_as(Godot::Node) should return empty Array" unless test_node.get_children_as(Godot::Node).empty?
+iter_count = 0
+test_node.each_child { iter_count += 1 }
+abort "Failed: each_child should not yield for orphan node" unless iter_count == 0
+
 # 6. Test Godot::Channel
 chan = Godot::Channel.new(4)
 abort "Failed: Initial channel size should be 0" unless chan.size == 0
@@ -127,5 +136,8 @@ arr = [100, 200, 300]
 g_arr = arr.to_godot_array
 abort "Failed: Array size" unless g_arr.size == 3
 abort "Failed: Array lookup" unless g_arr[0] == 100 && g_arr[2] == 300
+
+empty_g_arr = Godot::GArray(String).new(Pointer(Void).null)
+abort "Failed: GArray with null ptr" unless empty_g_arr.size == 0
 
 puts "All verification checks (including Channels, Collections, Resource/GDClass DSL) passed successfully!"

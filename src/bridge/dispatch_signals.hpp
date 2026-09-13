@@ -33,9 +33,13 @@ inline void* make_string_name(const char *name) {
 /** Destroys and frees a heap-backed Godot StringName instance (no-op: interned for engine lifetime) */
 inline void free_string_name(void *sn) {
     // StringNames are interned in s_string_name_cache for engine lifetime.
-    // Calling gd_string_name_destroy on static engine strings corrupts Godot's
-    // static string pool and causes 'BUG: Unreferenced static string to 0' at exit.
     (void)sn;
+}
+
+/** Cleans up all interned heap-backed Godot StringName instances at engine shutdown (no-op: interned for engine lifetime) */
+inline void bridge_cleanup_string_name_cache() {
+    // StringNames in s_string_name_cache are interned for engine lifetime.
+    // Freeing them at GDExtension unload corrupts Godot's static string pool.
 }
 
 /** Allocates and initializes a heap-backed Godot String instance */
@@ -1013,8 +1017,29 @@ inline void bridge_ret_ref(void *r_ret, void *obj) {
     }
 }
 
+inline bool bridge_object_is_class(GDExtensionObjectPtr obj, const char *class_name);
+
+static GDExtensionMethodBindPtr mb_ref_init_ref = nullptr;
+inline void refcounted_init_ref(void *obj) {
+    if (!obj) return;
+    if (!mb_ref_init_ref && gd_classdb_get_method_bind) {
+        void *class_sn = make_string_name("RefCounted");
+        void *method_sn = make_string_name("init_ref");
+        mb_ref_init_ref = gd_classdb_get_method_bind(class_sn, method_sn, 2240911060ULL);
+        free_string_name(class_sn);
+        free_string_name(method_sn);
+    }
+    if (mb_ref_init_ref && gd_object_method_bind_ptrcall) {
+        uint8_t ret = 0;
+        gd_object_method_bind_ptrcall(mb_ref_init_ref, obj, nullptr, &ret);
+    }
+}
+
 inline void bridge_ret_variant_object(void *r_ret, void *obj) {
     if (!r_ret) return;
+    if (obj && bridge_object_is_class(obj, "RefCounted")) {
+        refcounted_init_ref(obj);
+    }
     bridge_variant_from_type(GDEXTENSION_VARIANT_TYPE_OBJECT, r_ret, &obj);
 }
 

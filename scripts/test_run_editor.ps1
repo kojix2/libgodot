@@ -23,7 +23,7 @@ $failedTests = 0
 function Assert-Test {
     param(
         [string]$TestName,
-        [bool]$Condition,
+        $Condition,
         [string]$Details = ""
     )
     if ($Condition) {

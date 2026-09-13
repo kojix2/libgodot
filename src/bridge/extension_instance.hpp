@@ -663,10 +663,11 @@ inline void generic_class_call_virtual_with_data(
                         free_string_name(sn_script); free_string_name(sn_set_src);
                     }
                     if (mb_set_source_code) {
-                        void *src_str = make_string(script_source);
+                        alignas(void*) char src_str[8] = {0};
+                        gd_string_new_with_utf8_chars(src_str, script_source);
                         const void *sc_args[1] = { src_str };
                         gd_object_method_bind_ptrcall(mb_set_source_code, script_obj, sc_args, nullptr);
-                        free_string(src_str);
+                        if (gd_string_destroy) gd_string_destroy(src_str);
                     }
                     bridge_ret_ref(r_ret, script_obj);
                     return;
@@ -708,6 +709,103 @@ inline void generic_class_call_virtual_with_data(
                     }
                 }
                 if (r_ret) *(uint8_t*)r_ret = ok ? 1 : 0;
+                return;
+            }
+            if (strcmp(method_name, "_get_resource_type") == 0 || strcmp(method_name, "get_resource_type") == 0) {
+                char path_buf[512] = {0};
+                if (p_args && p_args[0]) {
+                    bridge_arg_to_string(p_args[0], path_buf, sizeof(path_buf));
+                }
+                if (has_cr_extension(path_buf)) {
+                    bridge_ret_string(r_ret, "CrystalScript");
+                } else {
+                    bridge_ret_string(r_ret, "");
+                }
+                return;
+            }
+            if (strcmp(method_name, "_get_resource_script_class") == 0 || strcmp(method_name, "get_resource_script_class") == 0) {
+                bridge_ret_string(r_ret, "");
+                return;
+            }
+            if (strcmp(method_name, "_load") == 0 || strcmp(method_name, "load") == 0) {
+                char path_buf[1024] = {0};
+                char orig_buf[1024] = {0};
+                if (p_args && p_args[0]) {
+                    bridge_arg_to_string(p_args[0], path_buf, sizeof(path_buf));
+                }
+                if (p_args && p_args[1]) {
+                    bridge_arg_to_string(p_args[1], orig_buf, sizeof(orig_buf));
+                }
+                const char *target_path = (orig_buf[0] != '\0') ? orig_buf : path_buf;
+                std::string fs_path = bridge_globalize_path(target_path);
+                if (fs_path.empty() && target_path[0] != '\0') {
+                    if (strncmp(target_path, "res://", 6) == 0) {
+                        fs_path = target_path + 6;
+                    } else if (strncmp(target_path, "user://", 7) == 0) {
+                        fs_path = target_path + 7;
+                    } else {
+                        fs_path = target_path;
+                    }
+                }
+
+                std::string code;
+                if (!fs_path.empty() && bridge_file_exists(fs_path.c_str())) {
+                    FILE *f = fopen(fs_path.c_str(), "rb");
+                    if (f) {
+                        fseek(f, 0, SEEK_END);
+                        long sz = ftell(f);
+                        fseek(f, 0, SEEK_SET);
+                        if (sz > 0) {
+                            code.resize((size_t)sz);
+                            fread(&code[0], 1, (size_t)sz, f);
+                        }
+                        fclose(f);
+                    }
+                }
+
+                void *cs_sn = make_string_name("CrystalScript");
+                GDExtensionObjectPtr script_obj = gd_classdb_construct_object(cs_sn);
+                free_string_name(cs_sn);
+
+                if (script_obj) {
+                    static GDExtensionMethodBindPtr mb_set_path = nullptr;
+                    if (!mb_set_path) {
+                        void *sn_res = make_string_name("Resource");
+                        void *sn_sp = make_string_name("set_path");
+                        mb_set_path = gd_classdb_get_method_bind(sn_res, sn_sp, 83702148ULL);
+                        free_string_name(sn_res); free_string_name(sn_sp);
+                    }
+                    if (mb_set_path && target_path[0] != '\0') {
+                        alignas(void*) char p_str[8] = {0};
+                        gd_string_new_with_utf8_chars(p_str, target_path);
+                        const void *p_args_sp[1] = { p_str };
+                        gd_object_method_bind_ptrcall(mb_set_path, script_obj, p_args_sp, nullptr);
+                        if (gd_string_destroy) gd_string_destroy(p_str);
+                    }
+
+                    static GDExtensionMethodBindPtr mb_set_src = nullptr;
+                    if (!mb_set_src) {
+                        void *sn_script = make_string_name("Script");
+                        void *sn_set_sc = make_string_name("set_source_code");
+                        mb_set_src = gd_classdb_get_method_bind(sn_script, sn_set_sc, 83702148ULL);
+                        free_string_name(sn_script); free_string_name(sn_set_sc);
+                    }
+                    if (mb_set_src) {
+                        alignas(void*) char src_str[8] = {0};
+                        gd_string_new_with_utf8_chars(src_str, code.c_str());
+                        const void *sc_args[1] = { src_str };
+                        gd_object_method_bind_ptrcall(mb_set_src, script_obj, sc_args, nullptr);
+                        if (gd_string_destroy) gd_string_destroy(src_str);
+                    }
+
+                    char log_msg[256];
+                    snprintf(log_msg, sizeof(log_msg), "[ResourceFormatLoaderCrystal] Successfully loaded %s (%zu bytes)", target_path, code.size());
+                    godot_log_print(log_msg);
+
+                    bridge_ret_variant_object(r_ret, script_obj);
+                    return;
+                }
+                bridge_ret_variant_nil(r_ret);
                 return;
             }
         } else if (strcmp(inst->desc->name, "ResourceFormatSaverCrystal") == 0) {

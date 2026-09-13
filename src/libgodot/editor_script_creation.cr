@@ -761,35 +761,46 @@ module Godot
     end
 
     def self.cleanup : Void
-      if dlg = @@dialog
-        if !dlg.pointer.null? && dlg.alive?
-          parent = dlg.call_obj("get_parent") rescue nil
-          if parent && !parent.pointer.null? && parent.alive?
-            parent.call("remove_child", dlg) rescue nil
-          end
-          dlg.queue_free rescue nil
-        end
-        @@dialog = nil
-      end
       if btn = @@toolbar_button
         if !btn.pointer.null? && btn.alive?
-          parent = btn.call_obj("get_parent") rescue nil
-          if parent && !parent.pointer.null? && parent.alive?
+          if parent = btn.call_obj("get_parent")
             parent.call("remove_child", btn) rescue nil
           end
           btn.queue_free rescue nil
         end
         @@toolbar_button = nil
       end
+      if dlg = @@dialog
+        if !dlg.pointer.null? && dlg.alive?
+          if parent = dlg.call_obj("get_parent")
+            parent.call("remove_child", dlg) rescue nil
+          end
+          dlg.queue_free rescue nil
+        end
+        @@dialog = nil
+      end
       @@class_edit = nil
       @@base_opt = nil
       @@tmpl_opt = nil
       @@path_edit = nil
       @@file_dialog = nil
+      @@hooked_popups.each do |target_id|
+        Godot.clear_signal_subscriptions(target_id) rescue nil
+      end
       @@hooked_popups.clear
+      @@hooked_script_dialogs.each do |target_id|
+        Godot.clear_signal_subscriptions(target_id) rescue nil
+      end
       @@hooked_script_dialogs.clear
+      @@hooked_create_dialogs.each do |target_id|
+        Godot.clear_signal_subscriptions(target_id) rescue nil
+      end
       @@hooked_create_dialogs.clear
       @@intercept_crystal_resource = false
+    end
+
+    def self.cleanup_on_shutdown : Void
+      cleanup
     end
   end
 end

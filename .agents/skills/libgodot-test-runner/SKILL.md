@@ -119,3 +119,34 @@ final_nodes = Godot.performance.get_monitor(Godot::Performance::OBJECT_NODE_COUN
 TestFramework.assert_eq final_nodes, initial_nodes, "Node count must return to baseline!"
 ```
 If object count or static memory leaks, the test runner fails immediately.
+
+---
+
+## LLDB Diagnostic & Debugging Workflow
+
+When encountering segmentation faults (`0xC0000005`), invalid parameter crashes, or mysterious exits:
+
+### 1. Launch Under LLDB via Helper Script
+```powershell
+# Debug runtime test suite in batch mode (prints backtrace if crash occurs)
+.\scripts\lldb_run.ps1 -Path test -Headless -Quit -Batch
+
+# Debug Godot Editor on template project
+.\scripts\lldb_run.ps1 -Path template -Editor -QuitAfter 60 -Batch
+
+# Launch unified editor launcher under LLDB
+.\run-editor.ps1 -Path template -QuitAfter 60 -LLDB -Batch
+```
+
+### 2. Set Breakpoints & Interactive Commands
+```powershell
+.\scripts\lldb_run.ps1 -Path template -Headless -Quit -Commands @("b extension_instance.hpp:815", "run", "bt")
+```
+
+### 3. Diagnose Memory Corruption with Hardware Watchpoints
+If a pointer or variable is mysteriously corrupted across calls:
+1. Break right after allocation: `(lldb) b file.hpp:line`
+2. Set hardware watchpoint: `(lldb) watchpoint set expression -s 8 -- (void**)&variable`
+3. Continue execution: `(lldb) c`
+4. LLDB will stop immediately at the exact instruction modifying the watched memory address.
+

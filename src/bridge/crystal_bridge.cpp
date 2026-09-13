@@ -64,9 +64,6 @@ static PVOID g_veh_handler = NULL;
 #endif
 
 
-static bool is_engine_shutting_down() {
-    return (s_is_reloading == 0);
-}
 
 /**
  * Callback invoked by Godot during engine shutdown or reload.
@@ -76,107 +73,93 @@ static bool is_engine_shutting_down() {
  */
 static void deinitialize_crystal_module(void *p_userdata, GDExtensionInitializationLevel p_level) {
     GDExtensionClassLibraryPtr lib = (GDExtensionClassLibraryPtr)p_userdata;
-    if (p_userdata) {
+    if (!lib) {
+        lib = g_library;
+    } else {
         g_library = lib;
     }
-    if (p_level == GDEXTENSION_INITIALIZATION_EDITOR) {
-        // Run Crystal deinitialization callbacks (e.g. unregistering ResourceFormatLoader, ResourceFormatSaver, ScriptLanguage)
-        // BEFORE unregistering classes from ClassDB so instances can be cleanly removed from singletons while their types exist.
-        if (lib) {
-            auto it = g_library_deinit_callbacks.find(lib);
-            if (it != g_library_deinit_callbacks.end()) {
-                for (auto fn : it->second) {
-                    if (fn) fn();
-                }
-                g_library_deinit_callbacks.erase(it);
-            }
-        }
 
-        // Only unregister from ClassDB during hot-reload. During normal engine shutdown,
-        // Godot's ClassDB::cleanup() automatically cleans up all classes.
-        // Calling unregister_extension_class during shutdown causes stack overflow recursion in Godot 4.
-        if (lib && !is_engine_shutting_down() && gd_classdb_unregister_extension_class) {
+    if (p_level == GDEXTENSION_INITIALIZATION_EDITOR) {
+        // Unregister editor classes from ClassDB in reverse registration order
+        if (gd_classdb_unregister_extension_class) {
             auto it_ed = g_library_editor_classes.find(lib);
             if (it_ed != g_library_editor_classes.end()) {
                 for (int i = (int)it_ed->second.size() - 1; i >= 0; i--) {
-                    void *sn = make_string_name(it_ed->second[i].c_str());
-                    gd_classdb_unregister_extension_class(lib, sn);
-                    free_string_name(sn);
+                    const std::string &cname = it_ed->second[i];
+                    void *sn = make_string_name(cname.c_str());
+                    gd_classdb_unregister_extension_class(it_ed->first, sn);
+                    g_all_registered_class_names.erase(cname);
                 }
                 g_library_editor_classes.erase(it_ed);
             }
         }
     } else if (p_level == GDEXTENSION_INITIALIZATION_SCENE) {
+        // Run Crystal deinitialization callbacks (e.g. unregistering scripts, loader, saver, language)
+        // at SCENE level after editor has finished shutting down.
+        std::vector<CrystalDeinitCallbackFn> cbs_to_run;
         if (lib) {
             auto it = g_library_deinit_callbacks.find(lib);
             if (it != g_library_deinit_callbacks.end()) {
                 for (auto fn : it->second) {
-                    if (fn) fn();
+                    if (fn) cbs_to_run.push_back(fn);
                 }
                 g_library_deinit_callbacks.erase(it);
             }
         }
-
-        if (lib) {
-            if (!is_engine_shutting_down() && gd_classdb_unregister_extension_class) {
-                auto it_ed = g_library_editor_classes.find(lib);
-                if (it_ed != g_library_editor_classes.end()) {
-                    for (int i = (int)it_ed->second.size() - 1; i >= 0; i--) {
-                        void *sn = make_string_name(it_ed->second[i].c_str());
-                        gd_classdb_unregister_extension_class(lib, sn);
-                        free_string_name(sn);
+        for (auto &pair : g_library_deinit_callbacks) {
+            for (auto fn : pair.second) {
+                if (fn) {
+                    bool already = false;
+                    for (auto ran : cbs_to_run) {
+                        if (ran == fn) { already = true; break; }
                     }
-                    g_library_editor_classes.erase(it_ed);
+                    if (!already) cbs_to_run.push_back(fn);
                 }
-
-                auto it_sc = g_library_scene_classes.find(lib);
-                if (it_sc != g_library_scene_classes.end()) {
-                    for (int i = (int)it_sc->second.size() - 1; i >= 0; i--) {
-                        void *sn = make_string_name(it_sc->second[i].c_str());
-                        gd_classdb_unregister_extension_class(lib, sn);
-                        free_string_name(sn);
-                    }
-                    g_library_scene_classes.erase(it_sc);
-                }
-            } else {
-                g_library_editor_classes.erase(lib);
-                g_library_scene_classes.erase(lib);
             }
         }
-        g_active_extension_count--;
-        if (g_active_extension_count <= 0) {
-            if (!is_engine_shutting_down() && gd_classdb_unregister_extension_class) {
-                for (auto &pair : g_library_editor_classes) {
-                    for (int i = (int)pair.second.size() - 1; i >= 0; i--) {
-                        void *sn = make_string_name(pair.second[i].c_str());
-                        gd_classdb_unregister_extension_class(pair.first, sn);
-                        free_string_name(sn);
-                    }
-                }
-                for (auto &pair : g_library_scene_classes) {
-                    for (int i = (int)pair.second.size() - 1; i >= 0; i--) {
-                        void *sn = make_string_name(pair.second[i].c_str());
-                        gd_classdb_unregister_extension_class(pair.first, sn);
-                        free_string_name(sn);
-                    }
+        g_library_deinit_callbacks.clear();
+        for (auto fn : cbs_to_run) {
+            fn();
+        }
+
+        // Unregister any remaining editor classes (e.g. in standalone mode where EDITOR level was not fired)
+        if (gd_classdb_unregister_extension_class) {
+            for (auto &pair : g_library_editor_classes) {
+                for (int i = (int)pair.second.size() - 1; i >= 0; i--) {
+                    const std::string &cname = pair.second[i];
+                    void *sn = make_string_name(cname.c_str());
+                    gd_classdb_unregister_extension_class(pair.first, sn);
+                    g_all_registered_class_names.erase(cname);
                 }
             }
+            g_library_editor_classes.clear();
+
+            // Unregister scene classes in reverse registration order
+            for (auto &pair : g_library_scene_classes) {
+                for (int i = (int)pair.second.size() - 1; i >= 0; i--) {
+                    const std::string &cname = pair.second[i];
+                    void *sn = make_string_name(cname.c_str());
+                    gd_classdb_unregister_extension_class(pair.first, sn);
+                    g_all_registered_class_names.erase(cname);
+                }
+            }
+            g_library_scene_classes.clear();
+        }
+
+        g_active_extension_count--;
+        if (g_active_extension_count <= 0) {
             g_active_extension_count = 0;
             g_library_deinit_callbacks.clear();
             g_library_scene_classes.clear();
             g_library_editor_classes.clear();
-            // Retain g_persistent_class_descs and g_all_registered_class_names:
-            // Godot ClassDB retains class_userdata pointers across reloads. Preserving them prevents dangling pointers.
             g_deferred_editor_classes.clear();
             g_editor_doc_xmls.clear();
             g_loader_registered = 0;
             g_saver_registered = 0;
             g_language_registered = 0;
             s_is_reloading = 0;
+            bridge_cleanup_string_name_cache();
             unload_crystal_game_library();
-#ifdef _WIN32
-            // Retain g_veh_handler so heap corruption or termination faults during process exit are captured
-#endif
             godot_log_print("[CrystalBridge] Crystal module deinitialized.");
         }
     }

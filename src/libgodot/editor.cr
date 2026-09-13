@@ -56,7 +56,12 @@ module Godot
   def self.has_editor_interface? : Bool
     return false if Godot::Engine.singleton_ptr.null?
     engine = Godot::Engine.new(Godot::Engine.singleton_ptr)
-    engine.has_singleton("EditorInterface")
+    return false unless engine.has_singleton("EditorInterface")
+    return false if Godot::EditorInterface.singleton_ptr.null?
+    ed_iface = Godot::EditorInterface.new(Godot::EditorInterface.singleton_ptr)
+    base_ctrl = ed_iface.get_base_control rescue nil
+    return false if base_ctrl.nil? || base_ctrl.pointer.null? || !(base_ctrl.call_bool("is_inside_tree") rescue false)
+    true
   end
 
   # Ensures all editor integration components are active when running inside the Godot Editor.
@@ -159,16 +164,11 @@ module Godot
     return if base_ctrl.pointer.null? || !base_ctrl.is_inside_tree
 
     theme = ed_iface.get_editor_theme rescue nil
-    theme ||= base_ctrl.get_theme rescue nil
     return if theme.nil? || theme.pointer.null?
 
     if icon_tex = get_crystal_icon_texture
-      b_theme = (base_ctrl.get_theme rescue nil)
       ["CrystalScript", "CrystalLanguage", "Crystal"].each do |type_name|
         theme.set_icon(type_name, "EditorIcons", icon_tex) rescue nil
-        if b_theme && !b_theme.pointer.null?
-          b_theme.set_icon(type_name, "EditorIcons", icon_tex) rescue nil
-        end
       end
       Godot.print("[CrystalIntegrationPlugin] Registered Crystal theme icons into EditorIcons theme.")
     end
@@ -177,30 +177,18 @@ module Godot
   end
 
   def self.clear_theme_icons : Void
-    return unless has_editor_interface?
-    return if Godot::EditorInterface.singleton_ptr.null?
-    ed_iface = Godot::EditorInterface.new(Godot::EditorInterface.singleton_ptr)
-    base_ctrl = ed_iface.get_base_control
-    return if base_ctrl.pointer.null? || !base_ctrl.is_inside_tree
-
-    theme = ed_iface.get_editor_theme rescue nil
-    theme ||= base_ctrl.get_theme rescue nil
-    return if theme.nil? || theme.pointer.null?
-
-    ["CrystalScript", "CrystalLanguage", "Crystal"].each do |type_name|
-      if (theme.has_icon(type_name, "EditorIcons") rescue false)
-        theme.clear_icon(type_name, "EditorIcons") rescue nil
-      end
-    end
-  rescue
+    # Let Godot's engine shutdown clean up the EditorTheme naturally.
+    # Mutating the theme or calling unreference on the master EditorTheme
+    # during plugin teardown prematurely unrefs static strings in Godot's static pool.
   end
 
   def self.cleanup : Void
     return if @@cleaning_up
     @@cleaning_up = true
     begin
+      Godot.print("[Cleanup] Step 1: highlighter")
       if (highlighter = @@crystal_highlighter) && !highlighter.pointer.null?
-        if !Godot::EditorInterface.singleton_ptr.null?
+        if has_editor_interface? && !Godot::EditorInterface.singleton_ptr.null?
           begin
             ed_interface = Godot::EditorInterface.new(Godot::EditorInterface.singleton_ptr)
             script_editor = ed_interface.get_script_editor
@@ -213,9 +201,11 @@ module Godot
           rescue
           end
         end
+        highlighter.unreference rescue nil
         @@crystal_highlighter = nil
       end
 
+      Godot.print("[Cleanup] Step 2: compile_button")
       if btn = @@compile_button
         if !btn.pointer.null? && btn.alive?
           btn.call("set_button_icon", nil) rescue nil
@@ -229,10 +219,16 @@ module Godot
         @@compile_button = nil
       end
 
+      Godot.print("[Cleanup] Step 3: EditorScriptCreation")
       EditorScriptCreation.cleanup rescue nil
 
+      Godot.print("[Cleanup] Step 4: clear_theme_icons")
+      clear_theme_icons
+
+      Godot.print("[Cleanup] Step 5: cached_icon_texture")
       @@cached_icon_texture = nil
 
+      Godot.print("[Cleanup] Step 6: debugger_plugin")
       if dbg_plug = @@debugger_plugin
         if !dbg_plug.pointer.null?
           begin
@@ -243,6 +239,7 @@ module Godot
             if (inst = @@instance) && inst.alive?
               inst.remove_debugger_plugin(dbg_plug) rescue nil
             end
+            dbg_plug.unreference rescue nil
           rescue ex
             Godot.print("[CrystalIntegrationPlugin] Error in debugger cleanup: #{ex.message}")
           end
@@ -250,19 +247,15 @@ module Godot
         @@debugger_plugin = nil
       end
 
+      Godot.print("[Cleanup] Step 7: crystal_panel")
       if panel = @@crystal_panel
         if !panel.pointer.null? && panel.alive?
-          parent = panel.call_obj("get_parent") rescue nil
-          if parent && !parent.pointer.null? && parent.alive?
-            parent.call("remove_child", panel) rescue nil
-          end
-          panel.destroy rescue (panel.queue_free rescue nil)
+          panel.queue_free rescue nil
         end
         @@crystal_panel = nil
       end
 
-      clear_theme_icons
-
+      Godot.print("[Cleanup] Step 8: error_dialog")
       if dlg = @@error_dialog
         if !dlg.pointer.null? && dlg.alive?
           dlg.queue_free rescue nil
@@ -270,8 +263,30 @@ module Godot
         @@error_dialog = nil
       end
 
+      Godot.print("[Cleanup] Step 9: ClassRegistry")
       ClassRegistry.cleanup rescue nil
 
+      @@building = false
+      @@reload_pending = false
+      Godot.print("[Cleanup] Completed all cleanup steps successfully!")
+    ensure
+      @@cleaning_up = false
+    end
+  end
+
+  def self.cleanup_on_shutdown : Void
+    return if @@cleaning_up
+    @@cleaning_up = true
+    begin
+      @@crystal_highlighter = nil
+      @@cached_icon_texture = nil
+      @@debugger_plugin = nil
+      @@compile_button = nil
+      @@crystal_panel = nil
+      @@error_dialog = nil
+      @@instance = nil
+      EditorScriptCreation.cleanup_on_shutdown rescue nil
+      ClassRegistry.cleanup rescue nil
       @@building = false
       @@reload_pending = false
     ensure
@@ -1248,7 +1263,6 @@ module Godot
     curr_script = se.get_current_script
     if curr_script && !curr_script.pointer.null?
       path = curr_script.call_str("get_path")
-      curr_script.unreference # Balance the Ref<Script> created by ptrcall
       if path.ends_with?(".cr")
         curr_ed = se.call_obj("get_current_editor")
         if curr_ed && !curr_ed.pointer.null?
@@ -1297,4 +1311,8 @@ end
 end
 
 alias CrystalIntegrationPlugin = Godot::CrystalIntegrationPlugin
+
+Godot::Bridge.register_shutdown_callback do
+  Godot::CrystalIntegrationPlugin.cleanup_on_shutdown rescue nil
+end
 

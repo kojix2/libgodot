@@ -265,67 +265,67 @@ inline void load_crystal_game_library(GDExtensionClassLibraryPtr p_library = nul
         if (last_slash) {
             *last_slash = '\0';
         }
+    }
+#endif
 
-        // On macOS/Linux, if multiple GDExtensions share the same loaded bridge dylib in memory,
-        // use gd_get_library_path to identify the specific addon directory for this extension instance.
-        GDExtensionClassLibraryPtr lib_target = p_library ? p_library : g_library;
-        if (gd_get_library_path && lib_target && gd_string_to_utf8_chars) {
-            uint8_t gd_str_storage[64] = {0};
-            GDExtensionUninitializedStringPtr gd_str = (GDExtensionUninitializedStringPtr)&gd_str_storage[0];
-            gd_get_library_path(lib_target, gd_str);
-            char lib_path[MAX_PATH] = {0};
-            int64_t len = gd_string_to_utf8_chars((GDExtensionConstStringPtr)gd_str, lib_path, sizeof(lib_path) - 1);
-            if (len >= 0 && len < (int64_t)sizeof(lib_path)) {
-                lib_path[len] = '\0';
-            }
-            if (gd_string_destroy) {
-                gd_string_destroy((GDExtensionStringPtr)gd_str);
-            }
+    // If multiple GDExtensions share the same loaded bridge DLL/dylib in memory,
+    // use gd_get_library_path to identify the specific addon directory for this extension instance.
+    GDExtensionClassLibraryPtr lib_target = p_library ? p_library : g_library;
+    if (gd_get_library_path && lib_target && gd_string_to_utf8_chars) {
+        uint8_t gd_str_storage[64] = {0};
+        GDExtensionUninitializedStringPtr gd_str = (GDExtensionUninitializedStringPtr)&gd_str_storage[0];
+        gd_get_library_path(lib_target, gd_str);
+        char lib_path[MAX_PATH] = {0};
+        int64_t len = gd_string_to_utf8_chars((GDExtensionConstStringPtr)gd_str, lib_path, sizeof(lib_path) - 1);
+        if (len >= 0 && len < (int64_t)sizeof(lib_path)) {
+            lib_path[len] = '\0';
+        }
+        if (gd_string_destroy) {
+            gd_string_destroy((GDExtensionStringPtr)gd_str);
+        }
 
-            if (lib_path[0] != '\0') {
-                const char *p = lib_path;
-                if (strncmp(p, "res://", 6) == 0) p += 6;
+        if (lib_path[0] != '\0') {
+            const char *p = lib_path;
+            if (strncmp(p, "res://", 6) == 0) p += 6;
 
-                char resolved_addon_dir[MAX_PATH] = {0};
-                if (p[0] == '/' || (p[0] != '\0' && p[1] == ':')) {
-                    // p is already an absolute path
+            char resolved_addon_dir[MAX_PATH] = {0};
+            if (p[0] == '/' || (p[0] != '\0' && p[1] == ':')) {
+                // p is already an absolute path
+                strncpy(resolved_addon_dir, p, sizeof(resolved_addon_dir) - 1);
+            } else {
+                // Find the project root prefix from the bridge_dir path
+                char *addons_pos = strstr(bridge_dir, "/addons/");
+                if (!addons_pos) addons_pos = strstr(bridge_dir, "\\addons\\");
+                if (addons_pos) {
+                    size_t prefix_len = (size_t)(addons_pos - bridge_dir + 1); // includes trailing '/' or '\\'
+                    snprintf(resolved_addon_dir, sizeof(resolved_addon_dir), "%.*s%s", (int)prefix_len, bridge_dir, p);
+                } else {
                     strncpy(resolved_addon_dir, p, sizeof(resolved_addon_dir) - 1);
-                } else {
-                    // Find the project root prefix from the dlinfo path
-                    char *addons_pos = strstr(bridge_dir, "/addons/");
-                    if (!addons_pos) addons_pos = strstr(bridge_dir, "\\addons\\");
-                    if (addons_pos) {
-                        size_t prefix_len = (size_t)(addons_pos - bridge_dir + 1); // includes trailing '/' or '\\'
-                        snprintf(resolved_addon_dir, sizeof(resolved_addon_dir), "%.*s%s", (int)prefix_len, bridge_dir, p);
-                    } else {
-                        strncpy(resolved_addon_dir, p, sizeof(resolved_addon_dir) - 1);
-                    }
                 }
-                char *slash = strrchr(resolved_addon_dir, '/');
-                if (!slash) slash = strrchr(resolved_addon_dir, '\\');
-                if (slash) *slash = '\0';
+            }
+            char *slash = strrchr(resolved_addon_dir, '/');
+            if (!slash) slash = strrchr(resolved_addon_dir, '\\');
+            if (slash) *slash = '\0';
 
-                // Check if resolved_addon_dir already ends with /bin or \bin
-                size_t rlen = strlen(resolved_addon_dir);
-                bool already_has_bin = (rlen >= 4 && (strcmp(resolved_addon_dir + rlen - 4, "/bin") == 0 || strcmp(resolved_addon_dir + rlen - 4, "\\bin") == 0));
+            // Check if resolved_addon_dir already ends with /bin or \bin
+            size_t rlen = strlen(resolved_addon_dir);
+            bool already_has_bin = (rlen >= 4 && (strcmp(resolved_addon_dir + rlen - 4, "/bin") == 0 || strcmp(resolved_addon_dir + rlen - 4, "\\bin") == 0));
 
-                if (already_has_bin) {
-                    if (bridge_file_exists(resolved_addon_dir)) {
-                        strncpy(bridge_dir, resolved_addon_dir, sizeof(bridge_dir) - 1);
-                    }
-                } else {
-                    char bin_subfolder[MAX_PATH] = {0};
-                    snprintf(bin_subfolder, sizeof(bin_subfolder), "%s/bin", resolved_addon_dir);
-                    if (bridge_file_exists(bin_subfolder)) {
-                        strncpy(bridge_dir, bin_subfolder, sizeof(bridge_dir) - 1);
-                    } else if (resolved_addon_dir[0] != '\0' && bridge_file_exists(resolved_addon_dir)) {
-                        strncpy(bridge_dir, resolved_addon_dir, sizeof(bridge_dir) - 1);
-                    }
+            if (already_has_bin) {
+                if (bridge_file_exists(resolved_addon_dir)) {
+                    strncpy(bridge_dir, resolved_addon_dir, sizeof(bridge_dir) - 1);
+                }
+            } else {
+                char bin_subfolder[MAX_PATH] = {0};
+                snprintf(bin_subfolder, sizeof(bin_subfolder), "%s/bin", resolved_addon_dir);
+                if (bridge_file_exists(bin_subfolder)) {
+                    strncpy(bridge_dir, bin_subfolder, sizeof(bridge_dir) - 1);
+                } else if (resolved_addon_dir[0] != '\0' && bridge_file_exists(resolved_addon_dir)) {
+                    strncpy(bridge_dir, resolved_addon_dir, sizeof(bridge_dir) - 1);
                 }
             }
         }
     }
-#endif
 
     if (bridge_dir[0] != '\0') {
         char dir_log[512];

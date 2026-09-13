@@ -208,6 +208,9 @@ module Godot
         end
         @tab = nil
       end
+      if !@session.pointer.null?
+        @session.unreference rescue nil
+      end
     end
   end
 end

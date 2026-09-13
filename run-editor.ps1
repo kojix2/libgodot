@@ -6,22 +6,33 @@ param(
     [Alias("log")]
     [string]$LogFile = "editor.log",
 
+    [Alias("q")]
+    [int]$QuitAfter = 0,
+
+    [switch]$LLDB,
+    [switch]$Batch,
+
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$AdditionalArgs
 )
+
+function Write-RunEditorError([string]$msg) {
+    Write-Host $msg -ForegroundColor Red
+    [Console]::Error.WriteLine($msg)
+}
 
 # Validate unknown named parameters or typos like -pah
 if ($AdditionalArgs) {
     for ($i = 0; $i -lt $AdditionalArgs.Count; $i++) {
         $arg = $AdditionalArgs[$i]
         if ($arg -match '^-pa[a-zA-Z]*$') {
-            Write-Host "[RunEditor] Error: Unknown parameter '$arg'. Did you mean '-Path'?" -ForegroundColor Red
+            Write-RunEditorError "[RunEditor] Error: Unknown parameter '$arg'. Did you mean '-Path'?"
             exit 1
         }
     }
 }
 if ($PSBoundParameters.ContainsKey("Path") -and $Path -match '^-(?!-)?[a-zA-Z]') {
-    Write-Host "[RunEditor] Error: Unknown parameter or invalid path '$Path'. Did you mean '-Path'?" -ForegroundColor Red
+    Write-RunEditorError "[RunEditor] Error: Unknown parameter or invalid path '$Path'. Did you mean '-Path'?"
     exit 1
 }
 
@@ -43,7 +54,7 @@ if ([System.IO.Path]::IsPathRooted($Path)) {
 }
 
 if (-not (Test-Path $TargetDir)) {
-    Write-Host "[RunEditor] Error: Target project directory '$TargetDir' does not exist!" -ForegroundColor Red
+    Write-RunEditorError "[RunEditor] Error: Target project directory '$TargetDir' does not exist!"
     exit 1
 }
 
@@ -70,7 +81,7 @@ if (Test-Path (Join-Path $RootDir "godot.exe")) {
 }
 
 if (-not $GodotExe -or -not (Test-Path $GodotExe)) {
-    Write-Host "[RunEditor] Error: Godot engine executable was not found!" -ForegroundColor Red
+    Write-RunEditorError "[RunEditor] Error: Godot engine executable was not found!"
     Write-Host "[RunEditor] Please ensure 'godot.exe' exists in '$RootDir' or set `$env:GODOT4." -ForegroundColor Yellow
     exit 1
 }
@@ -110,11 +121,41 @@ Write-Host "Engine:  $GodotExe"
 Write-Host "Log:     $ResolvedLog"
 Write-Host "=================================================" -ForegroundColor Green
 
-# 5. Launch Godot and shadow all output to log file
-$godotArgs = @("--verbose", "--editor", "--path", $TargetDir)
-if ($AdditionalArgs) {
-    $godotArgs += $AdditionalArgs
+# 5. Prepare Godot arguments
+$isVerbose = $PSBoundParameters.ContainsKey("Verbose") -or ($AdditionalArgs -and ($AdditionalArgs -contains "--verbose" -or $AdditionalArgs -contains "-v"))
+$filteredArgs = if ($AdditionalArgs) { @($AdditionalArgs | Where-Object { $_ -ne "--verbose" -and $_ -ne "-v" }) } else { @() }
+$godotArgs = @("--editor", "--path", $TargetDir)
+if ($isVerbose) {
+    $godotArgs = @("--verbose") + $godotArgs
 }
+if ($QuitAfter -gt 0) {
+    $godotArgs += @("--quit-after", "$QuitAfter")
+}
+if ($filteredArgs) {
+    $godotArgs += $filteredArgs
+}
+
+# 6. Handle LLDB debugger execution
+if ($LLDB) {
+    $lldbScript = Join-Path $RootDir "scripts/lldb_run.ps1"
+    $lldbParams = @{
+        Path = $TargetDir
+        Editor = $true
+    }
+    if ($QuitAfter -gt 0) {
+        $lldbParams["QuitAfter"] = $QuitAfter
+    }
+    if ($Batch) {
+        $lldbParams["Batch"] = $true
+    }
+    if ($filteredArgs) {
+        $lldbParams["AdditionalArgs"] = $filteredArgs
+    }
+    & $lldbScript @lldbParams
+    exit $LASTEXITCODE
+}
+
+# 7. Launch Godot and shadow all output to log file
 
 $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
 $writer = [System.IO.StreamWriter]::new($ResolvedLog, $false, $utf8NoBom)

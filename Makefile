@@ -44,7 +44,7 @@ ifeq ($(OS),Windows_NT)
 	GODOT           ?= ./godot.exe
 	PWSH_CMD        ?= powershell -NoProfile -ExecutionPolicy Bypass -Command
 	PWSH_FILE       ?= powershell -NoProfile -File
-	CXXFLAGS        ?= -std=c++17 -O2 -I rsrc -static -static-libgcc -static-libstdc++
+	CXXFLAGS        ?= -std=c++17 -O2 -g -I rsrc -static -static-libgcc -static-libstdc++
 	LINK_FLAGS      ?= /DLL /ENTRY:_DllMainCRTStartup /EXPORT:crystal_godot_init
 else ifeq ($(UNAME_S),Darwin)
 	PLATFORM        = macos
@@ -275,6 +275,16 @@ editor:
 	@echo Opening Godot Editor for Test Project...
 	$(GODOT) --editor --path test
 
+# Run project under LLDB debugger
+debug:
+	@echo Launching under LLDB debugger...
+	@$(PWSH_FILE) scripts/lldb_run.ps1 -Path $(or $(PROJECT),test) $(if $(BATCH),-Batch,) $(if $(QUIT),-Quit,)
+
+# Launch Godot editor under LLDB debugger
+debug-editor:
+	@echo Opening Godot Editor under LLDB debugger...
+	@$(PWSH_FILE) scripts/lldb_run.ps1 -Path $(or $(PROJECT),test) -Editor $(if $(BATCH),-Batch,)
+
 # Clean build artifacts (preserves libgodot.dll and runtime DLLs)
 clean:
 	@echo Cleaning build artifacts across bin/, test/bin/, template/bin/, addons/crystal_integration/bin, and examples...
@@ -301,6 +311,8 @@ help:
 	@echo   make docs         Generate API documentation via crystal docs
 	@echo   make run          Run the test suite in Godot
 	@echo   make editor       Open the test suite in the Godot Editor
+	@echo   make debug        Run the test suite (or PROJECT=<dir>) under LLDB
+	@echo   make debug-editor Open the Godot Editor under LLDB
 	@echo   make engine       Rebuild Godot engine shared library via SCons
 	@echo   make clean        Remove compiled game/bridge binaries
 	@echo ===================================================================

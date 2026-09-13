@@ -10,7 +10,7 @@ node MainNode < Node3D do
   signal initialized
 
   def _ready
-	Godot.print("Starting the game!")
+	Godot.print("Starting the game!!!!!!!")
 	
 	get_tree.create_timer(5.0).timeout.connect do
 	  say
@@ -20,6 +20,6 @@ node MainNode < Node3D do
   end
   
   def say
-	 Godot.print(say_text)
+	each_child {|c| Godot.print(c.name)}
   end
 end

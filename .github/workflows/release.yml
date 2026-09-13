@@ -166,6 +166,7 @@ jobs:
           if (Test-Path $libDir) { Remove-Item $libDir -Recurse -Force }
           New-Item -ItemType Directory -Force -Path $libDir | Out-Null
 
+          Remove-Item -Path "template/lib", "template/.godot" -Recurse -Force -ErrorAction SilentlyContinue
           Copy-Item -Path "src" -Destination (Join-Path $libDir "src") -Recurse -Force
           Copy-Item -Path "addons" -Destination (Join-Path $libDir "addons") -Recurse -Force
           Copy-Item -Path "template" -Destination (Join-Path $libDir "template") -Recurse -Force
@@ -185,9 +186,17 @@ jobs:
           Copy-Item "README.md" "$libDir/README.md" -Force
           if (Test-Path "LICENSE") { Copy-Item "LICENSE" "$libDir/LICENSE" -Force }
 
+          Remove-Item (Join-Path $libDir "template/.godot") -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item (Join-Path $libDir "template/bin") -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item (Join-Path $libDir "template/lib") -Recurse -Force -ErrorAction SilentlyContinue
+
           $tag = "${{ needs.init-release.outputs.tag_name }}"
           $archiveName = "bin/windows/libgodot-crystal-windows-x86_64-$tag.zip"
-          Compress-Archive -Path "$libDir/*" -DestinationPath $archiveName -Force
+          if (Get-Command tar.exe -ErrorAction SilentlyContinue) {
+            tar.exe -a -c -f $archiveName -C $libDir .
+          } else {
+            Compress-Archive -Path "$libDir/*" -DestinationPath $archiveName -Force
+          }
 
       - name: Package Windows Performance Benchmark (perf-windows.zip)
         shell: pwsh

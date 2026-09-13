@@ -237,10 +237,17 @@ if (-not $SkipToolTests) {
     Write-Host "--- Phase 2: In-Editor @tool Script Tests ---" -ForegroundColor Magenta
 
     # Clear old marker files
-    $passMarker = Join-Path $TestBinDir ".tool_tests_passed"
-    $failMarker = Join-Path $TestBinDir ".tool_tests_failed"
-    if (Test-Path $passMarker) { Remove-Item $passMarker -Force }
-    if (Test-Path $failMarker) { Remove-Item $failMarker -Force }
+    $passMarkers = @(
+        (Join-Path $TestBinDir ".tool_tests_passed"),
+        (Join-Path $TestDir ".tool_tests_passed")
+    )
+    $failMarkers = @(
+        (Join-Path $TestBinDir ".tool_tests_failed"),
+        (Join-Path $TestDir ".tool_tests_failed")
+    )
+    foreach ($m in ($passMarkers + $failMarkers)) {
+        if (Test-Path $m) { Remove-Item $m -Force }
+    }
 
     # Ensure test project extension_list.cfg is pre-populated before headless tool tests
     $ensureExtScript = Join-Path $RootDir "scripts/ensure_extension_list.ps1"
@@ -254,13 +261,19 @@ if (-not $SkipToolTests) {
         -EnvironmentVars @{ "GODOT_RUN_TOOL_TESTS" = "1"; "LIBGL_ALWAYS_SOFTWARE" = "1" } `
         -CustomVerification
 
-    if (Test-Path $failMarker) {
-        $failContent = Get-Content $failMarker -Raw
+    $failedMarkerFound = $failMarkers | Where-Object { Test-Path $_ } | Select-Object -First 1
+    $passedMarkerFound = $passMarkers | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+    if ($failedMarkerFound) {
+        $failContent = Get-Content $failedMarkerFound -Raw
         Write-Host "::error::In-Editor tool tests reported failures in marker file:`n$failContent" -ForegroundColor Red
         $FailedSteps.Add("In-Editor Tool Tests (ToolTester2D / ToolTester3D failed: $failContent)")
         $toolResult["Success"] = $false
         Write-Host "[FAILED] Headless Editor Tool Tests (ToolTester2D & ToolTester3D)`n" -ForegroundColor Red
-    } elseif (-not (Test-Path $passMarker) -and (-not $toolResult["Success"])) {
+    } elseif ($passedMarkerFound) {
+        $toolResult["Success"] = $true
+        Write-Host "[PASSED] In-Editor tool tests executed cleanly and verified via marker file.`n" -ForegroundColor Green
+    } elseif (-not $toolResult["Success"]) {
         $FailedSteps.Add("In-Editor Tool Tests (Process exited with code $($toolResult['ExitCode']))")
         $toolResult["Success"] = $false
         Write-Host "[FAILED] Headless Editor Tool Tests (ToolTester2D & ToolTester3D) (Exit Code: $($toolResult['ExitCode']))`n" -ForegroundColor Red
@@ -520,12 +533,21 @@ if (-not $SkipRuntimeTests) {
     Write-Host "--- Phase 3b: In-Project Runtime Test Runner (Godot Engine Host) ---" -ForegroundColor Magenta
 
     # Clear old marker files
-    $runPassMarker = Join-Path $TestBinDir ".runtime_tests_passed"
-    $runFailMarker = Join-Path $TestBinDir ".runtime_tests_failed"
-    $summaryFile = Join-Path $TestBinDir ".runtime_test_results.txt"
-    if (Test-Path $runPassMarker) { Remove-Item $runPassMarker -Force }
-    if (Test-Path $runFailMarker) { Remove-Item $runFailMarker -Force }
-    if (Test-Path $summaryFile) { Remove-Item $summaryFile -Force }
+    $runPassMarkers = @(
+        (Join-Path $TestBinDir ".runtime_tests_passed"),
+        (Join-Path $TestDir ".runtime_tests_passed")
+    )
+    $runFailMarkers = @(
+        (Join-Path $TestBinDir ".runtime_tests_failed"),
+        (Join-Path $TestDir ".runtime_tests_failed")
+    )
+    $summaryFiles = @(
+        (Join-Path $TestBinDir ".runtime_test_results.txt"),
+        (Join-Path $TestDir ".runtime_test_results.txt")
+    )
+    foreach ($m in ($runPassMarkers + $runFailMarkers + $summaryFiles)) {
+        if (Test-Path $m) { Remove-Item $m -Force }
+    }
 
     $runtimeResult = Invoke-TestCommand -Name "Runtime Test Runner (main_test_runner.tscn --autorun)" `
         -Executable $GodotExe `
@@ -533,17 +555,26 @@ if (-not $SkipRuntimeTests) {
         -WorkingDirectory $TestDir `
         -CustomVerification
 
-    if (Test-Path $summaryFile) {
-        $summary = Get-Content $summaryFile -Raw
-        Write-Host "Test Execution Summary:`n$summary" -ForegroundColor Cyan
+    foreach ($sf in $summaryFiles) {
+        if (Test-Path $sf) {
+            $summary = Get-Content $sf -Raw
+            Write-Host "Test Execution Summary:`n$summary" -ForegroundColor Cyan
+            break
+        }
     }
 
-    if (Test-Path $runFailMarker) {
+    $failedMarkerFound = $runFailMarkers | Where-Object { Test-Path $_ } | Select-Object -First 1
+    $passedMarkerFound = $runPassMarkers | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+    if ($failedMarkerFound) {
         $runtimeResult["Success"] = $false
         Write-Host "::error::Runtime test suite reported failures!" -ForegroundColor Red
-        $FailedSteps.Add("Runtime Test Suite (Failures recorded in $runFailMarker)")
+        $FailedSteps.Add("Runtime Test Suite (Failures recorded in $failedMarkerFound)")
         Write-Host "[FAILED] Runtime Test Runner (main_test_runner.tscn)`n" -ForegroundColor Red
-    } elseif (-not $runtimeResult["Success"] -and -not (Test-Path $runPassMarker)) {
+    } elseif ($passedMarkerFound) {
+        $runtimeResult["Success"] = $true
+        Write-Host "[PASSED] All runtime test suites executed and verified.`n" -ForegroundColor Green
+    } elseif (-not $runtimeResult["Success"]) {
         $runtimeResult["Success"] = $false
         $FailedSteps.Add("Runtime Test Suite (Process exited with code $($runtimeResult['ExitCode']))")
         Write-Host "[FAILED] Runtime Test Runner (main_test_runner.tscn) (Exit Code: $($runtimeResult['ExitCode']))`n" -ForegroundColor Red

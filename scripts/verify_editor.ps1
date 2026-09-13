@@ -119,7 +119,7 @@ if ($TestErrorRecovery) {
 try {
     $godotArgs = @("--editor", "--path", $TargetDir, "--quit-after", "$QuitAfter")
     $onUnix = ($env:OS -ne "Windows_NT" -and [System.IO.Path]::PathSeparator -ne ';')
-    if ($Headless -or ($onUnix -and -not $env:DISPLAY -and -not $env:WAYLAND_DISPLAY)) {
+    if ($Headless -or $env:CI -or ($onUnix -and -not $env:DISPLAY -and -not $env:WAYLAND_DISPLAY) -or $env:LIBGL_ALWAYS_SOFTWARE) {
         $godotArgs = @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy") + $godotArgs
     }
     $process = Start-Process -FilePath $GodotExe -ArgumentList $godotArgs -RedirectStandardOutput $logFile -RedirectStandardError $errLogFile -PassThru

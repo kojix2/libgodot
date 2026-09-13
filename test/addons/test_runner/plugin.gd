@@ -263,16 +263,28 @@ func _run_in_editor_tool_tests():
 		if f_bin:
 			f_bin.store_string(fail_msg)
 			f_bin.close()
-		if FileAccess.file_exists("res://.tool_tests_failed"):
-			DirAccess.remove_absolute("res://.tool_tests_failed")
+		var f_root = FileAccess.open("res://.tool_tests_failed", FileAccess.WRITE)
+		if f_root:
+			f_root.store_string(fail_msg)
+			f_root.close()
+		if FileAccess.file_exists("res://.tool_tests_passed"):
+			DirAccess.remove_absolute("res://.tool_tests_passed")
+		if FileAccess.file_exists("res://bin/.tool_tests_passed"):
+			DirAccess.remove_absolute("res://bin/.tool_tests_passed")
 	else:
 		print("[CrystalToolTester] ALL IN-EDITOR TOOL TESTS PASSED CLEANLY!")
 		var f_bin = FileAccess.open("res://bin/.tool_tests_passed", FileAccess.WRITE)
 		if f_bin:
 			f_bin.store_string("PASSED\n")
 			f_bin.close()
-		if FileAccess.file_exists("res://.tool_tests_passed"):
-			DirAccess.remove_absolute("res://.tool_tests_passed")
+		var f_root = FileAccess.open("res://.tool_tests_passed", FileAccess.WRITE)
+		if f_root:
+			f_root.store_string("PASSED\n")
+			f_root.close()
+		if FileAccess.file_exists("res://.tool_tests_failed"):
+			DirAccess.remove_absolute("res://.tool_tests_failed")
+		if FileAccess.file_exists("res://bin/.tool_tests_failed"):
+			DirAccess.remove_absolute("res://bin/.tool_tests_failed")
 
 	var has_quit_after = false
 	for arg in OS.get_cmdline_args():

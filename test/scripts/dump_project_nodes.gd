@@ -265,7 +265,7 @@ func find_gdscripts_recursive(dir_path: String) -> Array:
 	dir.list_dir_begin()
 	var file_name = dir.get_next()
 	while file_name != "":
-		if file_name.begins_with(".") or file_name == "addons" or file_name == "scripts" or file_name == "bin" or file_name == "lib" or file_name == "export" or file_name == "dist" or file_name.ends_with("dump_project_nodes.gd"):
+		if file_name.begins_with(".") or file_name == "addons" or file_name == "bin" or file_name == "lib" or file_name == "export" or file_name == "dist" or file_name.ends_with("dump_project_nodes.gd"):
 			file_name = dir.get_next()
 			continue
 

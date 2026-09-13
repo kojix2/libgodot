@@ -588,6 +588,12 @@ inline void generic_class_call_virtual_with_data(
     // Fast-path virtual dispatches for Crystal script integration classes
     if (inst->desc && inst->desc->name) {
         if (strcmp(inst->desc->name, "CrystalLanguage") == 0) {
+            if (strcmp(method_name, "_init") == 0 || strcmp(method_name, "init") == 0) {
+                return;
+            }
+            if (strcmp(method_name, "_finish") == 0 || strcmp(method_name, "finish") == 0) {
+                return;
+            }
             if (strcmp(method_name, "_get_extension") == 0 || strcmp(method_name, "get_extension") == 0) {
                 bridge_ret_string(r_ret, "cr");
                 return;

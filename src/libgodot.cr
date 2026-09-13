@@ -14,10 +14,12 @@ require "./libgodot/generated/global_enums"
 require "./libgodot/generated/classes/all_classes"
 require "./libgodot/generated/singletons"
 require "./libgodot/docs"
+{% unless flag?(:libgodot_addon) %}
 require "./libgodot/script"
 require "./libgodot/debugger/lldb_driver"
 require "./libgodot/debugger/agent"
 require "./libgodot/editor"
+{% end %}
 
 module Godot
   class PackedScene < Resource

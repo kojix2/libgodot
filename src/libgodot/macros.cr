@@ -365,6 +365,7 @@ module Godot
     end
 
     class_getter entries = Array(Entry).new
+    {% unless flag?(:libgodot_addon) %}
     @@script_cache = Hash(String, CrystalScript).new
 
     def self.get_or_load_script(path : String, class_name : String, base_type : String = "Node", is_tool : Bool = false) : CrystalScript?
@@ -388,6 +389,11 @@ module Godot
       @@script_cache[path] = script
       script
     end
+    {% else %}
+    def self.get_or_load_script(path : String, class_name : String, base_type : String = "Node", is_tool : Bool = false) : Nil
+      nil
+    end
+    {% end %}
 
     def self.register(entry : Entry)
       if parent = find(entry.parent_name)
@@ -406,12 +412,14 @@ module Godot
     end
 
     def self.cleanup : Void
+      {% unless flag?(:libgodot_addon) %}
       @@script_cache.each_value do |script|
         if !script.pointer.null? && script.alive?
           script.unreference rescue nil
         end
       end
       @@script_cache.clear
+      {% end %}
     end
   end
 end

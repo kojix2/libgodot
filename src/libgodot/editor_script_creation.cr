@@ -91,6 +91,11 @@ module Godot
 
     # Sets up all editor integration entry points: toolbar button, FileSystem dock menus, SceneTree menus, and ScriptCreateDialog interception
     def self.setup(ed_iface : EditorInterface, base_ctrl : Control) : Void
+      if !Godot::DisplayServer.singleton_ptr.null?
+        ds = Godot::DisplayServer.new(Godot::DisplayServer.singleton_ptr)
+        return if ds.call_str("get_name") == "headless"
+      end
+
       setup_toolbar_button(ed_iface, base_ctrl)
       setup_filesystem_dock_menus(ed_iface)
       setup_scene_tree_dock_menus(ed_iface, base_ctrl)

@@ -3,6 +3,7 @@
 # =============================================================================
 # A compiled GDExtension EditorPlugin registered directly in Godot's ClassDB.
 # Acts as the native backend for the Crystal integration addon, handling
+require "./script"
 require "./editor_script_creation"
 
 module Godot
@@ -919,13 +920,17 @@ module Godot
       engine = Godot::Engine.new(Godot::Engine.singleton_ptr)
       if engine.call_bool("has_meta", "crystal_test_reloaded")
         engine.call("remove_meta", "crystal_test_reloaded") rescue nil
-        current_cycle = (engine.call_i64("get_meta", "crystal_test_cycle") rescue 1_i64) + 1_i64
+        current_cycle = if engine.call_bool("has_meta", "crystal_test_cycle")
+          (engine.call_i64("get_meta", "crystal_test_cycle") rescue 0_i64) + 1_i64
+        else
+          1_i64
+        end
         engine.call("set_meta", "crystal_test_cycle", current_cycle) rescue nil
-        Godot.print("[TestBuildButton] Reload cycle #{current_cycle - 1}/#{target_cycles} completed cleanly!")
+        Godot.print("[TestBuildButton] Reload cycle #{current_cycle}/#{target_cycles} completed cleanly!")
 
-        if current_cycle <= target_cycles
+        if current_cycle < target_cycles
           # Schedule next reload cycle
-          schedule_test_button_press(1.5, current_cycle, target_cycles.to_i64)
+          schedule_test_button_press(1.5, current_cycle + 1_i64, target_cycles.to_i64)
           return
         else
           engine.call("remove_meta", "crystal_test_cycle") rescue nil

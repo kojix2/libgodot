@@ -50,6 +50,9 @@ static void gc_thread_cleanup_destructor(void *val) {
     std::lock_guard<std::recursive_mutex> lock(g_gc_modules_mutex);
     for (const auto &mod : g_gc_modules) {
         if (mod.unregister_my_thread) {
+            if (mod.thread_is_registered && !mod.thread_is_registered()) {
+                continue;
+            }
             mod.unregister_my_thread();
         }
     }

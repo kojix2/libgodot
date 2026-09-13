@@ -72,5 +72,5 @@ if [ $ret -ne 0 ]; then
 fi
 
 # 3. Link the shared library with localized object
-"$target_cc" "$localized" "${flags[@]}"
+"$target_cc" "$localized" -Wl,-Bsymbolic -Wl,-Bsymbolic-functions "${flags[@]}"
 exit $?

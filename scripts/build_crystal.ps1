@@ -128,7 +128,7 @@ trap cleanup EXIT INT TERM
 
 ld -r "${objs[@]}" -o "$combined" || exit $?
 objcopy -w --keep-global-symbol=crystal_godot_init "$combined" "$localized" || exit $?
-"$target_cc" "$localized" "${flags[@]}"
+"$target_cc" "$localized" -Wl,-Bsymbolic -Wl,-Bsymbolic-functions "${flags[@]}"
 exit $?
 '@
         Set-Content -Path $wrapperPath -Value $scriptContent -NoNewline -Force
@@ -158,7 +158,7 @@ exit $?
             $symFile = Join-Path ([System.IO.Path]::GetTempPath()) "crystal_game.sym"
             Set-Content -Path $symFile -Value "{`n  global:`n    crystal_godot_init;`n  local:`n    *;`n};`n" -Force
         }
-        $extraFlags = "-Wl,--undefined-version -Wl,--no-export-dynamic -Wl,--version-script=$symFile"
+        $extraFlags = "-Wl,-Bsymbolic -Wl,-Bsymbolic-functions -Wl,--undefined-version -Wl,--no-export-dynamic -Wl,--version-script=$symFile"
         if ((Get-Command ld.lld -ErrorAction SilentlyContinue) -or (Get-Command lld -ErrorAction SilentlyContinue)) {
             $extraFlags = "-fuse-ld=lld $extraFlags"
         }

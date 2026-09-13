@@ -87,7 +87,11 @@ inline HMODULE bridge_load_library(const char *path) {
     if (!h) h = LoadLibraryA(path);
     return h;
 #else
+#ifdef RTLD_DEEPBIND
+    return dlopen(path, RTLD_NOW | RTLD_LOCAL | RTLD_DEEPBIND);
+#else
     return dlopen(path, RTLD_NOW | RTLD_LOCAL);
+#endif
 #endif
 }
 

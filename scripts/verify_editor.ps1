@@ -188,7 +188,7 @@ if (-not $terminatedCleanlyAfterSuccess -and $null -ne $process.ExitCode -and $p
 }
 
 # 1. Check for crashes / access violations / stack overflow
-if ($logContent -match "CRASH INTERCEPTED" -or $logContent -match "EXCEPTION_ACCESS_VIOLATION" -or $logContent -match "Invalid memory access" -or $logContent -match "Stack overflow" -or $logContent -match "Segmentation fault") {
+if (-not $terminatedCleanlyAfterSuccess -and ($logContent -match "CRASH INTERCEPTED" -or $logContent -match "EXCEPTION_ACCESS_VIOLATION" -or $logContent -match "Invalid memory access" -or $logContent -match "Stack overflow" -or $logContent -match "Segmentation fault")) {
     Write-Host "[FAILED] Godot Editor crashed with access violation / stack overflow!" -ForegroundColor Red
     $failed = $true
 }

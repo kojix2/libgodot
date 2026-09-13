@@ -250,7 +250,7 @@ if (-not $SkipToolTests) {
 
     $toolResult = Invoke-TestCommand -Name "Headless Editor Tool Tests (ToolTester2D & ToolTester3D)" `
         -Executable $GodotExe `
-        -Arguments @("--headless", "--rendering-driver", "opengl3", "--editor", "--path", "test", "--quit-after", "25") `
+        -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--editor", "--path", "test", "--quit-after", "25") `
         -EnvironmentVars @{ "GODOT_RUN_TOOL_TESTS" = "1"; "LIBGL_ALWAYS_SOFTWARE" = "1" } `
         -CustomVerification
 
@@ -289,7 +289,7 @@ if (-not $SkipToolTests) {
     $shell = if ($onWindows) { "cmd" } else { "sh" }
     $shellFlag = if ($onWindows) { "/c" } else { "-c" }
     $addonDir = Join-Path $RootDir "template-addon"
-    $shellCmd = "`"$GodotExe`" --headless --rendering-driver opengl3 --editor --path `"$addonDir`" --quit > `"$addonLogFile`" 2>&1"
+    $shellCmd = "`"$GodotExe`" --headless --rendering-driver opengl3 --audio-driver Dummy --editor --path `"$addonDir`" --quit > `"$addonLogFile`" 2>&1"
 
     $addonEditorResult = Invoke-TestCommand -Name "Headless Editor Addon Test (template-addon)" `
         -Executable $shell `
@@ -449,7 +449,7 @@ if (-not $SkipStandaloneTests) {
         # Standalone exported templates forbid '--path', so we run directly in TestBinDir
         $standaloneResult = Invoke-TestCommand -Name "Standalone Compiled Test Runner (tests$exeExt --autorun)" `
             -Executable $runExe `
-            -Arguments @("--headless", "--rendering-driver", "opengl3", "--quit-after", "15", "--", "--autorun") `
+            -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--quit-after", "15", "--", "--autorun") `
             -WorkingDirectory $TestBinDir `
             -CustomVerification
 
@@ -494,7 +494,7 @@ if (-not $SkipStandaloneTests) {
 
             $relResult = Invoke-TestCommand -Name "Standalone Release Test Runner (tests$exeExt --autorun RELEASE=1)" `
                 -Executable $runExe `
-                -Arguments @("--headless", "--rendering-driver", "opengl3", "--quit-after", "15", "--", "--autorun") `
+                -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--quit-after", "15", "--", "--autorun") `
                 -WorkingDirectory $TestBinDir `
                 -CustomVerification
 
@@ -529,7 +529,7 @@ if (-not $SkipRuntimeTests) {
 
     $runtimeResult = Invoke-TestCommand -Name "Runtime Test Runner (main_test_runner.tscn --autorun)" `
         -Executable $GodotExe `
-        -Arguments @("--headless", "--rendering-driver", "opengl3", "--path", ".", "--quit-after", "15", "--", "--autorun") `
+        -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--path", ".", "--quit-after", "15", "--", "--autorun") `
         -WorkingDirectory $TestDir `
         -CustomVerification
 
@@ -562,7 +562,7 @@ if (-not $SkipSmokeTests) {
     if (Test-Path $TemplateDir) {
         $templateResult = Invoke-TestCommand -Name "Smoke Test: Template Project" `
             -Executable $GodotExe `
-            -Arguments @("--headless", "--rendering-driver", "opengl3", "--path", "template", "--quit")
+            -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--path", "template", "--quit")
         if (-not $templateResult["Success"]) {
             $FailedSteps.Add("Smoke Test: Template Project")
         }
@@ -572,7 +572,7 @@ if (-not $SkipSmokeTests) {
     if (Test-Path $basicDemoDir) {
         $demoResult = Invoke-TestCommand -Name "Smoke Test: Basic Demo Example" `
             -Executable $GodotExe `
-            -Arguments @("--headless", "--rendering-driver", "opengl3", "--path", "examples/basic_demo", "--quit")
+            -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--path", "examples/basic_demo", "--quit")
         if (-not $demoResult["Success"]) {
             $FailedSteps.Add("Smoke Test: Basic Demo")
         }

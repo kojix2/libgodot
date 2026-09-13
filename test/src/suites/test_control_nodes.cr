@@ -4,8 +4,8 @@
 
 macro test_ui(name, &block)
   ::TestFramework::Registry.register("UI", {{name}}) do |node|
-    root = node
-    {{block.body}}
+	root = node
+	{{block.body}}
   end
 end
 

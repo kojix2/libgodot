@@ -42,6 +42,45 @@ module TestFramework
 	raise AssertionError.new(msg) unless val.nil?
   end
 
+  def self.assert_raises(klass : T.class, msg : String = "", &block) forall T
+	begin
+	  yield
+	rescue ex : T
+	  return ex
+	rescue ex : Exception
+	  detail = msg.empty? ? "Expected #{T.name} to be raised, but got #{ex.class.name}: #{ex.message}" : "#{msg} (Expected #{T.name}, got #{ex.class.name})"
+	  raise AssertionError.new(detail)
+	end
+	detail = msg.empty? ? "Expected #{T.name} to be raised, but no exception was raised" : "#{msg} (Expected #{T.name})"
+	raise AssertionError.new(detail)
+  end
+
+  def self.assert_includes(collection, item, msg : String = "")
+	unless collection.includes?(item)
+	  detail = msg.empty? ? "Expected collection to include #{item.inspect}, but it was absent" : "#{msg} (Missing #{item.inspect})"
+	  raise AssertionError.new(detail)
+	end
+  end
+
+  def self.assert_in_delta(actual : Number, expected : Number, delta : Number, msg : String = "")
+	diff = (actual - expected).abs
+	if diff > delta
+	  detail = msg.empty? ? "Expected #{actual} to be within #{delta} of #{expected} (diff #{diff})" : "#{msg} (Expected #{actual} within #{delta} of #{expected})"
+	  raise AssertionError.new(detail)
+	end
+  end
+
+  def self.suppress_errors(&block)
+	engine = Godot::Engine.instance
+	prev = engine.is_printing_error_messages
+	engine.set_print_error_messages(false)
+	begin
+	  yield
+	ensure
+	  engine.set_print_error_messages(prev)
+	end
+  end
+
   # Signal Recording and Spy Helper
   class SignalSpy
 	getter emissions = Array(Array(String)).new
@@ -112,17 +151,24 @@ module TestFramework
 	  @@tests.map(&.category).uniq
 	end
 
-	def self.run_category(category : String, context_node : Godot::Node) : Array(TestResult)
+	def self.run_category(category : String, context_node : Godot::Node, filter : String? = nil) : Array(TestResult)
 	  results = Array(TestResult).new
 	  for_category(category).each do |test|
+		next if filter && !filter.empty? && !test.name.includes?(filter)
 		results << test.execute(context_node)
 	  end
 	  results
 	end
 
-	def self.run_all(context_node : Godot::Node) : Array(TestResult)
+	def self.run_all(context_node : Godot::Node, filter : String? = nil, category_filter : String? = nil) : Array(TestResult)
 	  results = Array(TestResult).new
+	  cat_norm = category_filter ? category_filter.downcase.sub(/^test_?/, "") : nil
 	  @@tests.each do |test|
+		if cat_norm && !cat_norm.empty?
+		  t_cat = test.category.downcase.sub(/^test_?/, "")
+		  next if t_cat != cat_norm
+		end
+		next if filter && !filter.empty? && !test.name.downcase.includes?(filter.downcase)
 		results << test.execute(context_node)
 	  end
 	  results
@@ -146,6 +192,13 @@ end
   {:test_scenes, "Scenes"},
   {:test_concurrency, "Concurrency"},
   {:test_macros_dsl, "MacrosDSL"},
+  {:test_reentrancy, "Reentrancy"},
+  {:test_duplication, "Duplication"},
+  {:test_callable_adv, "CallableAdv"},
+  {:test_dynamic_props, "DynamicProps"},
+  {:test_thread_safety, "ThreadSafety"},
+  {:test_polymorphism, "Polymorphism"},
+  {:test_undo_redo, "UndoRedo"},
 ] %}
   macro {{pair[0].id}}(name, &block)
 	::TestFramework::Registry.register({{pair[1]}}, \{{name}}) do |node|
@@ -464,14 +517,48 @@ node RunTesterPanel < Godot::Control do
 	# UI hook helper
   end
 
+  def cli_filter : String?
+	extract_cli_arg("--filter")
+  end
+
+  def cli_category : String?
+	extract_cli_arg("--category")
+  end
+
+  def extract_cli_arg(prefix : String) : String?
+	begin
+	  ARGV.each_with_index do |arg, idx|
+		if arg.starts_with?("#{prefix}=")
+		  return arg.sub("#{prefix}=", "").strip
+		elsif arg == prefix && idx + 1 < ARGV.size
+		  return ARGV[idx + 1].strip
+		end
+	  end
+	rescue
+	end
+	nil
+  end
+
   def run_and_display_category(category : String)
-	results = ::TestFramework::Registry.run_category(category, self)
+	filter = cli_filter
+	results = ::TestFramework::Registry.run_category(category, self, filter: filter)
 	display_results(results, category)
   end
 
   def run_and_display_all
-	results = ::TestFramework::Registry.run_all(self)
-	display_results(results, "All")
+	filter = cli_filter
+	category = cli_category
+	results = ::TestFramework::Registry.run_all(self, filter: filter, category_filter: category)
+	label = if category && filter
+	  "All [Category: #{category}, Filter: #{filter}]"
+	elsif category
+	  "All [Category: #{category}]"
+	elsif filter
+	  "All [Filter: #{filter}]"
+	else
+	  "All"
+	end
+	display_results(results, label)
   end
 
   def display_results(results : Array(TestFramework::TestResult), suite_label : String)
@@ -506,7 +593,7 @@ node RunTesterPanel < Godot::Control do
 	  log_box.call("set_text", lines.join("\n"))
 	end
 
-	if suite_label == "All"
+	if suite_label.starts_with?("All")
 	  begin
 		summary = "TOTAL=#{total}\nPASSED=#{passed}\nFAILED=#{total - passed}\n"
 		Godot::SystemIO.write_file(".runtime_test_results.txt", summary) rescue nil
@@ -1468,3 +1555,10 @@ require "./suites/test_autobound_gdscript_nodes"
 require "./suites/test_scenes_persistence"
 require "./suites/test_debugger_isolation"
 require "./suites/test_resource_lifecycle_deep"
+require "./suites/test_reentrancy_self_destruct"
+require "./suites/test_node_duplication_meta"
+require "./suites/test_callable_signals_advanced"
+require "./suites/test_dynamic_properties_classdb"
+require "./suites/test_thread_safe_apis"
+require "./suites/test_gdscript_inheritance_polymorphism"
+require "./suites/test_undo_redo_history"

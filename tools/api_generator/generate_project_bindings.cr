@@ -145,7 +145,11 @@ if gdscript_classes = data["gdscript_classes"]?.try(&.as_a)
     next if clean_class_name.empty?
 
     inherits_name = c["inherits"]?.try(&.as_s) || "Node"
-    inherits_type = inherits_name.starts_with?("Godot::") ? inherits_name : "Godot::#{inherits_name}"
+    if inherits_name.starts_with?("Crystal")
+      inherits_type = "Godot::Node"
+    else
+      inherits_type = inherits_name.starts_with?("Godot::") ? inherits_name : "Godot::#{inherits_name}"
+    end
     script_path = c["path"]?.try(&.as_s) || ""
 
     file_basename = "#{clean_class_name.underscore}.cr"

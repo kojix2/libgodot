@@ -523,11 +523,11 @@ inline bool bridge_is_object_refcounted(GDExtensionObjectPtr obj) {
         free_string_name(sn_obj); free_string_name(sn_ic);
     }
     if (!mb_object_is_class) return false;
-    void *sn_rc = make_string_name("RefCounted");
-    const void *args[1] = { sn_rc };
+    void *str_rc = make_string("RefCounted");
+    const void *args[1] = { str_rc };
     uint8_t is_rc = 0;
     gd_object_method_bind_ptrcall(mb_object_is_class, obj, (const GDExtensionConstTypePtr*)args, &is_rc);
-    free_string_name(sn_rc);
+    free_string(str_rc);
     return is_rc != 0;
 }
 

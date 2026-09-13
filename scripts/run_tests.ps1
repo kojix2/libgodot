@@ -33,6 +33,11 @@ if (-not (Test-Path $TestBinDir)) {
     New-Item -ItemType Directory -Force -Path $TestBinDir | Out-Null
 }
 
+# Ensure single-worker Crystal runtime when testing inside host engines to prevent thread pool conflicts
+if (-not ($env:OS -like "*Windows*" -or $IsWindows)) {
+    $env:CRYSTAL_WORKERS = "1"
+}
+
 # Clean up any legacy root executables, reports, or markers from previous runs
 @(
     (Join-Path $TestDir "tests.exe"),
@@ -52,8 +57,8 @@ if (-not (Test-Path $TestBinDir)) {
 
 # Resolve Godot executable path
 $GodotExe = $null
-$normGodot4 = if ($env:GODOT4) { $env:GODOT4 -replace '^/([a-zA-Z])/', '$1:/' } else { $null }
-$normGodot = if ($env:GODOT) { $env:GODOT -replace '^/([a-zA-Z])/', '$1:/' } else { $null }
+$normGodot4 = if ($env:GODOT4) { if ($IsWindows) { $env:GODOT4 -replace '^/([a-zA-Z])/', '$1:/' } else { $env:GODOT4 } } else { $null }
+$normGodot = if ($env:GODOT) { if ($IsWindows) { $env:GODOT -replace '^/([a-zA-Z])/', '$1:/' } else { $env:GODOT } } else { $null }
 
 if (-not [string]::IsNullOrWhiteSpace($GodotPath) -and (Test-Path $GodotPath)) {
     $GodotExe = (Resolve-Path $GodotPath).Path
@@ -61,7 +66,7 @@ if (-not [string]::IsNullOrWhiteSpace($GodotPath) -and (Test-Path $GodotPath)) {
     $GodotExe = (Resolve-Path $normGodot4).Path
 } elseif (-not [string]::IsNullOrWhiteSpace($normGodot) -and (Test-Path $normGodot)) {
     $GodotExe = (Resolve-Path $normGodot).Path
-} elseif (Test-Path (Join-Path $RootDir "godot.exe")) {
+} elseif ($IsWindows -and (Test-Path (Join-Path $RootDir "godot.exe"))) {
     $GodotExe = Join-Path $RootDir "godot.exe"
 } elseif (Test-Path (Join-Path $RootDir "godot")) {
     $GodotExe = Join-Path $RootDir "godot"
@@ -71,6 +76,8 @@ if (-not [string]::IsNullOrWhiteSpace($GodotPath) -and (Test-Path $GodotPath)) {
     $GodotExe = "/Applications/Godot.app/Contents/MacOS/Godot"
 } elseif (Get-Command godot -ErrorAction SilentlyContinue) {
     $GodotExe = (Get-Command godot).Source
+} elseif (Test-Path (Join-Path $RootDir "godot.exe")) {
+    $GodotExe = Join-Path $RootDir "godot.exe"
 }
 
 if (-not $GodotExe -or -not (Test-Path $GodotExe)) {
@@ -317,11 +324,12 @@ if (-not $SkipEditorTests) {
     if (Test-Path $verifyEditorScript) {
         $pwshExe = (Get-Process -Id $PID).Path
         if (-not $pwshExe -or -not (Test-Path $pwshExe)) { $pwshExe = "powershell" }
+        $extraVerifyArgs = if (-not ($env:OS -like "*Windows*" -or $IsWindows)) { @("-Headless") } else { @() }
 
         # 1. Verify template project editor launch
         $editorTemplateResult = Invoke-TestCommand -Name "Editor Launch & Clean Shutdown (template)" `
             -Executable $pwshExe `
-            -Arguments @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $verifyEditorScript, "-Path", "template", "-QuitAfter", "60", "-GodotExe", $GodotExe) `
+            -Arguments (@("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $verifyEditorScript, "-Path", "template", "-QuitAfter", "60", "-GodotExe", $GodotExe) + $extraVerifyArgs) `
             -CustomVerification
         if (-not $editorTemplateResult["Success"]) {
             $FailedSteps.Add("Editor Launch (template project)")
@@ -333,7 +341,7 @@ if (-not $SkipEditorTests) {
         # 2. Verify test project editor launch
         $editorTestResult = Invoke-TestCommand -Name "Editor Launch & Clean Shutdown (test)" `
             -Executable $pwshExe `
-            -Arguments @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $verifyEditorScript, "-Path", "test", "-QuitAfter", "60", "-GodotExe", $GodotExe) `
+            -Arguments (@("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $verifyEditorScript, "-Path", "test", "-QuitAfter", "60", "-GodotExe", $GodotExe) + $extraVerifyArgs) `
             -CustomVerification
         if (-not $editorTestResult["Success"]) {
             $FailedSteps.Add("Editor Launch (test project)")
@@ -345,7 +353,7 @@ if (-not $SkipEditorTests) {
         # 3. Verify editor live Crystal recompilation & GDExtension reload (template project)
         $editorRebuildResult = Invoke-TestCommand -Name "Editor Live Crystal Rebuild & Reload (template, 1 cycle)" `
             -Executable $pwshExe `
-            -Arguments @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $verifyEditorScript, "-Path", "template", "-TestBuildButton", "-ReloadCycles", "1", "-PurgeCache", "-GodotExe", $GodotExe) `
+            -Arguments (@("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $verifyEditorScript, "-Path", "template", "-TestBuildButton", "-ReloadCycles", "1", "-PurgeCache", "-GodotExe", $GodotExe) + $extraVerifyArgs) `
             -CustomVerification
         if (-not $editorRebuildResult["Success"]) {
             $FailedSteps.Add("Editor Live Rebuild & Reload (template)")
@@ -357,7 +365,7 @@ if (-not $SkipEditorTests) {
         # 3b. Verify editor live Crystal compilation error recovery (template project)
         $editorErrRecoveryResult = Invoke-TestCommand -Name "Editor Live Crystal Error Recovery (template)" `
             -Executable $pwshExe `
-            -Arguments @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $verifyEditorScript, "-Path", "template", "-TestErrorRecovery", "-PurgeCache", "-GodotExe", $GodotExe) `
+            -Arguments (@("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $verifyEditorScript, "-Path", "template", "-TestErrorRecovery", "-PurgeCache", "-GodotExe", $GodotExe) + $extraVerifyArgs) `
             -CustomVerification
         if (-not $editorErrRecoveryResult["Success"]) {
             $FailedSteps.Add("Editor Live Error Recovery (template)")

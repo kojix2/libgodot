@@ -68,16 +68,30 @@ $GodotExe = $null
 $normGodot4 = if ($env:GODOT4) { $env:GODOT4 -replace '^/([a-zA-Z])/', '$1:/' } else { $null }
 $normGodot = if ($env:GODOT) { $env:GODOT -replace '^/([a-zA-Z])/', '$1:/' } else { $null }
 
-if (Test-Path (Join-Path $RootDir "godot.exe")) {
-    $GodotExe = (Resolve-Path (Join-Path $RootDir "godot.exe")).Path
-} elseif (Test-Path (Join-Path $RootDir "godot")) {
-    $GodotExe = (Resolve-Path (Join-Path $RootDir "godot")).Path
-} elseif (-not [string]::IsNullOrWhiteSpace($normGodot4) -and (Test-Path $normGodot4)) {
-    $GodotExe = (Resolve-Path $normGodot4).Path
-} elseif (-not [string]::IsNullOrWhiteSpace($normGodot) -and (Test-Path $normGodot)) {
-    $GodotExe = (Resolve-Path $normGodot).Path
-} elseif (Get-Command godot -ErrorAction SilentlyContinue) {
-    $GodotExe = (Get-Command godot).Source
+$onWindows = ($env:OS -eq "Windows_NT") -and (-not $IsLinux) -and (-not $IsMacOS)
+
+if ($onWindows) {
+    if (Test-Path (Join-Path $RootDir "godot.exe")) {
+        $GodotExe = (Resolve-Path (Join-Path $RootDir "godot.exe")).Path
+    }
+} else {
+    if (Test-Path (Join-Path $RootDir "godot")) {
+        $GodotExe = (Resolve-Path (Join-Path $RootDir "godot")).Path
+    } elseif (Get-Command godot -ErrorAction SilentlyContinue) {
+        $GodotExe = (Get-Command godot).Source
+    }
+}
+
+if (-not $GodotExe) {
+    if (-not [string]::IsNullOrWhiteSpace($normGodot4) -and (Test-Path $normGodot4)) {
+        $GodotExe = (Resolve-Path $normGodot4).Path
+    } elseif (-not [string]::IsNullOrWhiteSpace($normGodot) -and (Test-Path $normGodot)) {
+        $GodotExe = (Resolve-Path $normGodot).Path
+    } elseif ($onWindows -and (Get-Command godot.exe -ErrorAction SilentlyContinue)) {
+        $GodotExe = (Get-Command godot.exe).Source
+    } elseif (Get-Command godot -ErrorAction SilentlyContinue) {
+        $GodotExe = (Get-Command godot).Source
+    }
 }
 
 if (-not $GodotExe -or -not (Test-Path $GodotExe)) {

@@ -215,6 +215,11 @@ module Godot
               inst.remove_control_from_container(Godot::EditorPlugin::CustomControlContainer::ContainerToolbar.value, btn) rescue nil
             end
           end
+          if parent = btn.get_parent
+            if parent.alive?
+              parent.call("remove_child", btn) rescue nil
+            end
+          end
           btn.queue_free rescue nil
         end
         @@compile_button = nil
@@ -251,6 +256,11 @@ module Godot
       Godot.print("[Cleanup] Step 7: crystal_panel")
       if panel = @@crystal_panel
         if !panel.pointer.null? && panel.alive?
+          if parent = panel.get_parent
+            if parent.alive?
+              parent.call("remove_child", panel) rescue nil
+            end
+          end
           panel.queue_free rescue nil
         end
         @@crystal_panel = nil
@@ -259,6 +269,11 @@ module Godot
       Godot.print("[Cleanup] Step 8: error_dialog")
       if dlg = @@error_dialog
         if !dlg.pointer.null? && dlg.alive?
+          if parent = dlg.get_parent
+            if parent.alive?
+              parent.call("remove_child", dlg) rescue nil
+            end
+          end
           dlg.queue_free rescue nil
         end
         @@error_dialog = nil
@@ -1098,11 +1113,28 @@ module Godot
 
       if needs_recompile
         Godot.print("[CrystalIntegrationPlugin] Recompiling modified addon: #{entry}...")
-        args = ["build", "--link-flags", link_flags, main_cr, "-o", target_bin]
-        compiler_env = build_compiler_env
+        build_script = ["scripts/build_crystal.ps1", "../scripts/build_crystal.ps1", "../../scripts/build_crystal.ps1"].find { |p| File.exists?(p) }
+        pwsh_bin = Process.find_executable("pwsh") || Process.find_executable("powershell")
         out_io = IO::Memory.new
         err_io = IO::Memory.new
-        status = Process.run("crystal", args, env: compiler_env, output: out_io, error: err_io)
+        compiler_env = build_compiler_env
+
+        status = if build_script && pwsh_bin
+          script_args = ["-NoProfile", "-File", File.expand_path(build_script), "-Entry", main_cr, "-Output", target_bin, "-LinkFlags", link_flags, "-Flags", "-Dlibgodot_addon"]
+          Godot.print("[CrystalIntegrationPlugin] Running: #{pwsh_bin} #{script_args.join(" ")}")
+          Process.run(pwsh_bin, script_args, env: compiler_env, output: out_io, error: err_io)
+        else
+          args = ["build", "--link-flags", link_flags]
+          {% unless flag?(:windows) %}
+            args << "-Dwithout_mt"
+          {% end %}
+          args << main_cr
+          args << "-o"
+          args << target_bin
+          Godot.print("[CrystalIntegrationPlugin] Running: crystal #{args.join(" ")}")
+          Process.run("crystal", args, env: compiler_env, output: out_io, error: err_io)
+        end
+
         out_msg = out_io.to_s.strip
         err_msg = err_io.to_s.strip
         Godot.print(out_msg) unless out_msg.empty?
@@ -1164,18 +1196,29 @@ module Godot
       "-shared"
     {% end %}
 
-    args = ["build", "--link-flags", link_flags]
-    args << "--release" if is_release
-    args << entry_file
-    args << "-o"
-    args << out_dll
-
     compiler_env = build_compiler_env
-    Godot.print("[CrystalIntegrationPlugin] Running: crystal #{args.join(" ")}")
-
+    build_script = ["scripts/build_crystal.ps1", "../scripts/build_crystal.ps1", "../../scripts/build_crystal.ps1"].find { |p| File.exists?(p) }
+    pwsh_bin = Process.find_executable("pwsh") || Process.find_executable("powershell")
     out_io = IO::Memory.new
     err_io = IO::Memory.new
-    status = Process.run("crystal", args, env: compiler_env, output: out_io, error: err_io)
+
+    status = if build_script && pwsh_bin
+      script_args = ["-NoProfile", "-File", File.expand_path(build_script), "-Entry", entry_file, "-Output", out_dll, "-LinkFlags", link_flags]
+      script_args << "-Release" if is_release
+      Godot.print("[CrystalIntegrationPlugin] Running: #{pwsh_bin} #{script_args.join(" ")}")
+      Process.run(pwsh_bin, script_args, env: compiler_env, output: out_io, error: err_io)
+    else
+      args = ["build", "--link-flags", link_flags]
+      {% unless flag?(:windows) %}
+        args << "-Dwithout_mt"
+      {% end %}
+      args << "--release" if is_release
+      args << entry_file
+      args << "-o"
+      args << out_dll
+      Godot.print("[CrystalIntegrationPlugin] Running: crystal #{args.join(" ")}")
+      Process.run("crystal", args, env: compiler_env, output: out_io, error: err_io)
+    end
     out_msg = out_io.to_s.strip
     err_msg = err_io.to_s.strip
     Godot.print(out_msg) unless out_msg.empty?

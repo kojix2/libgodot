@@ -49,6 +49,9 @@ static void initialize_crystal_module(void *p_userdata, GDExtensionInitializatio
     g_current_init_level = p_level;
     s_is_reloading = 0;
     if (p_level == GDEXTENSION_INITIALIZATION_SCENE) {
+#ifndef _WIN32
+        setenv("CRYSTAL_WORKERS", "1", 0);
+#endif
         init_common_method_binds();
         godot_log_print("[CrystalBridge] Initializing generic Crystal GDExtension host...");
         load_crystal_game_library((GDExtensionClassLibraryPtr)p_userdata);
@@ -199,6 +202,8 @@ extern "C" GDE_EXPORT GDExtensionBool crystal_library_init(
         s_handler_installed = true;
         g_veh_handler = AddVectoredExceptionHandler(1, custom_crash_handler);
     }
+#else
+    setenv("CRYSTAL_WORKERS", "1", 0);
 #endif
     gd_get_proc_address = p_get_proc_address;
     g_library = p_library;

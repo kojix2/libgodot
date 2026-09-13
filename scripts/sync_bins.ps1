@@ -65,13 +65,7 @@ $platformBinFiles = if ($onWindows) {
 $platformPluginFile = if ($onWindows) { "plugin.dll" } elseif ($isMac) { "plugin.dylib" } else { "plugin.so" }
 $platformGameFiles = if ($onWindows) { @("game.dll", "game.exe") } elseif ($isMac) { @("game.dylib", "game") } else { @("game.so", "game") }
 
-$foreignPatterns = if ($onWindows) {
-    @('*.so*', '*.dylib', '*.cr', '*.cr.uid')
-} elseif ($isMac) {
-    @('*.dll', '*.so*', 'gc.dll', 'iconv-2.dll', 'pcre2-8.dll', '*.cr', '*.cr.uid')
-} else {
-    @('*.dll', '*.dylib', 'gc.dll', 'iconv-2.dll', 'pcre2-8.dll', '*.cr', '*.cr.uid')
-}
+$foreignPatterns = @('*.cr', '*.cr.uid')
 
 function Safe-Copy([string]$Src, [string]$Dst) {
     if (Test-Path $Src) {

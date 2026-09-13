@@ -60,6 +60,9 @@ foreach ($cand in $godotCandidates) {
         if ($onWindows -and $cleanCand -notmatch '\.exe$') {
             continue
         }
+        if (-not $onWindows -and $cleanCand -match '\.exe$') {
+            continue
+        }
         if (Test-Path $cleanCand) {
             $item = Get-Item $cleanCand
             if ($item.Length -gt 0) {

@@ -19,6 +19,8 @@ $baseCrystalPath = crystal env CRYSTAL_PATH
 $sep = if ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';') { ";" } else { ":" }
 $env:CRYSTAL_PATH = "$SourcePath$sep$baseCrystalPath"
 
+$onWindows = ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';')
+
 $buildArgs = [System.Collections.Generic.List[string]]::new()
 $buildArgs.Add("build")
 
@@ -31,10 +33,30 @@ if ($Release) {
     }
 }
 
+if ($onWindows -and ($Output -match '\.dll$' -or $LinkFlags -match '/DLL')) {
+    if ([string]::IsNullOrWhiteSpace($LinkFlags)) {
+        $LinkFlags = "/DLL /ENTRY:_DllMainCRTStartup /EXPORT:crystal_godot_init"
+    } elseif ($LinkFlags -notmatch '/EXPORT:crystal_godot_init') {
+        $LinkFlags = "$LinkFlags /EXPORT:crystal_godot_init"
+    }
+}
+
 if (-not [string]::IsNullOrWhiteSpace($Flags)) {
     foreach ($f in ($Flags -split '\s+')) {
         if (-not [string]::IsNullOrWhiteSpace($f)) {
             $buildArgs.Add($f)
+        }
+    }
+}
+
+# On Linux/Unix, GDExtension shared libraries run inside the Godot engine host process.
+# Crystal 1.20+ enables a multi-threaded ExecutionContext thread pool by default on POSIX.
+# Passing -Dwithout_mt ensures cooperative single-threaded fiber execution on the host engine thread,
+# preventing worker thread spawning, thread pool hijacking, and Godot main thread ID assertions.
+if (-not ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';')) {
+    if ($Output -match '\.so$' -or $LinkFlags -match '-shared') {
+        if (-not ($buildArgs -contains "-Dwithout_mt")) {
+            $buildArgs.Add("-Dwithout_mt")
         }
     }
 }
@@ -105,7 +127,7 @@ cleanup() { rm -f "$combined" "$localized"; }
 trap cleanup EXIT INT TERM
 
 ld -r "${objs[@]}" -o "$combined" || exit $?
-objcopy -w --keep-global-symbol=crystal_godot_init --keep-global-symbol="GC_*" "$combined" "$localized" || exit $?
+objcopy -w --keep-global-symbol=crystal_godot_init "$combined" "$localized" || exit $?
 "$target_cc" "$localized" "${flags[@]}"
 exit $?
 '@
@@ -134,9 +156,9 @@ exit $?
         }
         if ([string]::IsNullOrWhiteSpace($symFile)) {
             $symFile = Join-Path ([System.IO.Path]::GetTempPath()) "crystal_game.sym"
-            Set-Content -Path $symFile -Value "{`n  global:`n    crystal_godot_init;`n    GC_*;`n  local:`n    *;`n};`n" -Force
+            Set-Content -Path $symFile -Value "{`n  global:`n    crystal_godot_init;`n  local:`n    *;`n};`n" -Force
         }
-        $extraFlags = "-Wl,--undefined-version -Wl,--exclude-libs,ALL -Wl,--no-export-dynamic -Wl,--version-script=$symFile"
+        $extraFlags = "-Wl,--undefined-version -Wl,--no-export-dynamic -Wl,--version-script=$symFile"
         if ((Get-Command ld.lld -ErrorAction SilentlyContinue) -or (Get-Command lld -ErrorAction SilentlyContinue)) {
             $extraFlags = "-fuse-ld=lld $extraFlags"
         }

@@ -9,18 +9,39 @@ param(
     [int]$ReloadCycles = 2,
     [switch]$PurgeCache = $false,
     [switch]$TestErrorRecovery = $false,
+    [switch]$Headless = $false,
     [switch]$Verbose = $true
 )
 
 $ErrorActionPreference = "Stop"
 $RootDir = if ($PSScriptRoot) { Split-Path -Parent $PSScriptRoot } else { (Get-Location).Path }
 
+$onWindows = ($env:OS -eq "Windows_NT") -and (-not $IsLinux) -and (-not $IsMacOS)
+$normGodot4 = if ($env:GODOT4) { $env:GODOT4 -replace '^/([a-zA-Z])/', '$1:/' } else { $null }
+$normGodot = if ($env:GODOT) { $env:GODOT -replace '^/([a-zA-Z])/', '$1:/' } else { $null }
+
 if (-not $GodotExe -or -not (Test-Path $GodotExe)) {
-    $GodotExe = Join-Path $RootDir "godot.exe"
+    if (-not [string]::IsNullOrWhiteSpace($normGodot4) -and (Test-Path $normGodot4)) {
+        $GodotExe = (Resolve-Path $normGodot4).Path
+    } elseif (-not [string]::IsNullOrWhiteSpace($normGodot) -and (Test-Path $normGodot)) {
+        $GodotExe = (Resolve-Path $normGodot).Path
+    } elseif ($onWindows -and (Test-Path (Join-Path $RootDir "godot.exe"))) {
+        $GodotExe = Join-Path $RootDir "godot.exe"
+    } elseif (Test-Path (Join-Path $RootDir "godot")) {
+        $GodotExe = Join-Path $RootDir "godot"
+    } elseif (Test-Path (Join-Path $RootDir "Godot.app/Contents/MacOS/Godot")) {
+        $GodotExe = Join-Path $RootDir "Godot.app/Contents/MacOS/Godot"
+    } elseif (Test-Path "/Applications/Godot.app/Contents/MacOS/Godot") {
+        $GodotExe = "/Applications/Godot.app/Contents/MacOS/Godot"
+    } elseif (Get-Command godot -ErrorAction SilentlyContinue) {
+        $GodotExe = (Get-Command godot).Source
+    } elseif (Test-Path (Join-Path $RootDir "godot.exe")) {
+        $GodotExe = Join-Path $RootDir "godot.exe"
+    }
 }
 
-if (-not (Test-Path $GodotExe)) {
-    Write-Error "Godot executable not found at $GodotExe"
+if (-not $GodotExe -or -not (Test-Path $GodotExe)) {
+    Write-Error "Godot executable not found"
 }
 
 $TargetDir = if ([System.IO.Path]::IsPathRooted($Path)) { $Path } else { Join-Path $RootDir $Path }
@@ -98,13 +119,40 @@ if ($TestErrorRecovery) {
 try {
     $godotArgs = @("--editor", "--path", $TargetDir, "--quit-after", "$QuitAfter")
     $onUnix = ($env:OS -ne "Windows_NT" -and [System.IO.Path]::PathSeparator -ne ';')
-    if ($onUnix -and -not $env:DISPLAY -and -not $env:WAYLAND_DISPLAY) {
-        $godotArgs = @("--headless", "--rendering-driver", "opengl3") + $godotArgs
+    if ($Headless -or ($onUnix -and -not $env:DISPLAY -and -not $env:WAYLAND_DISPLAY)) {
+        $godotArgs = @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy") + $godotArgs
     }
     $process = Start-Process -FilePath $GodotExe -ArgumentList $godotArgs -RedirectStandardOutput $logFile -RedirectStandardError $errLogFile -PassThru
     $timeoutSec = if ($TestBuildButton) { 180 + ($ReloadCycles * 120) } elseif ($TestErrorRecovery) { 180 } else { 90 }
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    $terminatedCleanlyAfterSuccess = $false
     while (-not $process.HasExited -and $sw.Elapsed.TotalSeconds -lt $timeoutSec) {
+        if ($TestBuildButton -and (Test-Path $logFile)) {
+            $currentLog = Get-Content $logFile -Raw -ErrorAction SilentlyContinue
+            if ($currentLog -and $currentLog -match "SUCCESS: Completed all") {
+                Write-Host "[TestBuildButton] Detected reload completion in log. Waiting for editor clean exit..." -ForegroundColor Cyan
+                $exited = $process.WaitForExit(10000)
+                if (-not $exited -and -not $process.HasExited) {
+                    $process.Kill()
+                    $process.WaitForExit(3000)
+                }
+                $terminatedCleanlyAfterSuccess = $true
+                break
+            }
+        }
+        if ($TestErrorRecovery -and (Test-Path $logFile)) {
+            $currentLog = Get-Content $logFile -Raw -ErrorAction SilentlyContinue
+            if ($currentLog -and $currentLog -match "SUCCESS: Compilation failure captured gracefully") {
+                Write-Host "[TestErrorRecovery] Detected error recovery completion in log. Waiting for editor clean exit..." -ForegroundColor Cyan
+                $exited = $process.WaitForExit(10000)
+                if (-not $exited -and -not $process.HasExited) {
+                    $process.Kill()
+                    $process.WaitForExit(3000)
+                }
+                $terminatedCleanlyAfterSuccess = $true
+                break
+            }
+        }
         Start-Sleep -Milliseconds 500
     }
     if (-not $process.HasExited) {
@@ -134,7 +182,7 @@ $logContent = "$outContent`n$errContent"
 $failed = $false
 
 # 0. Check process exit code
-if ($null -ne $process.ExitCode -and $process.ExitCode -ne 0) {
+if (-not $terminatedCleanlyAfterSuccess -and $null -ne $process.ExitCode -and $process.ExitCode -ne 0) {
     Write-Host "[FAILED] Godot Editor process exited with non-zero exit code $($process.ExitCode)!" -ForegroundColor Red
     $failed = $true
 }

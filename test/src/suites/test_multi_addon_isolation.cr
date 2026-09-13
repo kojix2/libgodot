@@ -197,11 +197,11 @@ test_multi_addon "Concurrent multi-threaded cross-plugin GC allocation stress te
     grid.destroy
   end
 
-  # Drain worker results
-  res1 = chan1.receive
-  res2 = chan2.receive
+  # Drain worker results after ensuring background OS threads have completed
   t1.join
   t2.join
+  res1 = chan1.receive
+  res2 = chan2.receive
 
   TestFramework.assert_true res1 > 0, "Worker 1 should complete allocations successfully"
   TestFramework.assert_eq res2, 500, "Worker 2 should populate 500 entries successfully"

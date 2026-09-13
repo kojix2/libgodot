@@ -334,9 +334,10 @@ jobs:
           rm -rf "$LIB_DIR"
           mkdir -p "$LIB_DIR/bin"
 
-          cp -r src "$LIB_DIR/"
-          cp -r addons "$LIB_DIR/"
-          cp -r template "$LIB_DIR/"
+          rm -rf template/lib template/.godot template/bin/*
+          cp -R src "$LIB_DIR/"
+          cp -R addons "$LIB_DIR/"
+          cp -R template "$LIB_DIR/"
           if [ -f "bin/crystal_bridge.so" ]; then
             cp "bin/crystal_bridge.so" "$LIB_DIR/bin/"
           fi
@@ -632,9 +633,10 @@ jobs:
           rm -rf "$LIB_DIR"
           mkdir -p "$LIB_DIR/bin"
 
-          cp -r src "$LIB_DIR/"
-          cp -r addons "$LIB_DIR/"
-          cp -r template "$LIB_DIR/"
+          rm -rf template/lib template/.godot template/bin/*
+          cp -R src "$LIB_DIR/"
+          cp -R addons "$LIB_DIR/"
+          cp -R template "$LIB_DIR/"
           if [ -f "bin/crystal_bridge.dylib" ]; then
             cp "bin/crystal_bridge.dylib" "$LIB_DIR/bin/"
           fi

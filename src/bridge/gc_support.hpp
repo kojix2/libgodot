@@ -22,11 +22,13 @@ using GCInitFn = void (*)(void);
 using GCIsInitCalledFn = int (*)(void);
 using GCGetSuspendSignalFn = int (*)(void);
 using GCGetThrRestartSignalFn = int (*)(void);
+using GCUnregisterMyThreadFn = int (*)(void);
 
 struct GCModuleEntry {
     void *handle = nullptr;
     GCGetStackBaseFn get_stack_base = nullptr;
     GCRegisterMyThreadFn register_my_thread = nullptr;
+    GCUnregisterMyThreadFn unregister_my_thread = nullptr;
     GCThreadIsRegisteredFn thread_is_registered = nullptr;
     GCAllowRegisterThreadsFn allow_register_threads = nullptr;
     GCInitFn init = nullptr;
@@ -38,6 +40,25 @@ static std::vector<GCModuleEntry> g_gc_modules;
 static std::recursive_mutex g_gc_modules_mutex;
 static thread_local size_t t_gc_registered_module_count = 0;
 static void *s_cached_game_module = nullptr;
+
+#ifndef _WIN32
+static pthread_key_t s_gc_thread_cleanup_key;
+static pthread_once_t s_gc_thread_cleanup_once = PTHREAD_ONCE_INIT;
+
+static void gc_thread_cleanup_destructor(void *val) {
+    if (!val) return;
+    std::lock_guard<std::recursive_mutex> lock(g_gc_modules_mutex);
+    for (const auto &mod : g_gc_modules) {
+        if (mod.unregister_my_thread) {
+            mod.unregister_my_thread();
+        }
+    }
+}
+
+static void init_gc_cleanup_key() {
+    pthread_key_create(&s_gc_thread_cleanup_key, gc_thread_cleanup_destructor);
+}
+#endif
 
 inline void init_gc_library(void *game_module_handle = nullptr) {
     std::lock_guard<std::recursive_mutex> lock(g_gc_modules_mutex);
@@ -66,6 +87,7 @@ inline void init_gc_library(void *game_module_handle = nullptr) {
             entry.allow_register_threads = reinterpret_cast<GCAllowRegisterThreadsFn>(GetProcAddress(hGc, "GC_allow_register_threads"));
             entry.get_stack_base = reinterpret_cast<GCGetStackBaseFn>(GetProcAddress(hGc, "GC_get_stack_base"));
             entry.register_my_thread = reinterpret_cast<GCRegisterMyThreadFn>(GetProcAddress(hGc, "GC_register_my_thread"));
+            entry.unregister_my_thread = reinterpret_cast<GCUnregisterMyThreadFn>(GetProcAddress(hGc, "GC_unregister_my_thread"));
             entry.thread_is_registered = reinterpret_cast<GCThreadIsRegisteredFn>(GetProcAddress(hGc, "GC_thread_is_registered"));
             GCIsInitCalledFn is_init_called = reinterpret_cast<GCIsInitCalledFn>(GetProcAddress(hGc, "GC_is_init_called"));
             bool already_inited = (is_init_called && is_init_called() != 0);
@@ -80,14 +102,6 @@ inline void init_gc_library(void *game_module_handle = nullptr) {
         candidates.push_back(game_module_handle);
     } else {
         candidates.push_back(RTLD_DEFAULT);
-
-        const char *gc_libs[] = { "libgc.so.1", "libgc.so", "libgc.dylib" };
-        for (size_t i = 0; i < sizeof(gc_libs) / sizeof(gc_libs[0]); i++) {
-            void *hLib = dlopen(gc_libs[i], RTLD_LAZY | RTLD_GLOBAL);
-            if (hLib) {
-                candidates.push_back(hLib);
-            }
-        }
     }
 
     for (void *hCand : candidates) {
@@ -111,6 +125,7 @@ inline void init_gc_library(void *game_module_handle = nullptr) {
         GCModuleEntry entry;
         entry.handle = hCand;
         entry.register_my_thread = reg_fn;
+        entry.unregister_my_thread = reinterpret_cast<GCUnregisterMyThreadFn>(dlsym(hCand, "GC_unregister_my_thread"));
         entry.init = reinterpret_cast<GCInitFn>(dlsym(hCand, "GC_init"));
         entry.allow_register_threads = reinterpret_cast<GCAllowRegisterThreadsFn>(dlsym(hCand, "GC_allow_register_threads"));
         entry.get_stack_base = reinterpret_cast<GCGetStackBaseFn>(dlsym(hCand, "GC_get_stack_base"));
@@ -221,6 +236,10 @@ inline void ensure_gc_thread_registered() {
                     continue;
                 }
                 mod.register_my_thread(&sb);
+#ifndef _WIN32
+                pthread_once(&s_gc_thread_cleanup_once, init_gc_cleanup_key);
+                pthread_setspecific(s_gc_thread_cleanup_key, (void*)1);
+#endif
             }
         }
         t_gc_registered_module_count = modules_snapshot.size();

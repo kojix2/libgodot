@@ -87,7 +87,7 @@ inline HMODULE bridge_load_library(const char *path) {
     if (!h) h = LoadLibraryA(path);
     return h;
 #else
-    return dlopen(path, RTLD_NOW | RTLD_GLOBAL);
+    return dlopen(path, RTLD_NOW | RTLD_LOCAL);
 #endif
 }
 

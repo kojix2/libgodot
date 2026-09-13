@@ -12,7 +12,7 @@
 #>
 
 param(
-    [string]$Distro = "Ubuntu",
+    [string]$Distro = "",
     [switch]$SkipSpecs,
     [switch]$SkipRuntimeTests,
     [switch]$SkipToolTests,
@@ -32,8 +32,18 @@ if (-not (Get-Command wsl -ErrorAction SilentlyContinue)) {
 }
 
 # 2. Check distro
-$distroList = wsl --list --quiet 2>$null
-if ($LASTEXITCODE -ne 0 -or -not ($distroList -match $Distro)) {
+$rawDistros = wsl --list --quiet 2>$null
+$distroList = ($rawDistros | ForEach-Object { $_ -replace [char]0, '' }) -join "`n"
+if ([string]::IsNullOrWhiteSpace($Distro)) {
+    if ($distroList -match "Ubuntu-24.04") {
+        $Distro = "Ubuntu-24.04"
+    } elseif ($distroList -match "Ubuntu") {
+        $Distro = "Ubuntu"
+    } else {
+        $Distro = "Ubuntu-24.04"
+    }
+}
+if ($LASTEXITCODE -ne 0 -or -not ($distroList -match [regex]::Escape($Distro))) {
     Write-Host "[WSL] Distribution '$Distro' not found. Available distros:" -ForegroundColor Yellow
     wsl --list
     exit 1

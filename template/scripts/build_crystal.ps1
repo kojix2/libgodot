@@ -24,7 +24,15 @@ $entryDir = Split-Path -Parent $Entry
 $projRoot = if ((Split-Path -Leaf $entryDir) -eq "src") { Split-Path -Parent $entryDir } else { $entryDir }
 if ([string]::IsNullOrWhiteSpace($projRoot) -or $projRoot -eq ".") { $projRoot = (Get-Location).Path }
 if (Test-Path $projRoot) {
-    $gdFiles = Get-ChildItem -Path $projRoot -Filter "*.gd" -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch '[\\/]addons[\\/]' -and $_.FullName -notmatch '[\\/]\.godot[\\/]' }
+    $gdFiles = Get-ChildItem -Path $projRoot -Filter "*.gd" -Recurse -ErrorAction SilentlyContinue | Where-Object {
+        $_.FullName -notmatch '[\\/]addons[\\/]' -and
+        $_.FullName -notmatch '[\\/]\.godot[\\/]' -and
+        $_.FullName -notmatch '[\\/]tools[\\/]' -and
+        $_.Name -ne "dump_project_nodes.gd"
+    }
+    $outDir = Join-Path $projRoot "src/generated/project_nodes"
+    $outJson = Join-Path $projRoot "src/generated/project_nodes.json"
+
     if ($gdFiles) {
         $dumpScript = @(
             (Join-Path $projRoot "scripts/dump_project_nodes.gd"),
@@ -48,13 +56,18 @@ if (Test-Path $projRoot) {
 
             if ($godotExe) {
                 Write-Host "[Build] Updating project GDScript bindings for $($gdFiles.Count) script(s)..." -ForegroundColor Cyan
-                $outJson = Join-Path $projRoot "src/generated/project_nodes.json"
-                $outDir = Join-Path $projRoot "src/generated/project_nodes"
                 $scriptsDir = Join-Path $projRoot "scripts"
                 if (-not (Test-Path $scriptsDir)) { New-Item -ItemType Directory -Force -Path $scriptsDir | Out-Null }
                 $localDump = Join-Path $scriptsDir "dump_project_nodes.gd"
                 if (-not (Test-Path $localDump)) {
                     Copy-Item $dumpScript $localDump -Force
+                }
+
+                # Clean out existing generated bindings before regen
+                if (Test-Path $outDir) {
+                    Get-ChildItem -Path $outDir -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+                } else {
+                    New-Item -ItemType Directory -Force -Path $outDir | Out-Null
                 }
                 
                 try {
@@ -62,10 +75,27 @@ if (Test-Path $projRoot) {
                     if (Test-Path $outJson) {
                         & crystal run $genScript -- $outJson $outDir
                     }
+                    $manifest = Join-Path $outDir "all_project_nodes.cr"
+                    if (-not (Test-Path $manifest)) {
+                        Set-Content -Path $manifest -Value "# Generated All Project Custom Nodes Manifest`n" -NoNewline
+                    }
                 } catch {
                     Write-Host "[Build] Warning during project bindings generation: $_" -ForegroundColor Yellow
                 }
             }
+        }
+    } elseif (Test-Path $outDir) {
+        $oldItems = Get-ChildItem -Path $outDir -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.Name -ne "all_project_nodes.cr" }
+        if ($oldItems) {
+            Write-Host "[Build] Cleaning stale generated bindings in $outDir (no project GDScripts found)..." -ForegroundColor Cyan
+            $oldItems | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+        }
+        $manifest = Join-Path $outDir "all_project_nodes.cr"
+        if (Test-Path $manifest) {
+            Set-Content -Path $manifest -Value "# Generated All Project Custom Nodes Manifest`n" -NoNewline
+        }
+        if (Test-Path $outJson) {
+            Remove-Item -Path $outJson -Force -ErrorAction SilentlyContinue
         }
     }
 }

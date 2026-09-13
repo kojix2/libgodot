@@ -73,6 +73,14 @@ $outDir = Join-Path $projDir "src/generated/project_nodes"
 $genDir = Join-Path $projDir "src/generated"
 if (-not (Test-Path $genDir)) { New-Item -ItemType Directory -Force -Path $genDir | Out-Null }
 
+# Clean out old generated files before regen
+if (Test-Path $outDir) {
+    Write-Host "[ProjectBindings] Cleaning existing generated bindings in $outDir..." -ForegroundColor Cyan
+    Get-ChildItem -Path $outDir -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+} else {
+    New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+}
+
 Write-Host "[ProjectBindings] Dumping custom nodes for $(Split-Path -Leaf $projDir)..." -ForegroundColor Cyan
 & $godotExe --headless --path $projDir -s res://scripts/dump_project_nodes.gd -- --output src/generated/project_nodes.json 2>&1 | Out-Null
 
@@ -82,4 +90,9 @@ if (Test-Path $outJson) {
     Write-Host "[ProjectBindings] Successfully updated project bindings in $outDir!" -ForegroundColor Green
 } else {
     Write-Host "[ProjectBindings] Warning: $outJson was not created." -ForegroundColor Yellow
+}
+
+$manifest = Join-Path $outDir "all_project_nodes.cr"
+if (-not (Test-Path $manifest)) {
+    Set-Content -Path $manifest -Value "# Generated All Project Custom Nodes Manifest`n" -NoNewline
 }

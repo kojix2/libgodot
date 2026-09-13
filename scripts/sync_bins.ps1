@@ -319,6 +319,12 @@ foreach ($cs in $commonScripts) {
     }
 }
 
+$testScriptsDir = Join-Path $RootDir "test/scripts"
+if (Test-Path $testScriptsDir) {
+    Copy-Item (Join-Path $RootDir "tools/api_generator/generate_project_bindings.cr") $testScriptsDir -Force
+    Copy-Item (Join-Path $RootDir "tools/api_generator/dump_project_nodes.gd") $testScriptsDir -Force
+}
+
 if (Test-Path (Join-Path $RootDir "scripts/package_game.ps1")) {
     Copy-Item (Join-Path $RootDir "scripts/package_game.ps1") $templateScriptsDir -Force
 }

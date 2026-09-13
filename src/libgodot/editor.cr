@@ -3,6 +3,7 @@
 # =============================================================================
 # A compiled GDExtension EditorPlugin registered directly in Godot's ClassDB.
 # Acts as the native backend for the Crystal integration addon, handling
+require "file_utils"
 require "./script"
 require "./editor_script_creation"
 
@@ -1173,11 +1174,50 @@ module Godot
   # Automatically generates project bindings for custom GDScript nodes if present
   def self.ensure_project_bindings : Void
     begin
+      out_json = "src/generated/project_nodes.json"
+      out_dir = "src/generated/project_nodes"
+
       gd_files = [] of String
-      if Dir.exists?("src")
-        Dir.glob("src/**/*.gd").each { |f| gd_files << f }
+      Dir.glob("**/*.gd").each do |f|
+        clean_f = f.gsub('\\', '/')
+        next if clean_f.starts_with?(".godot/")
+        next if clean_f.starts_with?("addons/")
+        next if clean_f.starts_with?("tools/")
+        next if clean_f == "scripts/dump_project_nodes.gd"
+        gd_files << clean_f
       end
-      return if gd_files.empty?
+
+      if gd_files.empty?
+        # Clean out any stale generated bindings if no GDScript files remain
+        if Dir.exists?(out_dir)
+          cleaned = false
+          Dir.each_child(out_dir) do |child|
+            next if child == "all_project_nodes.cr"
+            child_path = File.join(out_dir, child)
+            begin
+              if File.file?(child_path)
+                File.delete(child_path)
+                cleaned = true
+              elsif File.directory?(child_path)
+                FileUtils.rm_rf(child_path)
+                cleaned = true
+              end
+            rescue
+            end
+          end
+          manifest_path = File.join(out_dir, "all_project_nodes.cr")
+          if File.exists?(manifest_path)
+            File.write(manifest_path, "# Generated All Project Custom Nodes Manifest\n")
+          end
+          if File.exists?(out_json)
+            File.delete(out_json) rescue nil
+          end
+          if cleaned
+            Godot.print("[CrystalIntegrationPlugin] Cleaned stale generated bindings in #{out_dir} (no project GDScript files found).")
+          end
+        end
+        return
+      end
 
       dump_script = ["scripts/dump_project_nodes.gd", "tools/api_generator/dump_project_nodes.gd", "../tools/api_generator/dump_project_nodes.gd"].find { |p| File.exists?(p) }
       gen_script = ["scripts/generate_project_bindings.cr", "tools/api_generator/generate_project_bindings.cr", "../tools/api_generator/generate_project_bindings.cr"].find { |p| File.exists?(p) }
@@ -1196,9 +1236,24 @@ module Godot
       {% end %}
 
       Godot.print("[CrystalIntegrationPlugin] Updating project GDScript bindings for #{gd_files.size} script(s)...")
-      out_json = "src/generated/project_nodes.json"
-      out_dir = "src/generated/project_nodes"
       Dir.mkdir_p("src/generated") unless Dir.exists?("src/generated")
+
+      # Clean out old generated bindings folder before regen
+      if Dir.exists?(out_dir)
+        Dir.each_child(out_dir) do |child|
+          child_path = File.join(out_dir, child)
+          begin
+            if File.file?(child_path)
+              File.delete(child_path)
+            elsif File.directory?(child_path)
+              FileUtils.rm_rf(child_path)
+            end
+          rescue
+          end
+        end
+      else
+        Dir.mkdir_p(out_dir)
+      end
 
       Process.run(godot_exe, ["--headless", "-s", "res://scripts/dump_project_nodes.gd", "--", "--output", out_json], output: Process::Redirect::Close, error: Process::Redirect::Close) rescue nil
 
@@ -1208,6 +1263,12 @@ module Godot
         if c_status && c_status.success?
           Godot.print("[CrystalIntegrationPlugin] Successfully generated project node bindings in #{out_dir}")
         end
+      end
+
+      # Guarantee manifest exists even if generation was empty
+      manifest_path = File.join(out_dir, "all_project_nodes.cr")
+      if !File.exists?(manifest_path)
+        File.write(manifest_path, "# Generated All Project Custom Nodes Manifest\n")
       end
     rescue ex
       Godot.printerr("[CrystalIntegrationPlugin] Notice during ensure_project_bindings: #{ex.message}")

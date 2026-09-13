@@ -64,6 +64,7 @@ graph TD
 - **Godot Engine**: 4.3+ or 4.4+ (Standard build, 64-bit)
 - **C++ Compiler**: GCC (`g++`) or Clang (for compiling the GDExtension loader bridge)
 - **Make**: GNU Make
+- **Powershell**: Used for support scripts and make process
 
 ### Native In-Editor Debugging Prerequisite (LLDB)
 For native in-editor debugging, breakpoint synchronization, and multiplayer lockstep inspection, install **LLDB**:

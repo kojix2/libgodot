@@ -20,7 +20,23 @@ unless File.exists?(json_path)
   exit 1
 end
 
-FileUtils.mkdir_p(out_dir)
+# Clean out any previous generated files to prevent stale bindings
+if Dir.exists?(out_dir)
+  Dir.each_child(out_dir) do |entry|
+    path = File.join(out_dir, entry)
+    begin
+      if File.file?(path)
+        File.delete(path)
+      elsif File.directory?(path)
+        FileUtils.rm_rf(path)
+      end
+    rescue ex
+      STDERR.puts "[ProjectGenerator] Warning: Could not remove #{path}: #{ex.message}"
+    end
+  end
+else
+  FileUtils.mkdir_p(out_dir)
+end
 
 data = JSON.parse(File.read(json_path))
 

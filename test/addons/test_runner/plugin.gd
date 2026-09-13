@@ -286,14 +286,7 @@ func _run_in_editor_tool_tests():
 		if FileAccess.file_exists("res://bin/.tool_tests_failed"):
 			DirAccess.remove_absolute("res://bin/.tool_tests_failed")
 
-	var has_quit_after = false
-	for arg in OS.get_cmdline_args():
-		if arg == "--quit-after" or arg.begins_with("--quit-after"):
-			has_quit_after = true
-			break
-
-	if not has_quit_after:
-		if errors > 0:
-			get_tree().quit(1)
-		else:
-			get_tree().quit(0)
+	if errors > 0:
+		get_tree().quit(1)
+	else:
+		get_tree().quit(0)

@@ -257,7 +257,7 @@ if (-not $SkipToolTests) {
 
     $toolResult = Invoke-TestCommand -Name "Headless Editor Tool Tests (ToolTester2D & ToolTester3D)" `
         -Executable $GodotExe `
-        -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--editor", "--path", "test", "--quit-after", "25") `
+        -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--editor", "--path", "test", "--quit-after", "300") `
         -EnvironmentVars @{ "GODOT_RUN_TOOL_TESTS" = "1"; "LIBGL_ALWAYS_SOFTWARE" = "1" } `
         -CustomVerification
 
@@ -342,7 +342,7 @@ if (-not $SkipEditorTests) {
         # 1. Verify template project editor launch
         $editorTemplateResult = Invoke-TestCommand -Name "Editor Launch & Clean Shutdown (template)" `
             -Executable $pwshExe `
-            -Arguments (@("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $verifyEditorScript, "-Path", "template", "-QuitAfter", "60", "-GodotExe", $GodotExe) + $extraVerifyArgs) `
+            -Arguments (@("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $verifyEditorScript, "-Path", "template", "-QuitAfter", "60", "-PurgeCache", "-GodotExe", $GodotExe) + $extraVerifyArgs) `
             -CustomVerification
         if (-not $editorTemplateResult["Success"]) {
             $FailedSteps.Add("Editor Launch (template project)")
@@ -462,7 +462,7 @@ if (-not $SkipStandaloneTests) {
         # Standalone exported templates forbid '--path', so we run directly in TestBinDir
         $standaloneResult = Invoke-TestCommand -Name "Standalone Compiled Test Runner (tests$exeExt --autorun)" `
             -Executable $runExe `
-            -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--quit-after", "15", "--", "--autorun") `
+            -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--quit-after", "600", "--", "--autorun") `
             -WorkingDirectory $TestBinDir `
             -CustomVerification
 
@@ -507,7 +507,7 @@ if (-not $SkipStandaloneTests) {
 
             $relResult = Invoke-TestCommand -Name "Standalone Release Test Runner (tests$exeExt --autorun RELEASE=1)" `
                 -Executable $runExe `
-                -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--quit-after", "15", "--", "--autorun") `
+                -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--quit-after", "600", "--", "--autorun") `
                 -WorkingDirectory $TestBinDir `
                 -CustomVerification
 
@@ -551,7 +551,7 @@ if (-not $SkipRuntimeTests) {
 
     $runtimeResult = Invoke-TestCommand -Name "Runtime Test Runner (main_test_runner.tscn --autorun)" `
         -Executable $GodotExe `
-        -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--path", ".", "--quit-after", "15", "--", "--autorun") `
+        -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--path", ".", "--quit-after", "600", "--", "--autorun") `
         -WorkingDirectory $TestDir `
         -CustomVerification
 

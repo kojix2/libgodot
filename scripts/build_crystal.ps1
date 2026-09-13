@@ -54,15 +54,15 @@ if (-not [string]::IsNullOrWhiteSpace($Flags)) {
 # Passing -Dwithout_mt ensures cooperative single-threaded fiber execution on the host engine thread,
 # preventing worker thread spawning, thread pool hijacking, and Godot main thread ID assertions.
 if (-not ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';')) {
-    if ($Output -match '\.so$' -or $LinkFlags -match '-shared') {
+    if ($Output -match '\.so$' -or $Output -match '\.dylib$' -or $LinkFlags -match '-shared' -or $LinkFlags -match '-dynamiclib') {
         if (-not ($buildArgs -contains "-Dwithout_mt")) {
             $buildArgs.Add("-Dwithout_mt")
         }
     }
 }
 
-# On Linux, shared library linking requires hiding static runtime symbols
-# and using a version script to avoid "version node not found for symbol" errors on mangled names containing '@'.
+# On Linux/macOS, shared library linking requires hiding static runtime symbols
+# to avoid symbol collisions between multiple loaded Crystal shared libraries.
 $onWindows = ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';')
 $isMac = $false
 try {
@@ -77,6 +77,9 @@ if (-not $isMac -and -not $onWindows) {
 if ($isMac -and ($Output -match '\.dylib$' -or $LinkFlags -match '-dynamiclib')) {
     if ($LinkFlags -notmatch '-dynamiclib') {
         $LinkFlags = if ([string]::IsNullOrWhiteSpace($LinkFlags)) { "-dynamiclib" } else { "$LinkFlags -dynamiclib" }
+    }
+    if ($LinkFlags -notmatch '-exported_symbol') {
+        $LinkFlags = "$LinkFlags -Wl,-exported_symbol,_crystal_godot_init"
     }
 } elseif (-not $onWindows -and -not $isMac -and ($Output -match '\.so$' -or $LinkFlags -match '-shared')) {
     # Crystal passes -rdynamic when invoking cc, which translates to -export-dynamic.

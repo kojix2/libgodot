@@ -55,7 +55,7 @@ else ifeq ($(UNAME_S),Darwin)
 	PWSH_FILE       ?= pwsh -NoProfile -File
 	CXX             ?= clang++
 	CXXFLAGS        ?= -std=c++17 -O2 -fPIC -I rsrc
-	LINK_FLAGS      ?= -dynamiclib
+	LINK_FLAGS      ?= -dynamiclib -Wl,-exported_symbol,_crystal_godot_init
 else
 	PLATFORM        = linux
 	SO_EXT          = so

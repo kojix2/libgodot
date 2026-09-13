@@ -42,27 +42,7 @@ static std::recursive_mutex g_gc_modules_mutex;
 static thread_local size_t t_gc_registered_module_count = 0;
 static void *s_cached_game_module = nullptr;
 
-#ifndef _WIN32
-static pthread_key_t s_gc_thread_cleanup_key;
-static pthread_once_t s_gc_thread_cleanup_once = PTHREAD_ONCE_INIT;
 
-static void gc_thread_cleanup_destructor(void *val) {
-    if (!val) return;
-    std::lock_guard<std::recursive_mutex> lock(g_gc_modules_mutex);
-    for (const auto &mod : g_gc_modules) {
-        if (mod.unregister_my_thread) {
-            if (mod.thread_is_registered && !mod.thread_is_registered()) {
-                continue;
-            }
-            mod.unregister_my_thread();
-        }
-    }
-}
-
-static void init_gc_cleanup_key() {
-    pthread_key_create(&s_gc_thread_cleanup_key, gc_thread_cleanup_destructor);
-}
-#endif
 
 inline void bridge_register_gc_functions(const BridgeGCFunctions *funcs) {
     if (!funcs) return;
@@ -262,10 +242,7 @@ inline void ensure_gc_thread_registered() {
                     continue;
                 }
                 mod.register_my_thread(&sb);
-#ifndef _WIN32
-                pthread_once(&s_gc_thread_cleanup_once, init_gc_cleanup_key);
-                pthread_setspecific(s_gc_thread_cleanup_key, (void*)1);
-#endif
+
             }
         }
         t_gc_registered_module_count = modules_snapshot.size();

@@ -641,26 +641,11 @@ inline void load_crystal_game_library(GDExtensionClassLibraryPtr p_library = nul
             g_hGame = hModule;
             g_loaded_modules.push_back(hModule);
             CrystalInitFn init_fn = (CrystalInitFn)bridge_get_proc(hModule, "crystal_godot_init");
-#ifndef _WIN32
-            bool is_addon = (bridge_get_proc(hModule, "crystal_godot_is_addon") != nullptr) ||
-                            (strstr(canonical_path, "addons") != nullptr && strstr(canonical_path, "crystal_integration") == nullptr) ||
-                            (strstr(candidate_path.c_str(), "addons") != nullptr && strstr(candidate_path.c_str(), "crystal_integration") == nullptr);
-            BridgeSavedSignals saved_sigs;
-            bool should_restore_sigs = is_addon || (g_loaded_modules.size() > 1);
-            if (should_restore_sigs) {
-                saved_sigs = bridge_save_signals();
-            }
-#endif
             if (init_fn) {
                 init_fn(&g_bridge_api);
             } else {
                 godot_log_error("Failed to find 'crystal_godot_init' in loaded library", nullptr, "load_crystal_game_library", __FILE__, __LINE__);
             }
-#ifndef _WIN32
-            if (should_restore_sigs) {
-                bridge_restore_signals(saved_sigs);
-            }
-#endif
             init_gc_library(hModule);
             ensure_gc_thread_registered();
         }

@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <mutex>
+#include <atomic>
 
 #ifndef _WIN32
 #include <signal.h>
@@ -64,72 +65,50 @@ struct GCThreadRegistrationGuard {
 static thread_local GCThreadRegistrationGuard t_gc_registration_guard;
 
 #ifndef _WIN32
-struct BridgeSavedSignal {
-    int signum = 0;
-    struct sigaction sa;
-    bool valid = false;
-};
+static std::atomic<int> s_next_gc_signal_offset{0};
 
-struct BridgeSavedSignals {
-    std::vector<BridgeSavedSignal> signals;
-};
-
-inline BridgeSavedSignals bridge_save_signals() {
-    BridgeSavedSignals s;
-    std::vector<int> sigs_to_check;
-    {
-        std::lock_guard<std::recursive_mutex> lock(g_gc_modules_mutex);
-        for (const auto &mod : g_gc_modules) {
-            if (mod.get_suspend_signal) {
-                int sig = mod.get_suspend_signal();
-                if (sig > 0) sigs_to_check.push_back(sig);
-            }
-            if (mod.get_thr_restart_signal) {
-                int sig = mod.get_thr_restart_signal();
-                if (sig > 0) sigs_to_check.push_back(sig);
-            }
-        }
+inline void bridge_get_gc_signals(int *out_suspend, int *out_restart) {
+    if (!out_suspend || !out_restart) return;
+#if defined(__APPLE__)
+    // On macOS, Boehm GC uses Mach kernel threads (thread_suspend/thread_resume).
+    *out_suspend = 0;
+    *out_restart = 0;
+#elif defined(SIGRTMIN) && defined(SIGRTMAX)
+    int rt_min = SIGRTMIN;
+    int rt_max = SIGRTMAX;
+    int offset = s_next_gc_signal_offset.fetch_add(1);
+    // Boehm GC default starts at SIGRTMIN + 6.
+    // Allocate distinct pairs of real-time signals for each loaded Crystal module
+    // to prevent signal handler overwrites and delivery failures.
+    int base = rt_min + 6 + (offset * 2);
+    if (base + 1 <= rt_max) {
+        *out_suspend = base;
+        *out_restart = base + 1;
+    } else {
+        *out_suspend = 0;
+        *out_restart = 0;
     }
-#ifdef SIGPWR
-    sigs_to_check.push_back(SIGPWR);
-#endif
-#ifdef SIGXCPU
-    sigs_to_check.push_back(SIGXCPU);
-#endif
-
-    for (int sig : sigs_to_check) {
-        if (sig <= 0) continue;
-        bool already = false;
-        for (const auto &entry : s.signals) {
-            if (entry.signum == sig) {
-                already = true;
-                break;
-            }
-        }
-        if (already) continue;
-
-        struct sigaction sa = {};
-        if (sigaction(sig, nullptr, &sa) == 0) {
-            if (sa.sa_handler != nullptr && sa.sa_handler != SIG_DFL && sa.sa_handler != SIG_IGN) {
-                BridgeSavedSignal entry;
-                entry.signum = sig;
-                entry.sa = sa;
-                entry.valid = true;
-                s.signals.push_back(entry);
-            }
-        }
+#elif defined(__SIGRTMIN) && defined(__SIGRTMAX)
+    int rt_min = __SIGRTMIN;
+    int rt_max = __SIGRTMAX;
+    int offset = s_next_gc_signal_offset.fetch_add(1);
+    int base = rt_min + 6 + (offset * 2);
+    if (base + 1 <= rt_max) {
+        *out_suspend = base;
+        *out_restart = base + 1;
+    } else {
+        *out_suspend = 0;
+        *out_restart = 0;
     }
-    return s;
+#else
+    *out_suspend = 0;
+    *out_restart = 0;
+#endif
 }
-
-inline void bridge_restore_signals(const BridgeSavedSignals &s) {
-    for (const auto &entry : s.signals) {
-        if (entry.valid && entry.signum > 0) {
-            if (entry.sa.sa_handler != nullptr && entry.sa.sa_handler != SIG_DFL && entry.sa.sa_handler != SIG_IGN) {
-                sigaction(entry.signum, &entry.sa, nullptr);
-            }
-        }
-    }
+#else
+inline void bridge_get_gc_signals(int *out_suspend, int *out_restart) {
+    if (out_suspend) *out_suspend = 0;
+    if (out_restart) *out_restart = 0;
 }
 #endif
 

@@ -21,6 +21,7 @@ static GDExtensionInterfaceRefSetObject gd_ref_set_object = nullptr;
 static GDExtensionInterfaceRefGetObject gd_ref_get_object = nullptr;
 static GDExtensionInterfaceObjectGetInstanceId gd_object_get_instance_id = nullptr;
 static GDExtensionInterfaceObjectSetInstance gd_object_set_instance = nullptr;
+static GDExtensionInterfaceObjectGetClassName gd_object_get_class_name = nullptr;
 
 // ClassDB Registration & Reflection
 static GDExtensionInterfaceClassdbRegisterExtensionClass6 gd_classdb_register_extension_class6 = nullptr;

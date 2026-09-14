@@ -66,6 +66,11 @@ struct CrystalClassDesc {
     bool has_physics_process; /** True if the class overrides _physics_process(delta) */
     bool has_enter_tree;      /** True if the class overrides _enter_tree() */
     bool has_exit_tree;       /** True if the class overrides _exit_tree() */
+    bool has_input;           /** True if the class overrides _input(event) */
+    bool has_unhandled_input; /** True if the class overrides _unhandled_input(event) */
+    bool has_unhandled_key_input; /** True if the class overrides _unhandled_key_input(event) */
+    bool has_shortcut_input;  /** True if the class overrides _shortcut_input(event) */
+    bool has_gui_input;       /** True if the class overrides _gui_input(event) */
 
     // Crystal Host Callbacks
     void* (*create_instance)(const CrystalClassDesc *desc, void *godot_object);
@@ -288,6 +293,7 @@ struct BridgeAPI {
     bool (*object_is_class)(GDExtensionObjectPtr obj, const char *class_name);
     void (*register_gc_functions)(const struct BridgeGCFunctions *funcs);
     void (*get_gc_signals)(int *out_suspend, int *out_restart);
+    void (*object_get_class_name)(GDExtensionObjectPtr obj, char *buf, int max_len);
 };
 
 struct BridgeGCFunctions {

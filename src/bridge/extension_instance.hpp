@@ -377,6 +377,21 @@ inline void* generic_class_get_virtual_call_data(void *p_class_userdata, GDExten
     if (strcmp(method_buf, "_exit_tree") == 0 || strcmp(method_buf, "exit_tree") == 0) {
         return desc->has_exit_tree ? (void*)intern_virtual_method(method_buf) : nullptr;
     }
+    if (strcmp(method_buf, "_input") == 0 || strcmp(method_buf, "input") == 0) {
+        return desc->has_input ? (void*)intern_virtual_method(method_buf) : nullptr;
+    }
+    if (strcmp(method_buf, "_unhandled_input") == 0 || strcmp(method_buf, "unhandled_input") == 0) {
+        return desc->has_unhandled_input ? (void*)intern_virtual_method(method_buf) : nullptr;
+    }
+    if (strcmp(method_buf, "_unhandled_key_input") == 0 || strcmp(method_buf, "unhandled_key_input") == 0) {
+        return desc->has_unhandled_key_input ? (void*)intern_virtual_method(method_buf) : nullptr;
+    }
+    if (strcmp(method_buf, "_shortcut_input") == 0 || strcmp(method_buf, "shortcut_input") == 0) {
+        return desc->has_shortcut_input ? (void*)intern_virtual_method(method_buf) : nullptr;
+    }
+    if (strcmp(method_buf, "_gui_input") == 0 || strcmp(method_buf, "gui_input") == 0) {
+        return desc->has_gui_input ? (void*)intern_virtual_method(method_buf) : nullptr;
+    }
     if (strcmp(method_buf, "_build") == 0 || strcmp(method_buf, "build") == 0) {
         return (void*)intern_virtual_method(method_buf);
     }
@@ -587,6 +602,22 @@ inline void generic_class_call_virtual_with_data(
     if (strcmp(method_name, "_exit_tree") == 0 || strcmp(method_name, "exit_tree") == 0) {
         if (is_editor_active() && !is_tool_desc(inst->desc)) return;
         if (inst->crystal_instance && inst->desc->call_virtual) inst->desc->call_virtual(inst->crystal_instance, "_exit_tree", 0.0);
+        return;
+    }
+    if (strcmp(method_name, "_input") == 0 || strcmp(method_name, "input") == 0 ||
+        strcmp(method_name, "_unhandled_input") == 0 || strcmp(method_name, "unhandled_input") == 0 ||
+        strcmp(method_name, "_unhandled_key_input") == 0 || strcmp(method_name, "unhandled_key_input") == 0 ||
+        strcmp(method_name, "_shortcut_input") == 0 || strcmp(method_name, "shortcut_input") == 0 ||
+        strcmp(method_name, "_gui_input") == 0 || strcmp(method_name, "gui_input") == 0) {
+        if (is_editor_active() && !is_tool_desc(inst->desc)) return;
+        if (inst->crystal_instance && inst->desc->call_virtual_with_data) {
+            void *event_obj = (p_args && p_args[0]) ? bridge_ref_get_object(p_args[0]) : nullptr;
+            if (!event_obj && p_args && p_args[0]) {
+                event_obj = *(void**)p_args[0];
+            }
+            const void *c_args[1] = { event_obj };
+            inst->desc->call_virtual_with_data(inst->crystal_instance, method_name, c_args, r_ret);
+        }
         return;
     }
     if (strcmp(method_name, "_overrides_external_editor") == 0 || strcmp(method_name, "overrides_external_editor") == 0) {

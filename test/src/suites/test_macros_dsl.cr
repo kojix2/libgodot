@@ -56,6 +56,28 @@ node LifecycleMacroTestNode < Godot::Node do
   end
 end
 
+node InputDispatchTestNode < Godot::Node do
+  property input_received : Bool = false
+  property unhandled_received : Bool = false
+  property last_event_class : String = ""
+  property last_relative_x : Float32 = 0.0_f32
+  property last_relative_y : Float32 = 0.0_f32
+
+  def _input(event : Godot::InputEvent) : Void
+    @input_received = true
+    @last_event_class = event.get_class rescue ""
+  end
+
+  def _unhandled_input(event : Godot::InputEvent) : Void
+    @unhandled_received = true
+    @last_event_class = event.get_class rescue ""
+    if motion = event.as?(Godot::InputEventMouseMotion)
+      @last_relative_x = motion.relative.x.to_f32
+      @last_relative_y = motion.relative.y.to_f32
+    end
+  end
+end
+
 node TypedSignalTestEmitterNode < Godot::Node do
   signal status_ping
   signal single_score(score : Int32)
@@ -817,4 +839,58 @@ test_macros_dsl "TypedSignal cooperative await with typed return values" do
   root.remove_child(node)
   node.destroy
 end
+
+test_macros_dsl "Virtual input dispatch via _input and _unhandled_input" do
+  node = Godot.create(InputDispatchTestNode)
+  root.add_child(node)
+
+  # Create an InputEventMouseMotion
+  motion = Godot.create(Godot::InputEventMouseMotion)
+  motion.relative = Godot::Vector2.new(14.5_f32, -8.25_f32)
+
+  # Simulate engine virtual call data
+  motion_ptr = motion.to_unsafe
+  args_buf = pointerof(motion_ptr)
+
+  node._godot_call_virtual_with_data("_input", args_buf.as(Void**), Pointer(Void).null)
+  TestFramework.assert_true node.input_received, "_input should have been triggered"
+
+  node._godot_call_virtual_with_data("_unhandled_input", args_buf.as(Void**), Pointer(Void).null)
+  TestFramework.assert_true node.unhandled_received, "_unhandled_input should have been triggered"
+  TestFramework.assert_approx_eq node.last_relative_x, 14.5_f32, 0.01, "MouseMotion relative X should be extracted"
+  TestFramework.assert_approx_eq node.last_relative_y, -8.25_f32, 0.01, "MouseMotion relative Y should be extracted"
+
+  root.remove_child(node)
+  node.destroy
+end
+
+test_macros_dsl "Input singleton zero-allocation polling and accumulated input toggle" do
+  orig_accum = Godot::Input.use_accumulated_input
+  Godot::Input.use_accumulated_input = false
+  TestFramework.assert_false Godot::Input.use_accumulated_input, "use_accumulated_input should be false after setting"
+  Godot::Input.use_accumulated_input = true
+  TestFramework.assert_true Godot::Input.use_accumulated_input, "use_accumulated_input should be true after setting"
+  Godot::Input.use_accumulated_input = orig_accum
+
+  # Zero allocation vector polling
+  vec = Godot::Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+  TestFramework.assert_approx_eq vec.length, 0.0_f32, 0.001, "Initial vector should be zero when no keys pressed"
+
+  # Button polling
+  just_rel = Godot::Input.is_action_just_released("ui_accept")
+  TestFramework.assert_false just_rel, "ui_accept should not be just released without keypress"
+
+  mouse_down = Godot::Input.is_mouse_button_pressed(Godot::MouseButton::Left)
+  TestFramework.assert_false mouse_down, "Left mouse button should not be pressed in headless test"
+
+  # Key enum and InputEventKey typing
+  key_event = Godot.create(Godot::InputEventKey)
+  key_event.keycode = Godot::Key::Escape.value
+  TestFramework.assert_eq key_event.key, Godot::Key::Escape, "key_event.key should return typed Godot::Key"
+  TestFramework.assert_true (key_event.keycode == Godot::Key::Escape), "key_event.keycode should compare directly to Godot::Key"
+  TestFramework.assert_true (Godot::Key::Escape == key_event.keycode), "Godot::Key should compare directly to integer keycode"
+  TestFramework.assert_eq Godot::Key::Q.value, 81_i64, "Godot::Key::Q value should match ASCII/engine 81"
+  TestFramework.assert_eq Godot::Key::Escape.value, 4194305_i64, "Godot::Key::Escape value should match engine 4194305"
+end
+
 

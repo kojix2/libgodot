@@ -39,6 +39,11 @@ module Godot
       has_physics_process : Bool
       has_enter_tree : Bool
       has_exit_tree : Bool
+      has_input : Bool
+      has_unhandled_input : Bool
+      has_unhandled_key_input : Bool
+      has_shortcut_input : Bool
+      has_gui_input : Bool
 
       create_instance : (CrystalClassDesc*, Void* -> Void*)
       free_instance : (Void* -> Void)
@@ -152,6 +157,7 @@ module Godot
       object_is_class : (Void*, LibC::Char* -> Bool)
       register_gc_functions : (BridgeGCFunctions* -> Void)
       get_gc_signals : (LibC::Int*, LibC::Int* -> Void)
+      object_get_class_name : (Void*, LibC::Char*, Int32 -> Void)
     end
 
     struct BridgeGCFunctions
@@ -182,6 +188,12 @@ module Godot
     @@mb_input_is_action_pressed : Void* = Pointer(Void).null
     @@mb_input_is_action_just_released : Void* = Pointer(Void).null
     @@mb_input_get_axis : Void* = Pointer(Void).null
+    @@mb_input_get_vector : Void* = Pointer(Void).null
+    @@mb_input_is_mouse_button_pressed : Void* = Pointer(Void).null
+    @@mb_input_use_accumulated_input : Void* = Pointer(Void).null
+    @@mb_input_set_use_accumulated_input : Void* = Pointer(Void).null
+    @@cached_string_names = Hash(String, Void*).new
+    @@string_name_mutex = ::Thread::Mutex.new
 
     # Retain descriptions so their C strings and descriptors stay alive in memory
     @@registered_descs = Array(LibBridge::CrystalClassDesc).new
@@ -273,6 +285,14 @@ module Godot
         print "[CrystalBridge]   is_action_just_released: #{@@mb_input_is_action_just_released}"
         @@mb_input_get_axis = api.value.get_method_bind.call("Input".to_unsafe, "get_axis".to_unsafe, 1958752504_i64)
         print "[CrystalBridge]   get_axis: #{@@mb_input_get_axis}"
+        @@mb_input_get_vector = api.value.get_method_bind.call("Input".to_unsafe, "get_vector".to_unsafe, 2479607902_i64)
+        print "[CrystalBridge]   get_vector: #{@@mb_input_get_vector}"
+        @@mb_input_is_mouse_button_pressed = api.value.get_method_bind.call("Input".to_unsafe, "is_mouse_button_pressed".to_unsafe, 1821097125_i64)
+        print "[CrystalBridge]   is_mouse_button_pressed: #{@@mb_input_is_mouse_button_pressed}"
+        @@mb_input_use_accumulated_input = api.value.get_method_bind.call("Input".to_unsafe, "is_using_accumulated_input".to_unsafe, 2240911060_i64)
+        print "[CrystalBridge]   is_using_accumulated_input: #{@@mb_input_use_accumulated_input}"
+        @@mb_input_set_use_accumulated_input = api.value.get_method_bind.call("Input".to_unsafe, "set_use_accumulated_input".to_unsafe, 2586408642_i64)
+        print "[CrystalBridge]   set_use_accumulated_input: #{@@mb_input_set_use_accumulated_input}"
       end
 
       # Callbacks for C host
@@ -405,6 +425,11 @@ module Godot
         desc.has_physics_process = entry.has_physics_process
         desc.has_enter_tree = entry.has_enter_tree
         desc.has_exit_tree = entry.has_exit_tree
+        desc.has_input = entry.has_input
+        desc.has_unhandled_input = entry.has_unhandled_input
+        desc.has_unhandled_key_input = entry.has_unhandled_key_input
+        desc.has_shortcut_input = entry.has_shortcut_input
+        desc.has_gui_input = entry.has_gui_input
 
         desc.create_instance = create_fn
         desc.free_instance = free_fn
@@ -603,57 +628,108 @@ module Godot
       ret != 0_u8
     end
 
+    def self.cached_string_name(str : String) : Void*
+      return Pointer(Void).null if @@api.null? || @@api.value.make_string_name.pointer.null?
+      @@string_name_mutex.synchronize do
+        if sn = @@cached_string_names[str]?
+          sn
+        else
+          sn = @@api.value.make_string_name.call(str.to_unsafe)
+          @@cached_string_names[str] = sn
+          sn
+        end
+      end
+    end
+
     def self.is_action_just_pressed(action : String, exact_match : Bool = false) : Bool
       return false if @@singleton_input.null? || @@mb_input_is_action_just_pressed.null? || @@api.null?
-      sn = @@api.value.make_string_name.call(action.to_unsafe)
+      sn = cached_string_name(action)
       exact = exact_match ? 1_u8 : 0_u8
-      arg0 = sn
-      arg1 = pointerof(exact).as(Void*)
-      args = [arg0, arg1]
+      args = uninitialized Void*[2]
+      args[0] = sn
+      args[1] = pointerof(exact).as(Void*)
       ret = 0_u8
       @@api.value.method_bind_ptrcall.call(@@mb_input_is_action_just_pressed, @@singleton_input, args.to_unsafe, pointerof(ret).as(Void*))
-      @@api.value.free_string_name.call(sn)
       ret != 0_u8
     end
 
     def self.is_action_pressed(action : String, exact_match : Bool = false) : Bool
       return false if @@singleton_input.null? || @@mb_input_is_action_pressed.null? || @@api.null?
-      sn = @@api.value.make_string_name.call(action.to_unsafe)
+      sn = cached_string_name(action)
       exact = exact_match ? 1_u8 : 0_u8
-      arg0 = sn
-      arg1 = pointerof(exact).as(Void*)
-      args = [arg0, arg1]
+      args = uninitialized Void*[2]
+      args[0] = sn
+      args[1] = pointerof(exact).as(Void*)
       ret = 0_u8
       @@api.value.method_bind_ptrcall.call(@@mb_input_is_action_pressed, @@singleton_input, args.to_unsafe, pointerof(ret).as(Void*))
-      @@api.value.free_string_name.call(sn)
       ret != 0_u8
     end
 
     def self.is_action_just_released(action : String, exact_match : Bool = false) : Bool
       return false if @@singleton_input.null? || @@mb_input_is_action_just_released.null? || @@api.null?
-      sn = @@api.value.make_string_name.call(action.to_unsafe)
+      sn = cached_string_name(action)
       exact = exact_match ? 1_u8 : 0_u8
-      arg0 = sn
-      arg1 = pointerof(exact).as(Void*)
-      args = [arg0, arg1]
+      args = uninitialized Void*[2]
+      args[0] = sn
+      args[1] = pointerof(exact).as(Void*)
       ret = 0_u8
       @@api.value.method_bind_ptrcall.call(@@mb_input_is_action_just_released, @@singleton_input, args.to_unsafe, pointerof(ret).as(Void*))
-      @@api.value.free_string_name.call(sn)
       ret != 0_u8
     end
 
     def self.get_axis(negative_action : String, positive_action : String) : Float32
       return 0.0_f32 if @@singleton_input.null? || @@mb_input_get_axis.null? || @@api.null?
-      sn_neg = @@api.value.make_string_name.call(negative_action.to_unsafe)
-      sn_pos = @@api.value.make_string_name.call(positive_action.to_unsafe)
-      arg0 = sn_neg
-      arg1 = sn_pos
-      args = [arg0, arg1]
+      sn_neg = cached_string_name(negative_action)
+      sn_pos = cached_string_name(positive_action)
+      args = uninitialized Void*[2]
+      args[0] = sn_neg
+      args[1] = sn_pos
       ret = 0.0_f64
       @@api.value.method_bind_ptrcall.call(@@mb_input_get_axis, @@singleton_input, args.to_unsafe, pointerof(ret).as(Void*))
-      @@api.value.free_string_name.call(sn_neg)
-      @@api.value.free_string_name.call(sn_pos)
       ret.to_f32
+    end
+
+    def self.get_vector(negative_x : String, positive_x : String, negative_y : String, positive_y : String, deadzone : Float64 = -1.0_f64) : Vector2
+      return Vector2::ZERO if @@singleton_input.null? || @@mb_input_get_vector.null? || @@api.null?
+      sn_nx = cached_string_name(negative_x)
+      sn_px = cached_string_name(positive_x)
+      sn_ny = cached_string_name(negative_y)
+      sn_py = cached_string_name(positive_y)
+      dz = deadzone
+      args = uninitialized Void*[5]
+      args[0] = sn_nx
+      args[1] = sn_px
+      args[2] = sn_ny
+      args[3] = sn_py
+      args[4] = pointerof(dz).as(Void*)
+      ret = Vector2.new
+      @@api.value.method_bind_ptrcall.call(@@mb_input_get_vector, @@singleton_input, args.to_unsafe, pointerof(ret).as(Void*))
+      ret
+    end
+
+    def self.is_mouse_button_pressed(button : Int64) : Bool
+      return false if @@singleton_input.null? || @@mb_input_is_mouse_button_pressed.null? || @@api.null?
+      b = button
+      args = uninitialized Void*[1]
+      args[0] = pointerof(b).as(Void*)
+      ret = 0_u8
+      @@api.value.method_bind_ptrcall.call(@@mb_input_is_mouse_button_pressed, @@singleton_input, args.to_unsafe, pointerof(ret).as(Void*))
+      ret != 0_u8
+    end
+
+    def self.use_accumulated_input : Bool
+      return true if @@singleton_input.null? || @@mb_input_use_accumulated_input.null? || @@api.null?
+      ret = 0_u8
+      @@api.value.method_bind_ptrcall.call(@@mb_input_use_accumulated_input, @@singleton_input, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
+      ret != 0_u8
+    end
+
+    def self.use_accumulated_input=(enable : Bool) : Void
+      return if @@singleton_input.null? || @@mb_input_set_use_accumulated_input.null? || @@api.null?
+      en = enable ? 1_u8 : 0_u8
+      args = uninitialized Void*[1]
+      args[0] = pointerof(en).as(Void*)
+      @@api.value.method_bind_ptrcall.call(@@mb_input_set_use_accumulated_input, @@singleton_input, args.to_unsafe, Pointer(Void).null)
     end
 
     def self.available? : Bool
@@ -1207,6 +1283,13 @@ module Godot
     def self.object_is_class(obj : Void*, class_name : String) : Bool
       return false if obj.null? || @@api.null? || @@api.value.object_is_class.pointer.null?
       @@api.value.object_is_class.call(obj, class_name.to_unsafe)
+    end
+
+    def self.object_class_name(obj : Void*) : String
+      return "" if obj.null? || @@api.null? || @@api.value.object_get_class_name.pointer.null?
+      buf = uninitialized UInt8[128]
+      @@api.value.object_get_class_name.call(obj, buf.to_unsafe.as(LibC::Char*), 128)
+      String.new(buf.to_unsafe)
     end
   end
 end

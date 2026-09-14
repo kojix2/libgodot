@@ -88,7 +88,8 @@ static BridgeAPI g_bridge_api = {
     bridge_resource_get_path,
     bridge_object_is_class,
     bridge_register_gc_functions,
-    bridge_get_gc_signals
+    bridge_get_gc_signals,
+    bridge_object_get_class_name
 };
 
 // ==============================================================================

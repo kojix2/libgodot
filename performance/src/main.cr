@@ -225,15 +225,9 @@ module PerfFramework
       show_menu
     end
 
-    def _unhandled_input(event : Void*) : Void
-      # Check for Escape key press
-      is_key = Godot::Bridge.object_call_ret_bool(event, "is_class", "InputEventKey") rescue false
-      if is_key
-        is_pressed = Godot::Bridge.object_call_ret_bool(event, "is_pressed") rescue false
-        keycode = Godot::Bridge.object_call_ret_int(event, "get_keycode") rescue 0_i64
-        
-        # KEY_ESCAPE = 4194305 (0x400001) or KEY_Q = 81
-        if is_pressed && (keycode == 4194305_i64 || keycode == 81_i64)
+    def _unhandled_input(event : Godot::InputEvent) : Void
+      if key = event.as?(Godot::InputEventKey)
+        if key.pressed? && (key.key == Godot::Key::Escape || key.key == Godot::Key::Q)
           handle_escape_or_return
         end
       end

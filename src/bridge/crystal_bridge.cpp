@@ -236,6 +236,7 @@ extern "C" GDE_EXPORT GDExtensionBool crystal_library_init(
     gd_object_get_instance_from_id = (GDExtensionInterfaceObjectGetInstanceFromId)p_get_proc_address("object_get_instance_from_id");
     gd_object_destroy = (GDExtensionInterfaceObjectDestroy)p_get_proc_address("object_destroy");
     gd_object_get_instance_id = (GDExtensionInterfaceObjectGetInstanceId)p_get_proc_address("object_get_instance_id");
+    gd_object_get_class_name = (GDExtensionInterfaceObjectGetClassName)p_get_proc_address("object_get_class_name");
     gd_ref_set_object = (GDExtensionInterfaceRefSetObject)p_get_proc_address("ref_set_object");
     gd_ref_get_object = (GDExtensionInterfaceRefGetObject)p_get_proc_address("ref_get_object");
     gd_variant_stringify = (GDExtensionInterfaceVariantStringify)p_get_proc_address("variant_stringify");

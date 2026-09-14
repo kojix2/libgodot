@@ -2268,31 +2268,111 @@ module Godot
 
   # Singleton interface for handling keyboard, mouse, gamepad, and mapped input actions.
   class Input < Object
-    def self.is_action_pressed(action : String) : Bool
-      Bridge.is_action_pressed(action)
+    def self.is_action_pressed(action : String, exact_match : Bool = false) : Bool
+      Bridge.is_action_pressed(action, exact_match)
     end
 
-    def self.is_action_just_pressed(action : String) : Bool
-      Bridge.is_action_just_pressed(action)
+    def self.is_action_just_pressed(action : String, exact_match : Bool = false) : Bool
+      Bridge.is_action_just_pressed(action, exact_match)
     end
 
-    def self.is_action_just_released(action : String) : Bool
-      false
+    def self.is_action_just_released(action : String, exact_match : Bool = false) : Bool
+      Bridge.is_action_just_released(action, exact_match)
     end
 
-    def self.is_key_pressed(key : Key | Int32) : Bool
+    def self.action_pressed?(action : String, exact_match : Bool = false) : Bool
+      Bridge.is_action_pressed(action, exact_match)
+    end
+
+    def self.action_just_pressed?(action : String, exact_match : Bool = false) : Bool
+      Bridge.is_action_just_pressed(action, exact_match)
+    end
+
+    def self.action_just_released?(action : String, exact_match : Bool = false) : Bool
+      Bridge.is_action_just_released(action, exact_match)
+    end
+
+    def self.is_key_pressed(key : Key | Int32 | Int64) : Bool
       Bridge.is_key_pressed(key.to_i32) || Bridge.is_physical_key_pressed(key.to_i32)
     end
 
-    def self.is_physical_key_pressed(key : Key | Int32) : Bool
+    def self.is_physical_key_pressed(key : Key | Int32 | Int64) : Bool
       Bridge.is_physical_key_pressed(key.to_i32)
     end
 
-    def self.get_vector(negative_x : String, positive_x : String, negative_y : String, positive_y : String) : Vector2
-      x = (is_action_pressed(positive_x) ? 1.0_f32 : 0.0_f32) - (is_action_pressed(negative_x) ? 1.0_f32 : 0.0_f32)
-      y = (is_action_pressed(positive_y) ? 1.0_f32 : 0.0_f32) - (is_action_pressed(negative_y) ? 1.0_f32 : 0.0_f32)
-      v = Vector2.new(x, y)
-      v.length_squared > 0.0001_f32 ? v.normalized : v
+    def self.is_mouse_button_pressed(button : MouseButton | Int32 | Int64) : Bool
+      Bridge.is_mouse_button_pressed(button.to_i64)
+    end
+
+    def self.mouse_button_pressed?(button : MouseButton | Int32 | Int64) : Bool
+      Bridge.is_mouse_button_pressed(button.to_i64)
+    end
+
+    def self.axis(negative_action : String, positive_action : String) : Float32
+      Bridge.get_axis(negative_action, positive_action)
+    end
+
+    def self.get_vector(negative_x : String, positive_x : String, negative_y : String, positive_y : String, deadzone : Float64 = -1.0_f64) : Vector2
+      Bridge.get_vector(negative_x, positive_x, negative_y, positive_y, deadzone)
+    end
+
+    def self.use_accumulated_input : Bool
+      Bridge.use_accumulated_input
+    end
+
+    def self.use_accumulated_input=(enable : Bool) : Void
+      Bridge.use_accumulated_input = enable
+    end
+  end
+
+  class InputEvent < Resource
+    def self.wrap(ptr : Void*) : Godot::InputEvent
+      return Godot::InputEvent.new(ptr) if ptr.null?
+      cls = Bridge.object_class_name(ptr)
+      if cls.empty?
+        if Bridge.object_is_class(ptr, "InputEventMouseMotion")
+          return Godot::InputEventMouseMotion.new(ptr)
+        elsif Bridge.object_is_class(ptr, "InputEventMouseButton")
+          return Godot::InputEventMouseButton.new(ptr)
+        elsif Bridge.object_is_class(ptr, "InputEventKey")
+          return Godot::InputEventKey.new(ptr)
+        elsif Bridge.object_is_class(ptr, "InputEventJoypadButton")
+          return Godot::InputEventJoypadButton.new(ptr)
+        elsif Bridge.object_is_class(ptr, "InputEventJoypadMotion")
+          return Godot::InputEventJoypadMotion.new(ptr)
+        elsif Bridge.object_is_class(ptr, "InputEventAction")
+          return Godot::InputEventAction.new(ptr)
+        end
+      end
+
+      case cls
+      when "InputEventMouseMotion"
+        Godot::InputEventMouseMotion.new(ptr)
+      when "InputEventMouseButton"
+        Godot::InputEventMouseButton.new(ptr)
+      when "InputEventKey"
+        Godot::InputEventKey.new(ptr)
+      when "InputEventJoypadButton"
+        Godot::InputEventJoypadButton.new(ptr)
+      when "InputEventJoypadMotion"
+        Godot::InputEventJoypadMotion.new(ptr)
+      when "InputEventAction"
+        Godot::InputEventAction.new(ptr)
+      when "InputEventScreenDrag"
+        Godot::InputEventScreenDrag.new(ptr)
+      when "InputEventScreenTouch"
+        Godot::InputEventScreenTouch.new(ptr)
+      when "InputEventShortcut"
+        Godot::InputEventShortcut.new(ptr)
+      when "InputEventMagnifyGesture"
+        Godot::InputEventMagnifyGesture.new(ptr)
+      when "InputEventPanGesture"
+        Godot::InputEventPanGesture.new(ptr)
+      when "InputEventMIDI"
+        Godot::InputEventMIDI.new(ptr)
+      else
+        Godot::InputEvent.new(ptr)
+      end
     end
   end
 

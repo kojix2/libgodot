@@ -391,6 +391,11 @@ end
     false, # has_physics_process
     false, # has_enter_tree
     false, # has_exit_tree
+    false, # has_input
+    false, # has_unhandled_input
+    false, # has_unhandled_key_input
+    false, # has_shortcut_input
+    false, # has_gui_input
     [
       ::Godot::PropertyInfo.new("capacity", "Int32", 2, 0_u32, "", 6_u32),
     ],

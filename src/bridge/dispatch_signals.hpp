@@ -1101,6 +1101,36 @@ inline bool bridge_object_is_class(GDExtensionObjectPtr obj, const char *class_n
     return ret_val != 0;
 }
 
+inline void bridge_object_get_class_name(GDExtensionObjectPtr obj, char *buf, int max_len) {
+    if (!obj || !buf || max_len <= 0) {
+        if (buf && max_len > 0) buf[0] = '\0';
+        return;
+    }
+    buf[0] = '\0';
+    if (gd_object_get_class_name) {
+        alignas(void*) char sn[8] = {0};
+        gd_object_get_class_name(obj, nullptr, sn);
+        string_name_to_cstr(sn, buf, (size_t)max_len);
+        free_string_name(sn);
+        return;
+    }
+    static GDExtensionMethodBindPtr mb_get_class = nullptr;
+    if (!mb_get_class && gd_classdb_get_method_bind) {
+        void *sn_obj = make_string_name("Object");
+        void *sn_gc = make_string_name("get_class");
+        mb_get_class = gd_classdb_get_method_bind(sn_obj, sn_gc, 201670096ULL);
+        free_string_name(sn_obj); free_string_name(sn_gc);
+    }
+    if (mb_get_class && gd_object_method_bind_ptrcall) {
+        alignas(void*) char ret_str[8] = {0};
+        gd_object_method_bind_ptrcall(mb_get_class, obj, nullptr, ret_str);
+        if (gd_string_to_utf8_chars) {
+            gd_string_to_utf8_chars(ret_str, buf, (int64_t)max_len - 1);
+        }
+        if (gd_string_destroy) gd_string_destroy(ret_str);
+    }
+}
+
 inline void* bridge_ref_get_object(const void *ref_ptr) {
     if (!ref_ptr) return nullptr;
     if (gd_ref_get_object) {

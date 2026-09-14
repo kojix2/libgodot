@@ -2464,6 +2464,56 @@
 		},
 		{
 			"constants": {},
+			"inherits": "Node",
+			"is_instantiable": true,
+			"methods": [],
+			"name": "InputDispatchTestNode",
+			"properties": [
+				{
+					"class_name": "Bool",
+					"hint": 0,
+					"hint_string": "",
+					"name": "input_received",
+					"type": 1,
+					"type_name": "bool"
+				},
+				{
+					"class_name": "Bool",
+					"hint": 0,
+					"hint_string": "",
+					"name": "unhandled_received",
+					"type": 1,
+					"type_name": "bool"
+				},
+				{
+					"class_name": "String",
+					"hint": 0,
+					"hint_string": "",
+					"name": "last_event_class",
+					"type": 4,
+					"type_name": "String"
+				},
+				{
+					"class_name": "Float32",
+					"hint": 0,
+					"hint_string": "",
+					"name": "last_relative_x",
+					"type": 3,
+					"type_name": "float"
+				},
+				{
+					"class_name": "Float32",
+					"hint": 0,
+					"hint_string": "",
+					"name": "last_relative_y",
+					"type": 3,
+					"type_name": "float"
+				}
+			],
+			"signals": []
+		},
+		{
+			"constants": {},
 			"inherits": "Control",
 			"is_instantiable": true,
 			"methods": [],

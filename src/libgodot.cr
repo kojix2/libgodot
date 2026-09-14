@@ -22,6 +22,25 @@ require "./libgodot/editor"
 {% end %}
 
 module Godot
+  class InputEventKey < Godot::InputEventWithModifiers
+    # Returns the pressed keycode as a strongly-typed `Godot::Key` enum
+    def key : Godot::Key
+      Godot::Key.new(keycode)
+    end
+
+    # Returns the physical keycode as a strongly-typed `Godot::Key` enum
+    def physical_key : Godot::Key
+      Godot::Key.new(physical_keycode)
+    end
+  end
+
+  # Enable direct equality comparison between Godot::Key and integer keycodes
+  enum Key : Int64
+    def ==(other : Int) : Bool
+      value == other.to_i64
+    end
+  end
+
   class PackedScene < Resource
     # Convenience zero-argument instantiate defaulting edit_state to 0
     def instantiate : Node
@@ -579,6 +598,26 @@ module Godot
       Bridge.get_axis(negative_action, positive_action)
     end
 
+    def get_vector(negative_x : String, positive_x : String, negative_y : String, positive_y : String, deadzone : Float64 = -1.0_f64) : Vector2
+      Bridge.get_vector(negative_x, positive_x, negative_y, positive_y, deadzone)
+    end
+
+    def is_mouse_button_pressed(button : MouseButton | Int32 | Int64) : Bool
+      Bridge.is_mouse_button_pressed(button.to_i64)
+    end
+
+    def mouse_button_pressed?(button : MouseButton | Int32 | Int64) : Bool
+      Bridge.is_mouse_button_pressed(button.to_i64)
+    end
+
+    def use_accumulated_input : Bool
+      Bridge.use_accumulated_input
+    end
+
+    def use_accumulated_input=(enable : Bool) : Void
+      Bridge.use_accumulated_input = enable
+    end
+
     def self.action_pressed?(action : String, exact_match : Bool = false) : Bool
       Bridge.is_action_pressed(action, exact_match)
     end
@@ -593,6 +632,26 @@ module Godot
 
     def self.axis(negative_action : String, positive_action : String) : Float32
       Bridge.get_axis(negative_action, positive_action)
+    end
+
+    def self.get_vector(negative_x : String, positive_x : String, negative_y : String, positive_y : String, deadzone : Float64 = -1.0_f64) : Vector2
+      Bridge.get_vector(negative_x, positive_x, negative_y, positive_y, deadzone)
+    end
+
+    def self.is_mouse_button_pressed(button : MouseButton | Int32 | Int64) : Bool
+      Bridge.is_mouse_button_pressed(button.to_i64)
+    end
+
+    def self.mouse_button_pressed?(button : MouseButton | Int32 | Int64) : Bool
+      Bridge.is_mouse_button_pressed(button.to_i64)
+    end
+
+    def self.use_accumulated_input : Bool
+      Bridge.use_accumulated_input
+    end
+
+    def self.use_accumulated_input=(enable : Bool) : Void
+      Bridge.use_accumulated_input = enable
     end
   end
 
@@ -652,6 +711,13 @@ end
 def vec3(x : Number, y : Number, z : Number) : Vector3
   Vector3.new(x.to_f32, y.to_f32, z.to_f32)
 end
+
+struct Int
+  def ==(other : Godot::Key) : Bool
+    to_i64 == other.value
+  end
+end
+
 
 
 

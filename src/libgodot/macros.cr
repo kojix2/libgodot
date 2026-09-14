@@ -326,6 +326,11 @@ module Godot
       property has_physics_process : Bool
       property has_enter_tree : Bool
       property has_exit_tree : Bool
+      property has_input : Bool
+      property has_unhandled_input : Bool
+      property has_unhandled_key_input : Bool
+      property has_shortcut_input : Bool
+      property has_gui_input : Bool
       property properties : Array(PropertyInfo)
       property signals : Array(SignalInfo)
       property constants : Array(ConstantInfo)
@@ -352,6 +357,11 @@ module Godot
         @has_physics_process : Bool = false,
         @has_enter_tree : Bool = false,
         @has_exit_tree : Bool = false,
+        @has_input : Bool = false,
+        @has_unhandled_input : Bool = false,
+        @has_unhandled_key_input : Bool = false,
+        @has_shortcut_input : Bool = false,
+        @has_gui_input : Bool = false,
         @properties : Array(PropertyInfo) = [] of PropertyInfo,
         @signals : Array(SignalInfo) = [] of SignalInfo,
         @icon_path : String = "",
@@ -403,6 +413,11 @@ module Godot
         entry.has_physics_process ||= parent.has_physics_process
         entry.has_enter_tree ||= parent.has_enter_tree
         entry.has_exit_tree ||= parent.has_exit_tree
+        entry.has_input ||= parent.has_input
+        entry.has_unhandled_input ||= parent.has_unhandled_input
+        entry.has_unhandled_key_input ||= parent.has_unhandled_key_input
+        entry.has_shortcut_input ||= parent.has_shortcut_input
+        entry.has_gui_input ||= parent.has_gui_input
       end
       @@entries << entry
     end
@@ -467,6 +482,12 @@ macro node(decl, &block)
     has_enter_tree = false
     has_exit_tree = false
     has_build = false
+    has_input = false
+    has_unhandled_input = false
+    has_unhandled_key_input = false
+    has_shortcut_input = false
+    has_gui_input = false
+    has_custom_virtual_with_data = false
     is_tool_class = (base_godot_name == "EditorPlugin" || parent_name.stringify.includes?("EditorPlugin"))
     is_abstract_class = false
     is_static_unload = false
@@ -847,6 +868,18 @@ macro node(decl, &block)
         {% has_exit_tree = true %}
       {% elsif stmt.name.stringify == "_build" %}
         {% has_build = true %}
+      {% elsif stmt.name.stringify == "_input" %}
+        {% has_input = true %}
+      {% elsif stmt.name.stringify == "_unhandled_input" %}
+        {% has_unhandled_input = true %}
+      {% elsif stmt.name.stringify == "_unhandled_key_input" %}
+        {% has_unhandled_key_input = true %}
+      {% elsif stmt.name.stringify == "_shortcut_input" %}
+        {% has_shortcut_input = true %}
+      {% elsif stmt.name.stringify == "_gui_input" %}
+        {% has_gui_input = true %}
+      {% elsif stmt.name.stringify == "_godot_call_virtual_with_data" %}
+        {% has_custom_virtual_with_data = true %}
       {% elsif !stmt.name.stringify.starts_with?("_") && stmt.args.size == 0 %}
         {% user_methods << stmt.name %}
       {% end %}
@@ -1084,6 +1117,45 @@ macro node(decl, &block)
         super
       end
     end
+
+    {% if !has_custom_virtual_with_data && (has_input || has_unhandled_input || has_unhandled_key_input || has_shortcut_input || has_gui_input) %}
+    def _godot_call_virtual_with_data(method_name : String, args : Void**, ret : Void*) : Void
+      case method_name
+      {% if has_input %}
+      when "_input", "input"
+        if !args.null? && !args[0].null?
+          _input(::Godot::InputEvent.wrap(args[0]))
+        end
+      {% end %}
+      {% if has_unhandled_input %}
+      when "_unhandled_input", "unhandled_input"
+        if !args.null? && !args[0].null?
+          _unhandled_input(::Godot::InputEvent.wrap(args[0]))
+        end
+      {% end %}
+      {% if has_unhandled_key_input %}
+      when "_unhandled_key_input", "unhandled_key_input"
+        if !args.null? && !args[0].null?
+          _unhandled_key_input(::Godot::InputEvent.wrap(args[0]))
+        end
+      {% end %}
+      {% if has_shortcut_input %}
+      when "_shortcut_input", "shortcut_input"
+        if !args.null? && !args[0].null?
+          _shortcut_input(::Godot::InputEvent.wrap(args[0]))
+        end
+      {% end %}
+      {% if has_gui_input %}
+      when "_gui_input", "gui_input"
+        if !args.null? && !args[0].null?
+          _gui_input(::Godot::InputEvent.wrap(args[0]))
+        end
+      {% end %}
+      else
+        super
+      end
+    end
+    {% end %}
 
     {% if user_methods.size > 0 %}
     def call(method : String, *args) : Void*
@@ -1668,6 +1740,11 @@ macro node(decl, &block)
       {{has_physics_process}},
       {{has_enter_tree}},
       {{has_exit_tree}},
+      {{has_input}},
+      {{has_unhandled_input}},
+      {{has_unhandled_key_input}},
+      {{has_shortcut_input}},
+      {{has_gui_input}},
       properties_{{class_name}},
       signals_{{class_name}},
       {{class_icon_path}},

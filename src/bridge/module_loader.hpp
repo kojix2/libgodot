@@ -335,11 +335,6 @@ inline void load_crystal_game_library(GDExtensionClassLibraryPtr p_library = nul
         char dir_log[512];
         snprintf(dir_log, sizeof(dir_log), "[CrystalBridge] Resolved bridge directory: %s", bridge_dir);
         godot_log_print(dir_log);
-#ifndef _WIN32
-        if (strstr(bridge_dir, "addons") != nullptr && strstr(bridge_dir, "crystal_integration") == nullptr) {
-            g_is_addon_module = true;
-        }
-#endif
     }
 
     // Clean up stale shadow copies from previous editor sessions

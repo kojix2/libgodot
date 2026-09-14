@@ -38,7 +38,8 @@ function Assert-Test {
 # Test 1: Invalid Path Handling
 # -----------------------------------------------------------------------------
 Write-Host "`n[Test 1] Testing invalid path error handling..." -ForegroundColor Yellow
-$proc = Start-Process -FilePath $pwshExe -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $RunEditorScript, "-Path", "non_existent_folder_xyz_99") -RedirectStandardOutput (Join-Path $ScratchDir "test1_out.log") -RedirectStandardError (Join-Path $ScratchDir "test1_err.log") -PassThru -Wait
+$proc = Start-Process -FilePath $pwshExe -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $RunEditorScript, "-Path", "non_existent_folder_xyz_99") -RedirectStandardOutput (Join-Path $ScratchDir "test1_out.log") -RedirectStandardError (Join-Path $ScratchDir "test1_err.log") -PassThru
+[void]$proc.WaitForExit(10000)
 $t1Out = Get-Content (Join-Path $ScratchDir "test1_out.log") -Raw -ErrorAction SilentlyContinue
 Assert-Test "Invalid path exits with non-zero exit code" ($proc.ExitCode -ne 0) "ExitCode was $($proc.ExitCode)"
 Assert-Test "Invalid path outputs helpful error message" ($t1Out -match "does not exist") "Output was: $t1Out"
@@ -47,7 +48,8 @@ Assert-Test "Invalid path outputs helpful error message" ($t1Out -match "does no
 # Test 2: Typo Parameter Handling (-pah instead of -path)
 # -----------------------------------------------------------------------------
 Write-Host "`n[Test 2] Testing typo parameter error handling..." -ForegroundColor Yellow
-$proc2 = Start-Process -FilePath $pwshExe -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $RunEditorScript, "-pah", "template") -RedirectStandardOutput (Join-Path $ScratchDir "test2_out.log") -RedirectStandardError (Join-Path $ScratchDir "test2_err.log") -PassThru -Wait
+$proc2 = Start-Process -FilePath $pwshExe -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $RunEditorScript, "-pah", "template") -RedirectStandardOutput (Join-Path $ScratchDir "test2_out.log") -RedirectStandardError (Join-Path $ScratchDir "test2_err.log") -PassThru
+[void]$proc2.WaitForExit(10000)
 $t2Out = Get-Content (Join-Path $ScratchDir "test2_out.log") -Raw -ErrorAction SilentlyContinue
 Assert-Test "Typo parameter exits with non-zero code" ($proc2.ExitCode -ne 0) "ExitCode was $($proc2.ExitCode)"
 Assert-Test "Typo parameter suggests -Path" ($t2Out -match "Did you mean '-Path'") "Output was: $t2Out"
@@ -59,7 +61,14 @@ Write-Host "`n[Test 3] Testing headless launch and real-time log shadowing..." -
 $testLog = Join-Path $ScratchDir "runner_shadow_test.log"
 if (Test-Path $testLog) { Remove-Item $testLog -Force }
 
-$proc3 = Start-Process -FilePath $pwshExe -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $RunEditorScript, "-Path", "template", "-LogFile", $testLog, "--headless", "--quit-after", "10") -PassThru -Wait
+$testArgs = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $RunEditorScript, "-Path", "template", "-LogFile", $testLog, "--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--quit-after", "10")
+$proc3 = Start-Process -FilePath $pwshExe -ArgumentList $testArgs -PassThru
+$exited3 = $proc3.WaitForExit(60000) # 60 second max timeout
+if (-not $exited3 -and -not $proc3.HasExited) {
+    Write-Host "[TIMEOUT] Headless editor run in test_run_editor.ps1 exceeded 60s timeout. Terminating..." -ForegroundColor Red
+    try { $proc3.Kill($true) } catch { try { $proc3.Kill() } catch {} }
+    [void]$proc3.WaitForExit(3000)
+}
 
 Assert-Test "Headless run exits with 0" ($proc3.ExitCode -eq 0) "ExitCode was $($proc3.ExitCode)"
 Assert-Test "Log file was created" (Test-Path $testLog) "File $testLog was not found"

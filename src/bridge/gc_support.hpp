@@ -42,6 +42,35 @@ static std::recursive_mutex g_gc_modules_mutex;
 static thread_local size_t t_gc_registered_module_count = 0;
 static void *s_cached_game_module = nullptr;
 
+inline void unregister_gc_thread() {
+    std::vector<GCModuleEntry> modules_snapshot;
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_gc_modules_mutex);
+        modules_snapshot = g_gc_modules;
+    }
+    for (const auto &mod : modules_snapshot) {
+        if (mod.thread_is_registered && mod.thread_is_registered() == 0) {
+            continue;
+        }
+        if (mod.unregister_my_thread) {
+            mod.unregister_my_thread();
+            break; // Single shared Boehm GC runtime in the process
+        }
+    }
+    t_gc_registered_module_count = 0;
+}
+
+struct GCThreadRegistrationGuard {
+    bool active = false;
+    ~GCThreadRegistrationGuard() {
+        if (active) {
+            active = false;
+            unregister_gc_thread();
+        }
+    }
+};
+static thread_local GCThreadRegistrationGuard t_gc_registration_guard;
+
 
 
 inline void bridge_register_gc_functions(const BridgeGCFunctions *funcs) {
@@ -246,5 +275,6 @@ inline void ensure_gc_thread_registered() {
             }
         }
         t_gc_registered_module_count = modules_snapshot.size();
+        t_gc_registration_guard.active = true;
     }
 }

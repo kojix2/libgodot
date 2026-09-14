@@ -41,6 +41,11 @@ test_thread_safety "Actor Pattern: OS background thread offloads computation to 
   in_channel = Channel(ActorWorkTask).new(8)
   out_channel = Channel(ActorWorkResult).new(8)
 
+  # Main thread feeds tasks into buffered channel
+  in_channel.send(ActorWorkTask.new(1, "Alpha"))
+  in_channel.send(ActorWorkTask.new(2, "Beta"))
+  in_channel.send(ActorWorkTask.new(3, "Gamma"))
+
   # Spawn OS worker thread
   worker_thread = Thread.new do
     3.times do
@@ -50,11 +55,6 @@ test_thread_safety "Actor Pattern: OS background thread offloads computation to 
       out_channel.send(ActorWorkResult.new(task.id, processed))
     end
   end
-
-  # Main thread feeds tasks
-  in_channel.send(ActorWorkTask.new(1, "Alpha"))
-  in_channel.send(ActorWorkTask.new(2, "Beta"))
-  in_channel.send(ActorWorkTask.new(3, "Gamma"))
 
   worker_thread.join
 

@@ -26,6 +26,11 @@ if (-not $isMac -and -not $onWindows) {
 $exeExt = if ($onWindows) { ".exe" } else { "" }
 $soExt = if ($onWindows) { "dll" } elseif ($isMac) { "dylib" } else { "so" }
 
+$headlessGodotFlags = @("--headless")
+if (-not $onWindows -or $env:CI -or $env:LIBGL_ALWAYS_SOFTWARE) {
+    $headlessGodotFlags += @("--rendering-driver", "opengl3", "--audio-driver", "Dummy")
+}
+
 function Safe-Copy([string]$Src, [string]$Dst) {
     if (Test-Path $Src) {
         try {
@@ -277,7 +282,7 @@ if ($godotExe -and (Test-Path $godotExe)) {
     $pckFile = Join-Path $binDir "$Name.pck"
     if (Test-Path $presetCfg) {
         Write-Host "  -> Generating standalone project pack: $pckFile..." -ForegroundColor Cyan
-        & $godotExe @("--headless", "--path", $projFull, "--export-pack", $preset, $pckFile)
+        & $godotExe @($headlessGodotFlags + @("--path", $projFull, "--export-pack", $preset, $pckFile))
         $packExit = $LASTEXITCODE
 
         if ($packExit -eq 0 -and (Test-Path $pckFile)) {
@@ -298,7 +303,7 @@ if ($godotExe -and (Test-Path $godotExe)) {
         if ($hasTemplates) {
             $exportMode = if ($Release -eq "1" -or $Release -eq "true") { "--export-release" } else { "--export-debug" }
             Write-Host "  -> Running standalone export ($exportMode $preset)..." -ForegroundColor Cyan
-            & $godotExe @("--headless", "--path", $projFull, $exportMode, $preset, $binNamedExe)
+            & $godotExe @($headlessGodotFlags + @("--path", $projFull, $exportMode, $preset, $binNamedExe))
             if ($LASTEXITCODE -eq 0) {
                 Write-Host "  -> Standalone executable exported with embedded PCK!" -ForegroundColor Green
             }
@@ -376,7 +381,7 @@ if ($TargetDir) {
         if (Test-Path $destFile) { Remove-Item $destFile -Force }
 
         Write-Host "  -> Running Godot standalone export (Preset: $preset) -> $destFile..." -ForegroundColor Cyan
-        & $godotExe @("--headless", "--path", $projFull, "--export-release", $preset, $destFile)
+        & $godotExe @($headlessGodotFlags + @("--path", $projFull, "--export-release", $preset, $destFile))
         $exportExitCode = $LASTEXITCODE
         if ($exportExitCode -ne 0) {
             Write-Warning "  [PackageGame] Godot export exited with code $exportExitCode"

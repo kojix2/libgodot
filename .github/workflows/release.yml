@@ -25,6 +25,7 @@ jobs:
   init-release:
     name: Initialize Release Metadata
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       tag_name: ${{ steps.meta.outputs.tag_name }}
       release_title: ${{ steps.meta.outputs.release_title }}
@@ -56,6 +57,7 @@ jobs:
     name: Build Windows (x86_64)
     needs: [init-release]
     runs-on: windows-latest
+    timeout-minutes: 35
 
     steps:
       - name: Checkout Repository
@@ -143,6 +145,7 @@ jobs:
           & pwsh -NoProfile -File scripts/ensure_export_templates.ps1 -PackageZip -ZipOutput "$winBin/godot-crystal-export-templates-4.8-dev4.zip"
 
       - name: Compile Release Binaries & Run Test Suite
+        timeout-minutes: 25
         shell: pwsh
         run: |
           make all RELEASE=1
@@ -249,6 +252,7 @@ jobs:
     name: Build Linux (x86_64)
     needs: [init-release]
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     env:
       GC_MARKERS: 1
 
@@ -322,6 +326,7 @@ jobs:
           & pwsh -NoProfile -File scripts/ensure_export_templates.ps1
 
       - name: Compile Release Binaries & Run Test Suite
+        timeout-minutes: 25
         shell: bash
         run: |
           make all RELEASE=1
@@ -415,6 +420,7 @@ jobs:
     name: Build Android (arm64-v8a)
     needs: [init-release]
     runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     steps:
       - name: Checkout Repository
@@ -559,6 +565,7 @@ jobs:
     name: Build macOS
     needs: [init-release]
     runs-on: macos-latest
+    timeout-minutes: 35
 
     steps:
       - name: Checkout Repository
@@ -638,6 +645,7 @@ jobs:
           & pwsh -NoProfile -File scripts/ensure_export_templates.ps1 -PackageZip -ZipOutput "$macBin/godot-crystal-export-templates-4.8-dev4.zip"
 
       - name: Compile Release Binaries & Run Test Suite
+        timeout-minutes: 25
         shell: bash
         run: |
           make all RELEASE=1
@@ -732,6 +740,7 @@ jobs:
     needs: [init-release, build-windows, build-linux, build-android, build-macos]
     if: always() && !cancelled() && (needs.build-windows.result == 'success' || needs.build-linux.result == 'success' || needs.build-android.result == 'success' || needs.build-macos.result == 'success')
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout Repository

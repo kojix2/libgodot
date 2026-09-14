@@ -61,3 +61,4 @@ shard.lock
 *.jks
 *.credentials.json
 *credentials*.json
+*.uid

@@ -17,6 +17,7 @@ jobs:
   test:
     name: Run Test Suite (Windows)
     runs-on: windows-latest
+    timeout-minutes: 35
 
     steps:
       - name: Checkout Repository
@@ -117,6 +118,7 @@ jobs:
         run: crystal spec test/spec
 
       - name: Build and Run LibGodot Test Suite
+        timeout-minutes: 25
         shell: pwsh
         run: |
           # Per AGENTS.md, agents and CI must execute 'make all'
@@ -155,6 +157,7 @@ jobs:
   test-linux:
     name: Run Test Suite (Linux)
     runs-on: ubuntu-latest
+    timeout-minutes: 35
 
     steps:
       - name: Checkout Repository
@@ -231,6 +234,7 @@ jobs:
         run: crystal spec test/spec
 
       - name: Build and Run LibGodot Test Suite
+        timeout-minutes: 25
         shell: bash
         run: |
           make all
@@ -265,6 +269,7 @@ jobs:
   test-macos:
     name: Run Test Suite (macOS)
     runs-on: macos-latest
+    timeout-minutes: 35
 
     steps:
       - name: Checkout Repository
@@ -346,6 +351,7 @@ jobs:
         run: crystal spec test/spec
 
       - name: Build and Run LibGodot Test Suite
+        timeout-minutes: 25
         shell: bash
         run: |
           make all
@@ -380,6 +386,7 @@ jobs:
   test-android:
     name: Build & Verify Android Target (arm64-v8a)
     runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     steps:
       - name: Checkout Repository

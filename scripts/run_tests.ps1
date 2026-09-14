@@ -18,8 +18,12 @@ param(
     [switch]$SkipRuntimeTests,
     [switch]$SkipStandaloneTests,
     [switch]$SkipSmokeTests,
-    [int]$TimeoutSeconds = 60
+    [int]$TimeoutSeconds = 180
 )
+
+if ($env:TEST_STEP_TIMEOUT) {
+    $TimeoutSeconds = [int]$env:TEST_STEP_TIMEOUT
+}
 
 $ErrorActionPreference = "Stop"
 
@@ -105,11 +109,13 @@ function Invoke-TestCommand {
         [string[]]$Arguments,
         [string]$WorkingDirectory = $RootDir,
         [hashtable]$EnvironmentVars = @{},
-        [switch]$CustomVerification
+        [switch]$CustomVerification,
+        [int]$Timeout = $TimeoutSeconds,
+        [string]$OutputFile = ""
     )
 
     Write-Host "::group::$Name" -ForegroundColor Yellow
-    Write-Host "[RUNNING] $Name" -ForegroundColor Cyan
+    Write-Host "[RUNNING] $Name (Timeout: ${Timeout}s)" -ForegroundColor Cyan
     Write-Host "Command: $Executable $($Arguments -join ' ')" -ForegroundColor DarkGray
 
     # Set environment variables
@@ -137,16 +143,90 @@ function Invoke-TestCommand {
         }
     }
 
+    $timedOut = $false
+    $exitCode = -1
+
     Push-Location $WorkingDirectory
     try {
-        if (($env:OS -like "*Windows*" -or $IsWindows) -and $Executable.EndsWith(".exe", [System.StringComparison]::OrdinalIgnoreCase)) {
-            $argStr = ($Arguments | ForEach-Object { if ($_ -match '\s') { "`"$_`"" } else { $_ } }) -join ' '
-            cmd /c "`"$Executable`" $argStr" | Out-Host
-            $exitCode = $LASTEXITCODE
+        $resolvedExe = $Executable
+        if (Test-Path $Executable) {
+            $resolvedExe = (Resolve-Path $Executable).Path
         } else {
-            & $Executable $Arguments | Out-Host
-            $exitCode = $LASTEXITCODE
+            $cmd = Get-Command $Executable -ErrorAction SilentlyContinue
+            if ($cmd -and $cmd.Source) {
+                $resolvedExe = $cmd.Source
+            } elseif ($cmd -and $cmd.Path) {
+                $resolvedExe = $cmd.Path
+            }
         }
+
+        $psi = [System.Diagnostics.ProcessStartInfo]::new()
+        $psi.FileName = $resolvedExe
+        $psi.WorkingDirectory = $WorkingDirectory
+        $psi.UseShellExecute = $false
+
+        foreach ($k in $EnvironmentVars.Keys) {
+            $psi.EnvironmentVariables[$k] = [string]$EnvironmentVars[$k]
+        }
+
+        if ($psi.PSObject.Properties['ArgumentList']) {
+            foreach ($a in $Arguments) { $psi.ArgumentList.Add($a) }
+        } else {
+            $psi.Arguments = ($Arguments | ForEach-Object {
+                if ($_ -match '[\s"]') {
+                    '"' + ($_ -replace '(\\*)(")', '$1$1\"' -replace '(\\+)$', '$1$1') + '"'
+                } else {
+                    $_
+                }
+            }) -join ' '
+        }
+
+        $stdoutTask = $null
+        $stderrTask = $null
+
+        if ($OutputFile) {
+            $psi.RedirectStandardOutput = $true
+            $psi.RedirectStandardError = $true
+            $psi.CreateNoWindow = $true
+        } else {
+            $psi.RedirectStandardOutput = $false
+            $psi.RedirectStandardError = $false
+        }
+
+        $proc = [System.Diagnostics.Process]::Start($psi)
+        $sw = [System.Diagnostics.Stopwatch]::StartNew()
+
+        if ($OutputFile) {
+            $stdoutTask = $proc.StandardOutput.ReadToEndAsync()
+            $stderrTask = $proc.StandardError.ReadToEndAsync()
+        }
+
+        while (-not $proc.HasExited) {
+            if ($sw.Elapsed.TotalSeconds -ge $Timeout) {
+                $timedOut = $true
+                Write-Host "`n::error::[TIMEOUT] '$Name' exceeded maximum timeout of ${Timeout}s! Terminating process..." -ForegroundColor Red
+                try {
+                    $proc.Kill($true)
+                } catch {
+                    try { $proc.Kill() } catch {}
+                }
+                break
+            }
+            Start-Sleep -Milliseconds 100
+        }
+
+        $proc.WaitForExit()
+
+        if ($OutputFile) {
+            $outStr = if ($stdoutTask) { $stdoutTask.Result } else { "" }
+            $errStr = if ($stderrTask) { $stderrTask.Result } else { "" }
+            Set-Content -Path $OutputFile -Value ($outStr + "`n" + $errStr) -Force
+        }
+
+        $exitCode = if ($timedOut) { -1 } else { $proc.ExitCode }
+    } catch {
+        Write-Host "::error::Failed to launch '$Executable': $_" -ForegroundColor Red
+        $exitCode = 1
     } finally {
         Pop-Location
         $env:PATH = $oldPath
@@ -162,11 +242,18 @@ function Invoke-TestCommand {
     $item = @{
         Name = $Name
         Category = $Category
-        Success = ($exitCode -eq 0)
+        Success = ($exitCode -eq 0 -and -not $timedOut)
         ExitCode = $exitCode
         Duration = $cmdDuration
+        TimedOut = $timedOut
     }
     $RecordedResults.Add($item)
+
+    if ($timedOut) {
+        $FailedSteps.Add("$Name (Timed out after ${Timeout}s)")
+        Write-Host "[FAILED] $Name (TIMED OUT after ${Timeout}s)`n" -ForegroundColor Red
+        return $item
+    }
 
     if ($CustomVerification) {
         return $item
@@ -176,6 +263,7 @@ function Invoke-TestCommand {
         Write-Host "[PASSED] $Name (Exit Code: $exitCode, ${cmdDuration}s)`n" -ForegroundColor Green
         return $item
     } else {
+        $FailedSteps.Add("$Name (Exit Code: $exitCode)")
         Write-Host "[FAILED] $Name (Exit Code: $exitCode, ${cmdDuration}s)`n" -ForegroundColor Yellow
         return $item
     }
@@ -298,16 +386,12 @@ if (-not $SkipToolTests) {
     if (-not (Test-Path $addonGodotDir)) { New-Item -ItemType Directory -Force -Path $addonGodotDir | Out-Null }
     Set-Content -Path (Join-Path $addonGodotDir "extension_list.cfg") -Value @('res://addons/crystal_addon/crystal_addon.gdextension', 'res://addons/crystal_integration/crystal.gdextension') -Force
 
-    $onWindows = ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';')
-    $shell = if ($onWindows) { "cmd" } else { "sh" }
-    $shellFlag = if ($onWindows) { "/c" } else { "-c" }
     $addonDir = Join-Path $RootDir "template-addon"
-    $shellCmd = "`"$GodotExe`" --headless --rendering-driver opengl3 --audio-driver Dummy --editor --path `"$addonDir`" --quit > `"$addonLogFile`" 2>&1"
-
     $addonEditorResult = Invoke-TestCommand -Name "Headless Editor Addon Test (template-addon)" `
-        -Executable $shell `
-        -Arguments @($shellFlag, $shellCmd) `
+        -Executable $GodotExe `
+        -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--editor", "--path", $addonDir, "--quit") `
         -WorkingDirectory $addonDir `
+        -OutputFile $addonLogFile `
         -CustomVerification
 
     $addonLogContent = if (Test-Path $addonLogFile) { Get-Content $addonLogFile -Raw } else { "" }
@@ -367,6 +451,7 @@ if (-not $SkipEditorTests) {
         $editorRebuildResult = Invoke-TestCommand -Name "Editor Live Crystal Rebuild & Reload (template, 1 cycle)" `
             -Executable $pwshExe `
             -Arguments (@("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $verifyEditorScript, "-Path", "template", "-TestBuildButton", "-ReloadCycles", "1", "-PurgeCache", "-GodotExe", $GodotExe) + $extraVerifyArgs) `
+            -Timeout 360 `
             -CustomVerification
         if (-not $editorRebuildResult["Success"]) {
             $FailedSteps.Add("Editor Live Rebuild & Reload (template)")
@@ -379,6 +464,7 @@ if (-not $SkipEditorTests) {
         $editorErrRecoveryResult = Invoke-TestCommand -Name "Editor Live Crystal Error Recovery (template)" `
             -Executable $pwshExe `
             -Arguments (@("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $verifyEditorScript, "-Path", "template", "-TestErrorRecovery", "-PurgeCache", "-GodotExe", $GodotExe) + $extraVerifyArgs) `
+            -Timeout 300 `
             -CustomVerification
         if (-not $editorErrRecoveryResult["Success"]) {
             $FailedSteps.Add("Editor Live Error Recovery (template)")

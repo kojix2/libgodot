@@ -148,6 +148,14 @@ if ($QuitAfter -gt 0) {
 if ($filteredArgs) {
     $godotArgs += $filteredArgs
 }
+if ($godotArgs -contains "--headless" -or $env:CI) {
+    if (-not ($godotArgs -contains "--rendering-driver")) {
+        $godotArgs = @("--rendering-driver", "opengl3") + $godotArgs
+    }
+    if (-not ($godotArgs -contains "--audio-driver")) {
+        $godotArgs = @("--audio-driver", "Dummy") + $godotArgs
+    }
+}
 
 # 6. Handle LLDB debugger execution
 if ($LLDB) {

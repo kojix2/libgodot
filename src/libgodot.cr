@@ -604,6 +604,44 @@ module Godot
       node.as?(T)
     end
   end
+
+  class ShapeCast3D < Node3D
+    # Convenience query returning the collider as Godot::Object? if alive, or nil if no hit or dead
+    def get_collider?(index : Int = 0) : Godot::Object?
+      return nil unless is_colliding
+      return nil if index < 0 || index.to_i64 >= get_collision_count
+      col = get_collider(index.to_i64)
+      col.if_alive
+    end
+  end
+
+  class RayCast3D < Node3D
+    # Convenience query returning the collider as Godot::Object? if alive, or nil if no hit or dead
+    def get_collider? : Godot::Object?
+      return nil unless is_colliding
+      col = get_collider
+      col.if_alive
+    end
+  end
+
+  class ShapeCast2D < Node2D
+    # Convenience query returning the collider as Godot::Object? if alive, or nil if no hit or dead
+    def get_collider?(index : Int = 0) : Godot::Object?
+      return nil unless is_colliding
+      return nil if index < 0 || index.to_i64 >= get_collision_count
+      col = get_collider(index.to_i64)
+      col.if_alive
+    end
+  end
+
+  class RayCast2D < Node2D
+    # Convenience query returning the collider as Godot::Object? if alive, or nil if no hit or dead
+    def get_collider? : Godot::Object?
+      return nil unless is_colliding
+      col = get_collider
+      col.if_alive
+    end
+  end
 end
 
 # Top-level math constructors

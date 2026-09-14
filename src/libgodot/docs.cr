@@ -1025,7 +1025,36 @@ module Docs
   # end
   # ```
   #
-  # #### C. Handling Disposed Objects with `rescue`
+  # #### C. Nil-Coalescing with `if_alive` & Safe Collider Queries
+  # To avoid explicit boilerplate checks, use `#if_alive` or typed queries like `get_collider?`:
+  #
+  # ```crystal
+  # # Returns self if alive in ObjectDB, or nil if uninitialized, null, or destroyed:
+  # if live_target = maybe_target.if_alive
+  #   live_target.position = new_pos
+  # end
+  #
+  # # RayCast3D / ShapeCast3D return Godot::Object? directly:
+  # if col = shapecast.get_collider?
+  #   Godot.print("Hit collider: #{col}")
+  # end
+  # ```
+  #
+  # #### D. Engine Value Equality (`==`) and Hashing (`hash`)
+  # `Godot::Object` implements value equality based on Godot's 64-bit instance ID (or native pointer).
+  # Distinct Crystal wrapper instances representing the same engine object compare equal:
+  #
+  # ```crystal
+  # obj_a == obj_b      # => true if both refer to the same Godot entity
+  # null_obj == nil     # => true if underlying engine pointer is null
+  # nil == null_obj     # => true (symmetric nil equality)
+  # set = Set(Godot::Object).new
+  # set.add(obj_a)
+  # set.add(obj_b)
+  # set.size            # => 1 (properly deduplicated)
+  # ```
+  #
+  # #### E. Handling Disposed Objects with `rescue`
   # If code interacts with arbitrary or external nodes passed from GDScript, you can catch
   # `Godot::DisposedObjectError` at system boundaries:
   #

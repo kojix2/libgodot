@@ -217,3 +217,39 @@ test_lifecycle "Quantitative zero-leak verification using Performance monitors a
   final_nodes = get_node_count.call
   TestFramework.assert_eq final_nodes, baseline_nodes, "Node count must return to baseline after destruction (zero leaks)"
 end
+
+test_lifecycle "Engine value equality (==), hashing, and null safety" do
+  node_a = Godot.create(Godot::Node2D)
+  # Wrap the exact same native engine pointer in a second distinct Crystal wrapper
+  node_b = Godot::Node2D.new(node_a.pointer)
+
+  TestFramework.assert_true node_a.alive?
+  TestFramework.assert_true node_b.alive?
+  TestFramework.assert_false (node_a == nil)
+  TestFramework.assert_false (nil == node_a)
+
+  # Value equality
+  TestFramework.assert_true (node_a == node_b), "Distinct wrappers of the same engine instance must compare equal via =="
+  TestFramework.assert_eq node_a.hash, node_b.hash, "Wrappers of the same engine instance must have identical hash codes"
+
+  # Set deduplication
+  set = Set(Godot::Object).new
+  set.add(node_a)
+  set.add(node_b)
+  TestFramework.assert_eq set.size, 1, "Set must deduplicate multiple wrappers referring to the same engine instance"
+
+  # Hash map lookup
+  map = Hash(Godot::Object, String).new
+  map[node_a] = "found"
+  TestFramework.assert_eq map[node_b]?, "found", "Hash lookup with equivalent wrapper must retrieve stored value"
+
+  # Null / uninitialized wrapper
+  null_obj = Godot::Object.new
+  TestFramework.assert_false null_obj.alive?, "Uninitialized wrapper must report alive? == false"
+  TestFramework.assert_false null_obj.is_valid?, "Uninitialized wrapper must report is_valid? == false"
+  TestFramework.assert_nil null_obj.if_alive, "Uninitialized wrapper if_alive must return nil"
+  TestFramework.assert_true (null_obj == nil), "Null wrapper must equal nil"
+  TestFramework.assert_true (nil == null_obj), "Nil must equal null wrapper symmetrically"
+
+  node_a.destroy
+end

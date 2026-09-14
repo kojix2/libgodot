@@ -328,6 +328,7 @@ node PropertyTestTarget < Godot::Node do
   # 5. Signals
   signal test_event_fired(val : Int32)
   signal multi_arg_event(code : Int32, label : String, ratio : Float64)
+  signal custom_event(payload : String)
 end
 
 # =============================================================================

@@ -140,3 +140,22 @@ test_physics "VehicleBody3D and VehicleWheel3D motor and suspension parameters" 
   vw.destroy
   vb.destroy
 end
+
+test_physics "RayCast3D and ShapeCast3D null-safe get_collider? queries" do
+  rc3d = Godot.create(Godot::RayCast3D)
+  TestFramework.assert_nil rc3d.get_collider?, "RayCast3D get_collider? must return nil when not colliding"
+
+  sc3d = Godot.create(Godot::ShapeCast3D)
+  TestFramework.assert_nil sc3d.get_collider?(0), "ShapeCast3D get_collider? must return nil when not colliding"
+
+  rc2d = Godot.create(Godot::RayCast2D)
+  TestFramework.assert_nil rc2d.get_collider?, "RayCast2D get_collider? must return nil when not colliding"
+
+  sc2d = Godot.create(Godot::ShapeCast2D)
+  TestFramework.assert_nil sc2d.get_collider?(0), "ShapeCast2D get_collider? must return nil when not colliding"
+
+  rc3d.destroy
+  sc3d.destroy
+  rc2d.destroy
+  sc2d.destroy
+end

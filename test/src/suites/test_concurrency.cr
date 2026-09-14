@@ -34,7 +34,7 @@ test_concurrency "Cooperative Fiber modifying Godot Node properties across engin
 end
 
 test_concurrency "Cooperative fiber awaiting custom Godot Node signals" do
-  target = PropertyTestTarget.new
+  target = Godot.create(PropertyTestTarget)
   received_payload = ""
   fiber_done = false
 
@@ -97,7 +97,7 @@ test_concurrency "Dead-pointer protection: target destroyed while fiber is await
 end
 
 test_concurrency "Cooperative signal await with timeout expiration" do
-  target = PropertyTestTarget.new
+  target = Godot.create(PropertyTestTarget)
   timed_out = false
 
   start_time = ::Time.instant

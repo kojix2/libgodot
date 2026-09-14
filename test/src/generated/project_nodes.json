@@ -2790,6 +2790,17 @@
 						}
 					],
 					"name": "multi_arg_event"
+				},
+				{
+					"args": [
+						{
+							"class_name": "",
+							"name": "payload",
+							"type": 4,
+							"type_name": "String"
+						}
+					],
+					"name": "custom_event"
 				}
 			]
 		},

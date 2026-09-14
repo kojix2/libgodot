@@ -208,6 +208,51 @@ abort "Failed: move_and_slide fallback" unless null_3d.move_and_slide == false
 # Input queries without engine initialized should safely return false / zero without crash
 abort "Failed: Input.is_action_just_released" if Godot::Input.is_action_just_released("ui_accept")
 abort "Failed: Input.get_vector" unless Godot::Input.get_vector("left", "right", "up", "down") == Vector2::ZERO
-puts "  ✓ Defensive null-pointer safety verified!"
+
+# -------------------------------------------------------------
+# 6. Object Identity, Equality (==), Hashing, and Null-Safety
+# -------------------------------------------------------------
+puts "[Spec 6] Object Identity, Equality (==), Hashing, and Null-Safety..."
+
+# Null-pointer wrapper state
+abort "Failed: null_node.alive? should be false" if null_node.alive?
+abort "Failed: null_node.is_valid? should be false" if null_node.is_valid?
+abort "Failed: null_node.if_alive should be nil" unless null_node.if_alive.nil?
+abort "Failed: null_node == nil should be true" unless null_node == nil
+abort "Failed: nil == null_node should be true" unless nil == null_node
+
+# Two separate Crystal wrappers pointing to the same engine address
+fake_ptr = Pointer(Void).new(0xCAFEBABE_u64)
+wrap1 = Godot::Object.new(fake_ptr)
+wrap2 = Godot::Object.new(fake_ptr)
+diff_ptr = Pointer(Void).new(0xDEADBEEF_u64)
+wrap3 = Godot::Object.new(diff_ptr)
+
+abort "Failed: wrap1 == wrap2 should be true" unless wrap1 == wrap2
+abort "Failed: wrap1 == wrap3 should be false" if wrap1 == wrap3
+abort "Failed: wrap1 == nil should be false" if wrap1 == nil
+abort "Failed: nil == wrap1 should be false" if nil == wrap1
+abort "Failed: wrap1.hash == wrap2.hash" unless wrap1.hash == wrap2.hash
+
+# Set deduplication and Hash key lookup
+test_set = Set(Godot::Object).new
+test_set.add(wrap1)
+test_set.add(wrap2)
+abort "Failed: Set should deduplicate wrappers with identical engine identity" unless test_set.size == 1
+abort "Failed: Set should include wrap2" unless test_set.includes?(wrap2)
+
+test_map = Hash(Godot::Object, String).new
+test_map[wrap1] = "engine_entity"
+abort "Failed: Hash lookup via wrap2 should find wrap1 value" unless test_map[wrap2]? == "engine_entity"
+
+# RayCast3D & ShapeCast3D get_collider? on uncollided / null instances
+null_ray = Godot::RayCast3D.new
+abort "Failed: null_ray.get_collider? should be nil" unless null_ray.get_collider?.nil?
+
+null_shape = Godot::ShapeCast3D.new
+abort "Failed: null_shape.get_collider? should be nil" unless null_shape.get_collider?.nil?
+
+puts "  ✓ Engine identity equality (==), hashing, and null safety verified!"
 
 puts "All safety, memory, and dynamic binding specifications passed cleanly!"
+

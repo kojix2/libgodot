@@ -534,18 +534,41 @@ module Godot
       @instance_id > 0 ? @instance_id : object_id.to_u64
     end
 
-    # Returns true if this object instance is still alive and valid in Godot's ObjectDB
-    def alive? : Bool
-      return false if @destroyed
-      if @instance_id > 0
-        Bridge.is_instance_valid(@instance_id)
+    # Value equality based on Godot engine identity (instance ID or underlying pointer)
+    def ==(other : Godot::Object) : Bool
+      if @instance_id > 0 && other.instance_id > 0
+        @instance_id == other.instance_id
       else
-        !@destroyed
+        @pointer == other.pointer
       end
+    end
+
+    def ==(other : Nil) : Bool
+      @pointer.null?
+    end
+
+    # Hashing based on engine instance ID for use in Sets and Hash keys
+    def hash(hasher)
+      if @instance_id > 0
+        @instance_id.hash(hasher)
+      else
+        @pointer.address.hash(hasher)
+      end
+    end
+
+    # Returns true if this object instance has a valid engine pointer and is alive in Godot's ObjectDB
+    def alive? : Bool
+      return false if @destroyed || @pointer.null? || @instance_id == 0_u64
+      Bridge.is_instance_valid(@instance_id)
     end
 
     def is_valid? : Bool
       alive?
+    end
+
+    # Convenient nil-coalescing helper: returns self if alive, otherwise nil
+    def if_alive : self?
+      alive? ? self : nil
     end
 
     def destroyed? : Bool
@@ -932,6 +955,12 @@ module Godot
           end
         end
       end
+    end
+  end
+
+  struct ::Nil
+    def ==(other : Godot::Object) : Bool
+      other.pointer.null?
     end
   end
 

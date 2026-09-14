@@ -43,6 +43,13 @@ static thread_local size_t t_gc_registered_module_count = 0;
 static void *s_cached_game_module = nullptr;
 
 inline void unregister_gc_thread() {
+#if defined(__APPLE__) && defined(__MACH__)
+    // On macOS (Darwin), Boehm GC tracks threads via mach ports / pthread key destructors.
+    // Explicitly unregistering during C++ TLS destruction causes a use-after-free SEGV
+    // in GC_unregister_my_thread_inner because the GC thread structure has already been freed.
+    t_gc_registered_module_count = 0;
+    return;
+#else
     std::vector<GCModuleEntry> modules_snapshot;
     {
         std::lock_guard<std::recursive_mutex> lock(g_gc_modules_mutex);
@@ -58,6 +65,7 @@ inline void unregister_gc_thread() {
         }
     }
     t_gc_registered_module_count = 0;
+#endif
 }
 
 struct GCThreadRegistrationGuard {

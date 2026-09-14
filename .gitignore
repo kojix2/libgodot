@@ -46,6 +46,8 @@ dist/
 *.exp
 *.lib
 *.o
+cc_wrapper.sh
+**/cc_wrapper.sh
 
 test_report.*
 android_audit_report.txt

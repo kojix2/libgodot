@@ -47,40 +47,76 @@ if (Test-Path $projRoot) {
         ) | Where-Object { Test-Path $_ } | Select-Object -First 1
 
         if ($dumpScript -and $genScript) {
-            $godotExe = @(
+            $exeExt = if ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';') { ".exe" } else { "" }
+            $godotCandidates = @(
+                $env:GODOT,
+                $env:GODOT4,
+                $env:GODOT_BIN,
+                $env:GODOT4_BIN,
+                (Join-Path $projRoot "godot$exeExt"),
+                (Join-Path $projRoot "../godot$exeExt"),
+                (Join-Path $RootDir "godot$exeExt"),
                 (Join-Path $projRoot "godot.exe"),
-                (Join-Path $projRoot "../godot.exe"),
+                (Join-Path $projRoot "godot"),
                 (Join-Path $RootDir "godot.exe"),
-                "godot"
-            ) | Where-Object { (Test-Path $_) -or (Get-Command $_ -ErrorAction SilentlyContinue) } | Select-Object -First 1
+                (Join-Path $RootDir "godot")
+            )
 
-            if ($godotExe) {
-                Write-Host "[Build] Updating project GDScript bindings for $($gdFiles.Count) script(s)..." -ForegroundColor Cyan
-                $scriptsDir = Join-Path $projRoot "scripts"
-                if (-not (Test-Path $scriptsDir)) { New-Item -ItemType Directory -Force -Path $scriptsDir | Out-Null }
-                $localDump = Join-Path $scriptsDir "dump_project_nodes.gd"
-                if (-not (Test-Path $localDump)) {
-                    Copy-Item $dumpScript $localDump -Force
+            $godotExe = ""
+            foreach ($cand in $godotCandidates) {
+                if (-not [string]::IsNullOrWhiteSpace($cand) -and (Test-Path $cand)) {
+                    $godotExe = (Resolve-Path $cand).Path
+                    break
                 }
-
-                # Clean out existing generated bindings before regen
-                if (Test-Path $outDir) {
-                    Get-ChildItem -Path $outDir -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+            }
+            if (-not $godotExe) {
+                $cmd = Get-Command godot -ErrorAction SilentlyContinue
+                if ($cmd) {
+                    $godotExe = if ($cmd.Source) { $cmd.Source } else { $cmd.Name }
                 } else {
-                    New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+                    $cmd4 = Get-Command godot4 -ErrorAction SilentlyContinue
+                    if ($cmd4) {
+                        $godotExe = if ($cmd4.Source) { $cmd4.Source } else { $cmd4.Name }
+                    }
                 }
-                
-                try {
+            }
+
+            Write-Host "[Build] Updating project GDScript bindings for $($gdFiles.Count) script(s)..." -ForegroundColor Cyan
+            $scriptsDir = Join-Path $projRoot "scripts"
+            if (-not (Test-Path $scriptsDir)) { New-Item -ItemType Directory -Force -Path $scriptsDir | Out-Null }
+            $localDump = Join-Path $scriptsDir "dump_project_nodes.gd"
+            if (-not (Test-Path $localDump)) {
+                Copy-Item $dumpScript $localDump -Force
+            }
+
+            # Clean out existing generated bindings before regen
+            if (Test-Path $outDir) {
+                Get-ChildItem -Path $outDir -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+            } else {
+                New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+            }
+
+            $manifest = Join-Path $outDir "all_project_nodes.cr"
+            try {
+                if ($godotExe) {
                     $null = & $godotExe --headless --path $projRoot -s res://scripts/dump_project_nodes.gd -- --output src/generated/project_nodes.json 2>&1
                     if (Test-Path $outJson) {
                         & crystal run $genScript -- $outJson $outDir
+                    } else {
+                        Write-Host "[Build] Warning: $outJson was not created during project node dump" -ForegroundColor Yellow
                     }
-                    $manifest = Join-Path $outDir "all_project_nodes.cr"
-                    if (-not (Test-Path $manifest)) {
-                        Set-Content -Path $manifest -Value "# Generated All Project Custom Nodes Manifest`n" -NoNewline
-                    }
-                } catch {
-                    Write-Host "[Build] Warning during project bindings generation: $_" -ForegroundColor Yellow
+                } else {
+                    Write-Host "[Build] Warning: Could not locate Godot executable to generate project bindings" -ForegroundColor Yellow
+                }
+            } catch {
+                Write-Host "[Build] Warning during project bindings generation: $_" -ForegroundColor Yellow
+            } finally {
+                # Guarantee manifest exists so crystal build never fails on missing require
+                if (-not (Test-Path $outDir)) {
+                    New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+                }
+                if (-not (Test-Path $manifest)) {
+                    Set-Content -Path $manifest -Value "# Generated All Project Custom Nodes Manifest`n" -NoNewline
                 }
             }
         }

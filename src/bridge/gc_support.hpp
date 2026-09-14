@@ -41,6 +41,7 @@ static std::vector<GCModuleEntry> g_gc_modules;
 static std::recursive_mutex g_gc_modules_mutex;
 static thread_local size_t t_gc_registered_module_count = 0;
 static void *s_cached_game_module = nullptr;
+static bool g_is_addon_module = false;
 
 inline void unregister_gc_thread() {
     // Boehm GC automatically manages thread lifecycle via pthread key destructors
@@ -66,7 +67,11 @@ static thread_local GCThreadRegistrationGuard t_gc_registration_guard;
 
 
 inline void bridge_register_gc_functions(const BridgeGCFunctions *funcs) {
+#ifndef _WIN32
+    if (!funcs || g_is_addon_module) return;
+#else
     if (!funcs) return;
+#endif
     std::lock_guard<std::recursive_mutex> lock(g_gc_modules_mutex);
     for (const auto &m : g_gc_modules) {
         if (funcs->register_my_thread && m.register_my_thread == (GCRegisterMyThreadFn)funcs->register_my_thread) {
@@ -88,6 +93,9 @@ inline void bridge_register_gc_functions(const BridgeGCFunctions *funcs) {
 }
 
 inline void init_gc_library(void *game_module_handle = nullptr) {
+#ifndef _WIN32
+    if (g_is_addon_module) return;
+#endif
     std::lock_guard<std::recursive_mutex> lock(g_gc_modules_mutex);
 
     if (game_module_handle) {
@@ -182,6 +190,11 @@ inline void init_gc_library(void *game_module_handle = nullptr) {
 }
 
 inline void ensure_gc_thread_registered() {
+#ifndef _WIN32
+    if (g_is_addon_module) {
+        return;
+    }
+#endif
     if (t_gc_registered_module_count >= g_gc_modules.size() && !g_gc_modules.empty()) {
         return;
     }

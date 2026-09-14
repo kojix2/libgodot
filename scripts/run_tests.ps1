@@ -597,9 +597,12 @@ if (-not $SkipStandaloneTests) {
         $standaloneLogFile = Join-Path $scratchDir "standalone_tests.log"
         if (Test-Path $standaloneLogFile) { Remove-Item $standaloneLogFile -Force }
 
+        $pckCandidate = Join-Path $TestBinDir "tests.pck"
+        $mainPackArgs = if (Test-Path $pckCandidate) { @("--main-pack", $pckCandidate) } else { @() }
+
         $standaloneResult = Invoke-TestCommand -Name "Standalone Compiled Test Runner (tests$exeExt --autorun)" `
             -Executable $runExe `
-            -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--quit-after", "600", "--", "--autorun") `
+            -Arguments (@("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy") + $mainPackArgs + @("--quit-after", "600", "--", "--autorun")) `
             -WorkingDirectory $TestBinDir `
             -OutputFile $standaloneLogFile `
             -CustomVerification
@@ -652,9 +655,10 @@ if (-not $SkipStandaloneTests) {
             $relLogFile = Join-Path $scratchDir "standalone_rel_tests.log"
             if (Test-Path $relLogFile) { Remove-Item $relLogFile -Force }
 
+            $relPackArgs = if (Test-Path $pckCandidate) { @("--main-pack", $pckCandidate) } else { @() }
             $relResult = Invoke-TestCommand -Name "Standalone Release Test Runner (tests$exeExt --autorun RELEASE=1)" `
                 -Executable $runExe `
-                -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--quit-after", "600", "--", "--autorun") `
+                -Arguments (@("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy") + $relPackArgs + @("--quit-after", "600", "--", "--autorun")) `
                 -WorkingDirectory $TestBinDir `
                 -OutputFile $relLogFile `
                 -CustomVerification

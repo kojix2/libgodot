@@ -335,6 +335,11 @@ inline void load_crystal_game_library(GDExtensionClassLibraryPtr p_library = nul
         char dir_log[512];
         snprintf(dir_log, sizeof(dir_log), "[CrystalBridge] Resolved bridge directory: %s", bridge_dir);
         godot_log_print(dir_log);
+#ifndef _WIN32
+        if (strstr(bridge_dir, "addons") != nullptr && strstr(bridge_dir, "crystal_integration") == nullptr) {
+            g_is_addon_module = true;
+        }
+#endif
     }
 
     // Clean up stale shadow copies from previous editor sessions
@@ -649,11 +654,21 @@ inline void load_crystal_game_library(GDExtensionClassLibraryPtr p_library = nul
             } else {
                 godot_log_error("Failed to find 'crystal_godot_init' in loaded library", nullptr, "load_crystal_game_library", __FILE__, __LINE__);
             }
-            bool is_addon = (bridge_get_proc(hModule, "crystal_godot_is_addon") != nullptr);
-            if (!is_addon) {
+#ifndef _WIN32
+            bool is_addon = g_is_addon_module ||
+                            (bridge_get_proc(hModule, "crystal_godot_is_addon") != nullptr) ||
+                            (strstr(canonical_path, "addons") != nullptr && strstr(canonical_path, "crystal_integration") == nullptr) ||
+                            (strstr(candidate_path.c_str(), "addons") != nullptr && strstr(candidate_path.c_str(), "crystal_integration") == nullptr);
+            if (is_addon) {
+                g_is_addon_module = true;
+            } else {
                 init_gc_library(hModule);
+                ensure_gc_thread_registered();
             }
+#else
+            init_gc_library(hModule);
             ensure_gc_thread_registered();
+#endif
         }
     }
 }

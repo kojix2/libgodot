@@ -31,6 +31,7 @@ $buildArgs = @{
     Output = $output
     LinkFlags = $linkFlags
     SourcePath = (Resolve-Path (Join-Path $Root "../src")).Path
+    Flags = "-Dlibgodot_addon"
 }
 if ($Release) {
     $buildArgs.Release = $true

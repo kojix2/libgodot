@@ -247,7 +247,7 @@ cleanup() { rm -f "$combined" "$localized"; }
 trap cleanup EXIT INT TERM
 
 ld -r "${objs[@]}" -o "$combined" || exit $?
-objcopy -w --keep-global-symbol=crystal_godot_init "$combined" "$localized" || exit $?
+objcopy -w --keep-global-symbol=crystal_godot_init --keep-global-symbol=crystal_godot_is_addon "$combined" "$localized" || exit $?
 "$target_cc" "$localized" -Wl,-Bsymbolic -Wl,-Bsymbolic-functions "${flags[@]}"
 exit $?
 '@

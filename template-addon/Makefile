@@ -79,7 +79,7 @@ bindings: project_bindings
 
 build: dirs deps bridge extension_list addons project_bindings
 	@echo [Addon] Compiling $(GAME_LIB) from $(ENTRY)...
-	@$(PWSH_FILE) $(SCRIPTS_DIR)/build_crystal.ps1 -Entry $(ENTRY) -Output $(GAME_LIB) -LinkFlags '$(LINK_FLAGS)' $(if $(filter 1,$(RELEASE)),-Release,) -SourcePath $(SOURCE_DIR)
+	@$(PWSH_FILE) $(SCRIPTS_DIR)/build_crystal.ps1 -Entry $(ENTRY) -Output $(GAME_LIB) -LinkFlags '$(LINK_FLAGS)' $(if $(filter 1,$(RELEASE)),-Release,) -SourcePath $(SOURCE_DIR) -Flags '-Dlibgodot_addon'
 
 package: all
 	@echo [Addon] Packaging distributable zip for '$(ADDON_NAME)'...

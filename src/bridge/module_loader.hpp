@@ -223,7 +223,7 @@ inline void cleanup_old_shadow_dlls(const char *dir) {
  * (`game_loaded_<PID>_<timestamp>.dll/so`) before loading the Crystal library.
  */
 inline bool bridge_should_use_shadow_copy() {
-#if defined(__ANDROID__) || defined(ANDROID)
+#ifndef _WIN32
     return false;
 #else
     if (!is_editor_active()) {
@@ -476,7 +476,6 @@ inline void load_crystal_game_library(GDExtensionClassLibraryPtr p_library = nul
         const char *fallbacks[] = {
             "addons/crystal_integration/bin/plugin.dll",
             "addons/crystal_integration/bin/game.dll",
-            "addons/crystal_addon/bin/game.dll",
             "bin/game.dll",
             "game.dll",
             "test/bin/game.dll",
@@ -494,7 +493,6 @@ inline void load_crystal_game_library(GDExtensionClassLibraryPtr p_library = nul
         const char *fallbacks[] = {
             "addons/crystal_integration/bin/plugin.dylib",
             "addons/crystal_integration/bin/game.dylib",
-            "addons/crystal_addon/bin/game.dylib",
             "bin/game.dylib",
             "game.dylib",
             "bin/libgame.dylib",
@@ -506,7 +504,6 @@ inline void load_crystal_game_library(GDExtensionClassLibraryPtr p_library = nul
         const char *fallbacks[] = {
             "addons/crystal_integration/bin/plugin.so",
             "addons/crystal_integration/bin/game.so",
-            "addons/crystal_addon/bin/game.so",
             "bin/game.so",
             "game.so",
             "test/bin/game.so",

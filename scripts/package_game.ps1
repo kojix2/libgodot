@@ -306,7 +306,20 @@ if ($godotExe -and (Test-Path $godotExe)) {
         & $godotExe @($headlessGodotFlags + @("--path", $projFull, "--export-pack", $preset, $pckFile))
         $packExit = $LASTEXITCODE
 
-        if ($packExit -eq 0 -and (Test-Path $pckFile)) {
+        if (-not (Test-Path $pckFile) -or (Get-Item $pckFile).Length -lt 100) {
+            foreach ($altPreset in @("Linux", "Windows Desktop", "macOS")) {
+                if ($altPreset -ne $preset) {
+                    Write-Host "  -> Retrying pack export using fallback preset '$altPreset'..." -ForegroundColor Yellow
+                    & $godotExe @($headlessGodotFlags + @("--path", $projFull, "--export-pack", $altPreset, $pckFile))
+                    if ($LASTEXITCODE -eq 0 -and (Test-Path $pckFile) -and (Get-Item $pckFile).Length -ge 100) {
+                        $packExit = 0
+                        break
+                    }
+                }
+            }
+        }
+
+        if ($packExit -eq 0 -and (Test-Path $pckFile) -and (Get-Item $pckFile).Length -ge 100) {
             if ($onWindows) {
                 Safe-Copy $pckFile (Join-Path $binDir "$Name.console.pck")
             }

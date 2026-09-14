@@ -124,6 +124,14 @@ inline void init_gc_library(void *game_module_handle = nullptr) {
         }
     }
 #else
+    // On POSIX platforms where Boehm GC is statically linked into shared libraries,
+    // registering multiple static GC instances to track the same OS threads causes
+    // fatal collisions in pthread key destructors (signal 11 / SIGSEGV at address 0x18).
+    // Only the primary game module should register with g_gc_modules.
+    if (!g_gc_modules.empty()) {
+        return;
+    }
+
     std::vector<void*> candidates;
     if (game_module_handle) {
         candidates.push_back(game_module_handle);

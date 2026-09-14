@@ -649,7 +649,10 @@ inline void load_crystal_game_library(GDExtensionClassLibraryPtr p_library = nul
             } else {
                 godot_log_error("Failed to find 'crystal_godot_init' in loaded library", nullptr, "load_crystal_game_library", __FILE__, __LINE__);
             }
-            init_gc_library(hModule);
+            bool is_addon = (bridge_get_proc(hModule, "crystal_godot_is_addon") != nullptr);
+            if (!is_addon) {
+                init_gc_library(hModule);
+            }
             ensure_gc_thread_registered();
         }
     }

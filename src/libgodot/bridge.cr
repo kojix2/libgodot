@@ -1230,6 +1230,7 @@ end
 
 # C ABI Entry point called by crystal_bridge when game library is loaded
 fun crystal_godot_init(api : Godot::LibBridge::BridgeAPI*) : Void
+{% unless flag?(:libgodot_addon) %}
   if !api.null? && !api.value.register_gc_functions.pointer.null?
     gc_funcs = Godot::LibBridge::BridgeGCFunctions.new
     gc_funcs.gc_init = ->LibGCBridge.init
@@ -1244,6 +1245,7 @@ fun crystal_godot_init(api : Godot::LibBridge::BridgeAPI*) : Void
     {% end %}
     api.value.register_gc_functions.call(pointerof(gc_funcs))
   end
+{% end %}
   GC.init
   Crystal.init_runtime
   dummy_arg = "game".to_unsafe
@@ -1256,3 +1258,10 @@ fun crystal_godot_init(api : Godot::LibBridge::BridgeAPI*) : Void
   end
 {% end %}
 end
+
+{% if flag?(:libgodot_addon) %}
+@[NoInline]
+fun crystal_godot_is_addon : LibC::Int
+  1
+end
+{% end %}

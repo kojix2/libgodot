@@ -64,6 +64,72 @@ struct GCThreadRegistrationGuard {
 };
 static thread_local GCThreadRegistrationGuard t_gc_registration_guard;
 
+#ifndef _WIN32
+struct BridgeSavedSignals {
+    struct sigaction sa_pwr;
+    struct sigaction sa_xcpu;
+    struct sigaction sa_segv;
+    struct sigaction sa_bus;
+    struct sigaction sa_rt[32];
+    int rt_min = 0;
+    int rt_max = 0;
+};
+
+inline BridgeSavedSignals bridge_save_signals() {
+    BridgeSavedSignals s = {};
+#ifdef SIGPWR
+    sigaction(SIGPWR, nullptr, &s.sa_pwr);
+#endif
+#ifdef SIGXCPU
+    sigaction(SIGXCPU, nullptr, &s.sa_xcpu);
+#endif
+#ifdef SIGSEGV
+    sigaction(SIGSEGV, nullptr, &s.sa_segv);
+#endif
+#ifdef SIGBUS
+    sigaction(SIGBUS, nullptr, &s.sa_bus);
+#endif
+#if defined(SIGRTMIN) && defined(SIGRTMAX)
+    s.rt_min = SIGRTMIN;
+    s.rt_max = SIGRTMAX;
+    for (int sig = s.rt_min; sig <= s.rt_max && (sig - s.rt_min) < 32; sig++) {
+        sigaction(sig, nullptr, &s.sa_rt[sig - s.rt_min]);
+    }
+#elif defined(__SIGRTMIN) && defined(__SIGRTMAX)
+    s.rt_min = __SIGRTMIN;
+    s.rt_max = __SIGRTMAX;
+    for (int sig = s.rt_min; sig <= s.rt_max && (sig - s.rt_min) < 32; sig++) {
+        sigaction(sig, nullptr, &s.sa_rt[sig - s.rt_min]);
+    }
+#endif
+    return s;
+}
+
+inline void bridge_restore_signals(const BridgeSavedSignals &s) {
+#ifdef SIGPWR
+    sigaction(SIGPWR, &s.sa_pwr, nullptr);
+#endif
+#ifdef SIGXCPU
+    sigaction(SIGXCPU, &s.sa_xcpu, nullptr);
+#endif
+#ifdef SIGSEGV
+    sigaction(SIGSEGV, &s.sa_segv, nullptr);
+#endif
+#ifdef SIGBUS
+    sigaction(SIGBUS, &s.sa_bus, nullptr);
+#endif
+#if defined(SIGRTMIN) && defined(SIGRTMAX)
+    for (int sig = s.rt_min; sig <= s.rt_max && (sig - s.rt_min) < 32; sig++) {
+        sigaction(sig, &s.sa_rt[sig - s.rt_min], nullptr);
+    }
+#elif defined(__SIGRTMIN) && defined(__SIGRTMAX)
+    for (int sig = s.rt_min; sig <= s.rt_max && (sig - s.rt_min) < 32; sig++) {
+        sigaction(sig, &s.sa_rt[sig - s.rt_min], nullptr);
+    }
+#endif
+}
+#endif
+
 
 
 inline void bridge_register_gc_functions(const BridgeGCFunctions *funcs) {

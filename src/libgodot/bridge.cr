@@ -1225,19 +1225,12 @@ lib LibGCBridge
   {% unless flag?(:win32) %}
     fun get_suspend_signal = GC_get_suspend_signal : LibC::Int
     fun get_thr_restart_signal = GC_get_thr_restart_signal : LibC::Int
-    fun set_suspend_signal = GC_set_suspend_signal(sig : LibC::Int) : Void
-    fun set_thr_restart_signal = GC_set_thr_restart_signal(sig : LibC::Int) : Void
   {% end %}
 end
 
 # C ABI Entry point called by crystal_bridge when game library is loaded
 fun crystal_godot_init(api : Godot::LibBridge::BridgeAPI*) : Void
-{% if flag?(:libgodot_addon) %}
-  {% unless flag?(:win32) %}
-    LibGCBridge.set_suspend_signal(-1)
-    LibGCBridge.set_thr_restart_signal(-1)
-  {% end %}
-{% else %}
+{% unless flag?(:libgodot_addon) %}
   if !api.null? && !api.value.register_gc_functions.pointer.null?
     gc_funcs = Godot::LibBridge::BridgeGCFunctions.new
     gc_funcs.gc_init = ->LibGCBridge.init

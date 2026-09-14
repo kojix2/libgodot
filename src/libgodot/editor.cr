@@ -159,6 +159,7 @@ module Godot
 
   # Registers Crystal icons into Godot's EditorIcons theme so ScriptCreateDialog and FileSystem dock display proper icons
   def self.ensure_theme_icons : Void
+    return if headless?
     return unless has_editor_interface?
     return if Godot::EditorInterface.singleton_ptr.null?
     ed_iface = Godot::EditorInterface.new(Godot::EditorInterface.singleton_ptr)
@@ -494,17 +495,28 @@ module Godot
     make_crystal_panel_visible(visible)
   end
 
+  def self.headless? : Bool
+    return true if ::ENV["GODOT_HEADLESS"]? == "1" || ::ENV["CI"]? || ::ENV["LIBGL_ALWAYS_SOFTWARE"]? == "1"
+    if !Godot::DisplayServer.singleton_ptr.null?
+      begin
+        ds = Godot::DisplayServer.new(Godot::DisplayServer.singleton_ptr)
+        name = ds.call_str("get_name")
+        return true if name == "headless" || name.empty?
+      rescue
+        return true
+      end
+    else
+      return true
+    end
+    false
+  end
+
   def self.get_crystal_icon_texture : Godot::Texture2D?
     if cached = @@cached_icon_texture
       return cached if !cached.pointer.null?
     end
 
-    if !Godot::DisplayServer.singleton_ptr.null?
-      ds = Godot::DisplayServer.new(Godot::DisplayServer.singleton_ptr)
-      if ds.call_str("get_name") == "headless"
-        return nil
-      end
-    end
+    return nil if headless?
 
     icon_tex : Godot::Texture2D? = nil
     img = Godot.create(Godot::Image)

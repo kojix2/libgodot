@@ -6,7 +6,17 @@ $ErrorActionPreference = "Stop"
 
 $projRoot = $PSScriptRoot
 $onWindows = ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';')
+$isMac = $false
+try {
+    if ($IsMacOS -or [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::OSX)) {
+        $isMac = $true
+    }
+} catch {}
+if (-not $isMac -and -not $onWindows) {
+    if ((Get-Command uname -ErrorAction SilentlyContinue) -and ((& uname) -eq "Darwin")) { $isMac = $true }
+}
 $exeName = if ($onWindows) { "godot.exe" } else { "godot" }
+$soExt = if ($onWindows) { "dll" } elseif ($isMac) { "dylib" } else { "so" }
 
 # 1. Resolve Godot executable
 $godotCandidates = @(
@@ -38,7 +48,7 @@ if (-not $godotExe) {
 # 2. Build addon library if needed
 if (-not $NoBuild) {
     $addonName = "crystal_addon"
-    $addonBin = Join-Path $projRoot "addons/$addonName/bin/game." + (if ($onWindows) { "dll" } elseif ($IsMacOS) { "dylib" } else { "so" })
+    $addonBin = Join-Path $projRoot "addons/$addonName/bin/game.$soExt"
     $mainCr = Join-Path $projRoot "src/main.cr"
     $needsBuild = $false
 

@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "4.8.dev4",
+    [string]$Version = "",
     [string]$DownloadUrl = "",
     [switch]$Force
 )
@@ -21,6 +21,7 @@ if (-not $isMac -and -not $onWindows) {
 $exeName = if ($onWindows) { "godot.exe" } else { "godot" }
 $targetExe = Join-Path $projRoot $exeName
 
+# 1. Check if already installed
 if (-not $Force -and (Test-Path $targetExe)) {
     Write-Host "[SetupDev] Godot is already installed at '$targetExe'." -ForegroundColor Green
     try {
@@ -30,24 +31,99 @@ if (-not $Force -and (Test-Path $targetExe)) {
     exit 0
 }
 
-Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "  LibGodot Project Setup: Installing Godot Engine         " -ForegroundColor Cyan
-Write-Host "==========================================================" -ForegroundColor Cyan
-
-# Determine default download URL based on OS and version
-if (-not $DownloadUrl) {
-    $tag = $Version -replace '\.', '-'
-    $baseUrl = "https://github.com/godotengine/godot-builds/releases/download/$tag"
-    if ($onWindows) {
-        $DownloadUrl = "$baseUrl/Godot_v${Version}_win64.exe.zip"
-    } elseif ($isMac) {
-        $DownloadUrl = "$baseUrl/Godot_v${Version}_macos.universal.zip"
-    } else {
-        $DownloadUrl = "$baseUrl/Godot_v${Version}_linux.x86_64.zip"
+# 2. Check if an existing Godot can be copied from parent folders or environment
+if (-not $Force) {
+    $existingCandidates = @(
+        (Join-Path $projRoot "../$exeName"),
+        (Join-Path $projRoot "../../$exeName"),
+        $env:GODOT4,
+        $env:GODOT4_BIN
+    )
+    $existingFound = $null
+    foreach ($cand in $existingCandidates) {
+        if ($cand -and (Test-Path $cand)) {
+            $existingFound = (Resolve-Path $cand).Path
+            break
+        }
+    }
+    if (-not $existingFound -and (Get-Command godot -ErrorAction SilentlyContinue)) {
+        $existingFound = (Get-Command godot).Source
+    }
+    if ($existingFound -and (Test-Path $existingFound)) {
+        Write-Host "[SetupDev] Found existing Godot at '$existingFound'. Copying to '$targetExe'..." -ForegroundColor Green
+        Copy-Item $existingFound $targetExe -Force
+        if (-not $onWindows -and (Get-Command chmod -ErrorAction SilentlyContinue)) {
+            & chmod +x $targetExe
+        }
+        try {
+            & $targetExe --headless --version
+        } catch {}
+        exit 0
     }
 }
 
-Write-Host "[SetupDev] Downloading Godot $Version from:" -ForegroundColor Cyan
+# 3. Resolve target version
+if (-not $Version) {
+    foreach ($vFile in @((Join-Path $projRoot "godot-version.yml"), (Join-Path $projRoot "../godot-version.yml"))) {
+        if (Test-Path $vFile) {
+            $content = Get-Content -Path $vFile -Raw
+            if ($content -match 'version:\s*"?([^"\r\n]+)"?') {
+                $Version = $matches[1].Trim()
+                break
+            }
+        }
+    }
+}
+if (-not $Version) {
+    $Version = "4.8-dev5"
+}
+
+# Normalize version tag (e.g. '4.8.dev5' -> '4.8-dev5')
+$tag = $Version
+if ($tag -match '^(\d+\.\d+)\.(dev\d+|rc\d+|beta\d+|alpha\d+|stable)$') {
+    $tag = "$($matches[1])-$($matches[2])"
+} elseif ($tag -match '^\d+\.\d+$') {
+    $tag = "$tag-stable"
+}
+
+Write-Host "==========================================================" -ForegroundColor Cyan
+Write-Host "  LibGodot Project Setup: Installing Godot Engine         " -ForegroundColor Cyan
+Write-Host "==========================================================" -ForegroundColor Cyan
+Write-Host "Target Version : $tag" -ForegroundColor Gray
+
+# 4. Resolve download URL (query GitHub API with direct fallback)
+if (-not $DownloadUrl) {
+    $apiUrl = "https://api.github.com/repos/godotengine/godot-builds/releases/tags/$tag"
+    try {
+        $headers = @{ "User-Agent" = "LibGodot-SetupDev" }
+        $release = Invoke-RestMethod -Uri $apiUrl -Headers $headers -TimeoutSec 10 -ErrorAction Stop
+        if ($onWindows) {
+            $asset = $release.assets | Where-Object { $_.name -match 'win64.*\.zip$' -and $_.name -notmatch 'mono' } | Select-Object -First 1
+        } elseif ($isMac) {
+            $asset = $release.assets | Where-Object { $_.name -match 'macos.*\.zip$' -and $_.name -notmatch 'mono' } | Select-Object -First 1
+        } else {
+            $asset = $release.assets | Where-Object { $_.name -match 'linux.*x86_64.*\.zip$' -and $_.name -notmatch 'mono' } | Select-Object -First 1
+        }
+        if ($asset -and $asset.browser_download_url) {
+            $DownloadUrl = $asset.browser_download_url
+        }
+    } catch {
+        # Fallback to direct release download URL
+    }
+
+    if (-not $DownloadUrl) {
+        $baseUrl = "https://github.com/godotengine/godot-builds/releases/download/$tag"
+        if ($onWindows) {
+            $DownloadUrl = "$baseUrl/Godot_v${tag}_win64.exe.zip"
+        } elseif ($isMac) {
+            $DownloadUrl = "$baseUrl/Godot_v${tag}_macos.universal.zip"
+        } else {
+            $DownloadUrl = "$baseUrl/Godot_v${tag}_linux.x86_64.zip"
+        }
+    }
+}
+
+Write-Host "[SetupDev] Downloading Godot from:" -ForegroundColor Cyan
 Write-Host "  $DownloadUrl" -ForegroundColor Gray
 
 $tempZip = Join-Path ([System.IO.Path]::GetTempPath()) "godot_setup_$([System.Guid]::NewGuid().ToString('N')).zip"
@@ -57,15 +133,14 @@ try {
     if (Test-Path $tempZip) { Remove-Item $tempZip -Force }
     if (Test-Path $tempDir) { Remove-Item $tempDir -Recurse -Force }
 
-    Write-Host "[SetupDev] Downloading archive..."
+    Write-Host "[SetupDev] Downloading archive..." -ForegroundColor Cyan
     Invoke-WebRequest -Uri $DownloadUrl -OutFile $tempZip -UseBasicParsing
 
-    Write-Host "[SetupDev] Extracting Godot archive..."
+    Write-Host "[SetupDev] Extracting Godot archive..." -ForegroundColor Cyan
     Expand-Archive -Path $tempZip -DestinationPath $tempDir -Force
 
     $binaryFound = $null
     if ($onWindows) {
-        # Prefer the standard editor exe over console wrapper if both exist
         $exes = Get-ChildItem -Path $tempDir -Filter "*.exe" -Recurse | Where-Object { $_.Name -notmatch '_console\.exe$' }
         if (-not $exes) {
             $exes = Get-ChildItem -Path $tempDir -Filter "*.exe" -Recurse

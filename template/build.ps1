@@ -27,22 +27,43 @@ foreach ($dll in @("gc.dll", "iconv-2.dll", "pcre2-8.dll")) {
 }
 
 # Copy crystal_bridge.dll
-if (Test-Path "../bin/crystal_bridge.dll") {
-    Copy-Item "../bin/crystal_bridge.dll" "bin/" -Force
+$bridgeCand = @(
+    "../bin/crystal_bridge.dll",
+    "addons/crystal_integration/bin/crystal_bridge.dll",
+    "lib/libgodot/bin/crystal_bridge.dll"
+) | Where-Object { Test-Path $_ } | Select-Object -First 1
+if ($bridgeCand) {
+    if ((Resolve-Path $bridgeCand).Path -ne (Resolve-Path "bin/crystal_bridge.dll" -ErrorAction SilentlyContinue).Path) {
+        Copy-Item $bridgeCand "bin/crystal_bridge.dll" -Force
+    }
 }
 
 # Copy libgodot.dll if present
-if (Test-Path "../bin/libgodot.dll") {
-    Copy-Item "../bin/libgodot.dll" "bin/" -Force
+$libgodotCand = @(
+    "../bin/libgodot.dll",
+    "addons/crystal_integration/bin/libgodot.dll",
+    "lib/libgodot/bin/libgodot.dll"
+) | Where-Object { Test-Path $_ } | Select-Object -First 1
+if ($libgodotCand) {
+    if ((Resolve-Path $libgodotCand).Path -ne (Resolve-Path "bin/libgodot.dll" -ErrorAction SilentlyContinue).Path) {
+        Copy-Item $libgodotCand "bin/libgodot.dll" -Force
+    }
 }
 
 $onWindows = ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';')
 $sep = if ($onWindows) { ";" } else { ":" }
 $soExt = if ($onWindows) { "dll" } else { "so" }
 
-# Set CRYSTAL_PATH so require "libgodot" finds ../src/libgodot.cr
+# Set CRYSTAL_PATH so require "libgodot" finds libgodot.cr
 $origPath = crystal env CRYSTAL_PATH
-$env:CRYSTAL_PATH = "../src$sep$origPath"
+$srcCand = @(
+    "../src",
+    "lib/libgodot/src",
+    "lib"
+) | Where-Object { Test-Path $_ } | Select-Object -First 1
+if ($srcCand) {
+    $env:CRYSTAL_PATH = "$srcCand$sep$origPath"
+}
 
 # Compile Crystal source
 if ($onWindows) {
@@ -115,6 +136,8 @@ exit $?
 # Ensure playable Godot game executable is in place
 $godotExe = ""
 $godotCandidates = @(
+    "./godot$exeExt",
+    "./godot.exe",
     "../godot$exeExt",
     "../../godot$exeExt",
     "../godot.exe",
@@ -132,14 +155,15 @@ if (-not $godotExe -and (Get-Command godot -ErrorAction SilentlyContinue)) {
 }
 
 if ($godotExe -and (Test-Path $godotExe)) {
-    Copy-Item $godotExe "game$exeExt" -Force
-    Copy-Item $godotExe "bin/game$exeExt" -Force
+    $binGameExe = "bin/game$exeExt"
+    if ((Resolve-Path $godotExe).Path -ne (Resolve-Path $binGameExe -ErrorAction SilentlyContinue).Path) {
+        Copy-Item $godotExe $binGameExe -Force
+    }
     if (-not $onWindows -and (Get-Command chmod -ErrorAction SilentlyContinue)) {
-        & chmod +x "game$exeExt"
-        & chmod +x "bin/game$exeExt"
+        & chmod +x $binGameExe
     }
     if (Test-Path "project.godot") { Copy-Item "project.godot" "bin/" -Force }
-    Write-Host "[Template] Created playable executable: game$exeExt" -ForegroundColor Green
+    Write-Host "[Template] Created playable executable: $binGameExe" -ForegroundColor Green
 }
 
 Write-Host "[Template] Build completed successfully: bin/game.$soExt" -ForegroundColor Green

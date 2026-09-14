@@ -20,7 +20,6 @@ if ($Destinations.Count -eq 0) {
 }
 
 if (-not (Test-Path $Source)) {
-    Write-Warning "[Sync] Source directory '$Source' does not exist."
     exit 0
 }
 

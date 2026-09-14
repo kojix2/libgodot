@@ -32,12 +32,20 @@ if (-not $onWindows -or $env:CI -or $env:LIBGL_ALWAYS_SOFTWARE) {
 }
 
 function Safe-Copy([string]$Src, [string]$Dst) {
-    if (Test-Path $Src) {
+    if (-not (Test-Path $Src)) { return }
+    if (Test-Path $Dst) {
         try {
-            Copy-Item $Src $Dst -Force -ErrorAction Stop
-        } catch {
-            # File locked by running process; safely continue
-        }
+            $srcResolved = (Resolve-Path $Src -ErrorAction SilentlyContinue).Path
+            $dstResolved = (Resolve-Path $Dst -ErrorAction SilentlyContinue).Path
+            if ($srcResolved -and $dstResolved -and ($srcResolved -eq $dstResolved)) {
+                return
+            }
+        } catch {}
+    }
+    try {
+        Copy-Item $Src $Dst -Force -ErrorAction Stop
+    } catch {
+        # File locked by running process; safely continue
     }
 }
 
@@ -143,9 +151,18 @@ if (Test-Path $depsScript) {
     & $depsScript -TargetBin $binDir
 }
 
-$bridgeSrc = Join-Path $rootDir "bin/crystal_bridge.$soExt"
-if (Test-Path $bridgeSrc) {
-    Copy-Item $bridgeSrc (Join-Path $binDir "crystal_bridge.$soExt") -Force
+$bridgeDest = Join-Path $binDir "crystal_bridge.$soExt"
+$bridgeCandidates = @(
+    (Join-Path $rootDir "bin/crystal_bridge.$soExt"),
+    (Join-Path $projFull "addons/crystal_integration/bin/crystal_bridge.$soExt"),
+    (Join-Path $rootDir "addons/crystal_integration/bin/crystal_bridge.$soExt"),
+    (Join-Path $projFull "bin/crystal_bridge.$soExt")
+)
+foreach ($cand in $bridgeCandidates) {
+    if (Test-Path $cand) {
+        Safe-Copy $cand $bridgeDest
+        break
+    }
 }
 
 # 7. Compile Crystal game library (game.dll / game.so) if missing or outdated
@@ -270,7 +287,7 @@ if ($godotExe -and (Test-Path $godotExe)) {
 
     # Place runner inside bin/ following the preset name (e.g. bin/tests.exe or bin/basic_demo.exe)
     $binNamedExe = Join-Path $binDir "$Name$exeExt"
-    Copy-Item $godotExe $binNamedExe -Force
+    Safe-Copy $godotExe $binNamedExe
     if (-not $onWindows -and (Get-Command chmod -ErrorAction SilentlyContinue)) {
         & chmod +x $binNamedExe
     }
@@ -291,7 +308,7 @@ if ($godotExe -and (Test-Path $godotExe)) {
 
         if ($packExit -eq 0 -and (Test-Path $pckFile)) {
             if ($onWindows) {
-                Copy-Item $pckFile (Join-Path $binDir "$Name.console.pck") -Force -ErrorAction SilentlyContinue
+                Safe-Copy $pckFile (Join-Path $binDir "$Name.console.pck")
             }
             Write-Host "  -> Standalone pack generated successfully ($([math]::Round((Get-Item $pckFile).Length / 1KB, 1)) KB)" -ForegroundColor Green
         } else {
@@ -483,7 +500,7 @@ if ($TargetDir) {
         if (-not (Test-Path $targetBin)) { New-Item -ItemType Directory -Force -Path $targetBin | Out-Null }
         Copy-Item (Join-Path $binDir "/*") $targetBin -Recurse -Force
         foreach ($dll in Get-ChildItem -Path $binDir -File) {
-            Copy-Item $dll.FullName $gameDir -Force
+            Safe-Copy $dll.FullName (Join-Path $gameDir $dll.Name)
         }
     }
 

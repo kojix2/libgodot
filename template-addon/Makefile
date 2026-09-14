@@ -6,8 +6,6 @@ ADDON_NAME      ?= crystal_addon
 ADDON_DIR       = addons/$(ADDON_NAME)
 ADDON_BIN_DIR   = $(ADDON_DIR)/bin
 
-UNAME_S := $(shell uname -s 2>/dev/null)
-
 ifeq ($(OS),Windows_NT)
 	PLATFORM        = windows
 	SO_EXT          = dll
@@ -16,22 +14,25 @@ ifeq ($(OS),Windows_NT)
 	PWSH_CMD        ?= powershell -NoProfile -ExecutionPolicy Bypass -Command
 	PWSH_FILE       ?= powershell -NoProfile -ExecutionPolicy Bypass -File
 	LINK_FLAGS      ?= /DLL /ENTRY:_DllMainCRTStartup /EXPORT:crystal_godot_init
-else ifeq ($(UNAME_S),Darwin)
-	PLATFORM        = macos
-	SO_EXT          = dylib
-	EXE_EXT         =
-	GODOT           ?= $(if $(wildcard ./godot),./godot,$(if $(wildcard ../godot),../godot,godot))
-	PWSH_CMD        ?= pwsh -NoProfile -Command
-	PWSH_FILE       ?= pwsh -NoProfile -File
-	LINK_FLAGS      ?= -dynamiclib
 else
-	PLATFORM        = linux
-	SO_EXT          = so
-	EXE_EXT         =
-	GODOT           ?= $(if $(wildcard ./godot),./godot,$(if $(wildcard ../godot),../godot,godot))
-	PWSH_CMD        ?= pwsh -NoProfile -Command
-	PWSH_FILE       ?= pwsh -NoProfile -File
-	LINK_FLAGS      ?= -shared
+	UNAME_S := $(shell uname -s 2>/dev/null)
+	ifeq ($(UNAME_S),Darwin)
+		PLATFORM        = macos
+		SO_EXT          = dylib
+		EXE_EXT         =
+		GODOT           ?= $(if $(wildcard ./godot),./godot,$(if $(wildcard ../godot),../godot,godot))
+		PWSH_CMD        ?= pwsh -NoProfile -Command
+		PWSH_FILE       ?= pwsh -NoProfile -File
+		LINK_FLAGS      ?= -dynamiclib
+	else
+		PLATFORM        = linux
+		SO_EXT          = so
+		EXE_EXT         =
+		GODOT           ?= $(if $(wildcard ./godot),./godot,$(if $(wildcard ../godot),../godot,godot))
+		PWSH_CMD        ?= pwsh -NoProfile -Command
+		PWSH_FILE       ?= pwsh -NoProfile -File
+		LINK_FLAGS      ?= -shared
+	endif
 endif
 
 ENTRY           ?= src/main.cr

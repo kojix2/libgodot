@@ -71,6 +71,16 @@ if ($onWindows) {
     if ((Test-Path $godotSrcDll) -and (-not (Test-Path $binLibgodot))) {
         Copy-Item $godotSrcDll $binLibgodot -Force -ErrorAction SilentlyContinue
     }
+    if (-not (Test-Path $binLibgodot)) {
+        $candLibgodot = @(
+            (Join-Path $RootDir "addons/crystal_integration/bin/libgodot.dll"),
+            (Join-Path $RootDir "lib/libgodot/bin/libgodot.dll"),
+            (Join-Path $RootDir "../bin/libgodot.dll")
+        ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+        if ($candLibgodot) {
+            Copy-Item $candLibgodot $binLibgodot -Force -ErrorAction SilentlyContinue
+        }
+    }
 
     if (Test-Path $binLibgodot) {
         foreach ($d in $binDirs) {
@@ -82,12 +92,45 @@ if ($onWindows) {
             }
         }
     }
+
+    # Windows GDExtension bridge DLL
+    $binBridge = Join-Path $RootDir "bin/crystal_bridge.dll"
+    if (-not (Test-Path $binBridge)) {
+        $candBridge = @(
+            (Join-Path $RootDir "addons/crystal_integration/bin/crystal_bridge.dll"),
+            (Join-Path $RootDir "lib/libgodot/bin/crystal_bridge.dll"),
+            (Join-Path $RootDir "../bin/crystal_bridge.dll")
+        ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+        if ($candBridge) {
+            Copy-Item $candBridge $binBridge -Force -ErrorAction SilentlyContinue
+        }
+    }
+    if (Test-Path $binBridge) {
+        foreach ($d in $binDirs) {
+            if (Test-Path $d) {
+                $dst = Join-Path $d "crystal_bridge.dll"
+                if (-not (Test-Path $dst)) {
+                    Copy-Item $binBridge $dst -Force -ErrorAction SilentlyContinue
+                }
+            }
+        }
+    }
 } elseif (-not $isMac) {
     # 2. Linux LibGodot shared object (.so)
     $godotSrcSo = Join-Path $RootDir "godot-src/bin/godot.linuxbsd.template_debug.x86_64.so"
     $binLibgodotSo = Join-Path $RootDir "bin/libgodot.so"
     if ((Test-Path $godotSrcSo) -and (-not (Test-Path $binLibgodotSo))) {
         Copy-Item $godotSrcSo $binLibgodotSo -Force -ErrorAction SilentlyContinue
+    }
+    if (-not (Test-Path $binLibgodotSo)) {
+        $candLibgodotSo = @(
+            (Join-Path $RootDir "addons/crystal_integration/bin/libgodot.so"),
+            (Join-Path $RootDir "lib/libgodot/bin/libgodot.so"),
+            (Join-Path $RootDir "../bin/libgodot.so")
+        ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+        if ($candLibgodotSo) {
+            Copy-Item $candLibgodotSo $binLibgodotSo -Force -ErrorAction SilentlyContinue
+        }
     }
 
     if (Test-Path $binLibgodotSo) {
@@ -96,6 +139,29 @@ if ($onWindows) {
                 $dst = Join-Path $d "libgodot.so"
                 if (-not (Test-Path $dst)) {
                     Copy-Item $binLibgodotSo $dst -Force -ErrorAction SilentlyContinue
+                }
+            }
+        }
+    }
+
+    # Linux GDExtension bridge shared object
+    $binBridgeSo = Join-Path $RootDir "bin/crystal_bridge.so"
+    if (-not (Test-Path $binBridgeSo)) {
+        $candBridgeSo = @(
+            (Join-Path $RootDir "addons/crystal_integration/bin/crystal_bridge.so"),
+            (Join-Path $RootDir "lib/libgodot/bin/crystal_bridge.so"),
+            (Join-Path $RootDir "../bin/crystal_bridge.so")
+        ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+        if ($candBridgeSo) {
+            Copy-Item $candBridgeSo $binBridgeSo -Force -ErrorAction SilentlyContinue
+        }
+    }
+    if (Test-Path $binBridgeSo) {
+        foreach ($d in $binDirs) {
+            if (Test-Path $d) {
+                $dst = Join-Path $d "crystal_bridge.so"
+                if (-not (Test-Path $dst)) {
+                    Copy-Item $binBridgeSo $dst -Force -ErrorAction SilentlyContinue
                 }
             }
         }
@@ -114,6 +180,16 @@ if ($onWindows) {
             break
         }
     }
+    if (-not (Test-Path $binLibgodotDylib)) {
+        $candLibgodotDylib = @(
+            (Join-Path $RootDir "addons/crystal_integration/bin/libgodot.dylib"),
+            (Join-Path $RootDir "lib/libgodot/bin/libgodot.dylib"),
+            (Join-Path $RootDir "../bin/libgodot.dylib")
+        ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+        if ($candLibgodotDylib) {
+            Copy-Item $candLibgodotDylib $binLibgodotDylib -Force -ErrorAction SilentlyContinue
+        }
+    }
 
     if (Test-Path $binLibgodotDylib) {
         foreach ($d in $binDirs) {
@@ -125,12 +201,36 @@ if ($onWindows) {
             }
         }
     }
+
+    # macOS GDExtension bridge dylib
+    $binBridgeDylib = Join-Path $RootDir "bin/crystal_bridge.dylib"
+    if (-not (Test-Path $binBridgeDylib)) {
+        $candBridgeDylib = @(
+            (Join-Path $RootDir "addons/crystal_integration/bin/crystal_bridge.dylib"),
+            (Join-Path $RootDir "lib/libgodot/bin/crystal_bridge.dylib"),
+            (Join-Path $RootDir "../bin/crystal_bridge.dylib")
+        ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+        if ($candBridgeDylib) {
+            Copy-Item $candBridgeDylib $binBridgeDylib -Force -ErrorAction SilentlyContinue
+        }
+    }
+    if (Test-Path $binBridgeDylib) {
+        foreach ($d in $binDirs) {
+            if (Test-Path $d) {
+                $dst = Join-Path $d "crystal_bridge.dylib"
+                if (-not (Test-Path $dst)) {
+                    Copy-Item $binBridgeDylib $dst -Force -ErrorAction SilentlyContinue
+                }
+            }
+        }
+    }
 }
 
 # 4. Ensure shard dependencies are installed for projects with shard.yml missing lib/
 $shardsCmd = Get-Command shards -ErrorAction SilentlyContinue
 if ($shardsCmd) {
     $shardProjects = [System.Collections.Generic.List[string]]::new()
+    $shardProjects.Add($RootDir)
     $shardProjects.Add((Join-Path $RootDir "template"))
     $shardProjects.Add((Join-Path $RootDir "test"))
     $shardProjects.Add((Join-Path $RootDir "template-addon"))

@@ -2,8 +2,6 @@
 # Crystal Godot Template Makefile
 # =============================================================================
 
-UNAME_S := $(shell uname -s 2>/dev/null)
-
 # Platform and OS detection
 ifeq ($(OS),Windows_NT)
 	PLATFORM        = windows
@@ -13,22 +11,25 @@ ifeq ($(OS),Windows_NT)
 	PWSH_CMD        ?= powershell -NoProfile -ExecutionPolicy Bypass -Command
 	PWSH_FILE       ?= powershell -NoProfile -ExecutionPolicy Bypass -File
 	LINK_FLAGS      ?= /DLL /ENTRY:_DllMainCRTStartup /EXPORT:crystal_godot_init
-else ifeq ($(UNAME_S),Darwin)
-	PLATFORM        = macos
-	SO_EXT          = dylib
-	EXE_EXT         =
-	GODOT           ?= $(if $(wildcard ./godot),./godot,$(if $(wildcard ../godot),../godot,godot))
-	PWSH_CMD        ?= pwsh -NoProfile -Command
-	PWSH_FILE       ?= pwsh -NoProfile -File
-	LINK_FLAGS      ?= -dynamiclib
 else
-	PLATFORM        = linux
-	SO_EXT          = so
-	EXE_EXT         =
-	GODOT           ?= $(if $(wildcard ./godot),./godot,$(if $(wildcard ../godot),../godot,godot))
-	PWSH_CMD        ?= pwsh -NoProfile -Command
-	PWSH_FILE       ?= pwsh -NoProfile -File
-	LINK_FLAGS      ?= -shared
+	UNAME_S := $(shell uname -s 2>/dev/null)
+	ifeq ($(UNAME_S),Darwin)
+		PLATFORM        = macos
+		SO_EXT          = dylib
+		EXE_EXT         =
+		GODOT           ?= $(if $(wildcard ./godot),./godot,$(if $(wildcard ../godot),../godot,godot))
+		PWSH_CMD        ?= pwsh -NoProfile -Command
+		PWSH_FILE       ?= pwsh -NoProfile -File
+		LINK_FLAGS      ?= -dynamiclib
+	else
+		PLATFORM        = linux
+		SO_EXT          = so
+		EXE_EXT         =
+		GODOT           ?= $(if $(wildcard ./godot),./godot,$(if $(wildcard ../godot),../godot,godot))
+		PWSH_CMD        ?= pwsh -NoProfile -Command
+		PWSH_FILE       ?= pwsh -NoProfile -File
+		LINK_FLAGS      ?= -shared
+	endif
 endif
 
 ENTRY        ?= src/main.cr
@@ -38,7 +39,7 @@ GAME_LIB      = $(BIN_DIR)/game.$(SO_EXT)
 GAME_EXE      = $(BIN_DIR)/game$(EXE_EXT)
 BRIDGE_SRC    = ../bin/crystal_bridge.$(SO_EXT)
 SCRIPTS_DIR   = $(if $(wildcard scripts),scripts,../scripts)
-SOURCE_DIR    = $(if $(wildcard ../src),../src,lib)
+SOURCE_DIR    = $(if $(wildcard ../src),../src,$(if $(wildcard lib/libgodot/src),lib/libgodot/src,lib))
 
 # Backward-compatibility alias
 GAME_DLL      = $(GAME_LIB)
@@ -65,13 +66,13 @@ deps: dirs
 	@$(PWSH_FILE) $(SCRIPTS_DIR)/ensure_deps.ps1 -TargetBin '$(BIN_DIR)'
 
 bridge: dirs
-	@$(PWSH_CMD) "if (Test-Path '$(BRIDGE_SRC)') { Copy-Item '$(BRIDGE_SRC)' '$(BIN_DIR)/crystal_bridge.$(SO_EXT)' -Force -ErrorAction SilentlyContinue }"
+	@$(PWSH_CMD) "$$cands = @('$(BRIDGE_SRC)', 'addons/crystal_integration/bin/crystal_bridge.$(SO_EXT)', 'lib/libgodot/bin/crystal_bridge.$(SO_EXT)'); foreach ($$c in $$cands) { if (Test-Path $$c) { if ((Resolve-Path $$c).Path -ne (Resolve-Path '$(BIN_DIR)/crystal_bridge.$(SO_EXT)' -ErrorAction SilentlyContinue).Path) { Copy-Item $$c '$(BIN_DIR)/crystal_bridge.$(SO_EXT)' -Force -ErrorAction SilentlyContinue }; break } }"
 
 extension_list:
-	@$(PWSH_CMD) "if (-not (Test-Path '.godot')) { New-Item -ItemType Directory -Force -Path '.godot' | Out-Null }; Set-Content -Path '.godot/extension_list.cfg' -Value 'res://addons/crystal_integration/crystal.gdextension' -Force"
+	@$(PWSH_FILE) $(SCRIPTS_DIR)/ensure_extension_list.ps1 -ProjectPath .
 
 addons:
-	@$(PWSH_FILE) $(SCRIPTS_DIR)/sync_addons.ps1 -Source ../addons -Destinations addons
+	@$(PWSH_CMD) "if (Test-Path '../addons') { & $(PWSH_FILE) $(SCRIPTS_DIR)/sync_addons.ps1 -Source ../addons -Destinations addons }"
 
 project_bindings: dirs
 	@echo [Template] Dumping project custom GDScript and plugin nodes...

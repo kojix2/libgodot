@@ -34,8 +34,6 @@ GODOT        ?= ./godot.exe
 ENTRY        ?= test/src/main.cr
 SCONS_JOBS   ?= 7
 
-UNAME_S := $(shell uname -s 2>/dev/null)
-
 # Platform and OS detection
 ifeq ($(OS),Windows_NT)
 	PLATFORM        = windows
@@ -46,25 +44,29 @@ ifeq ($(OS),Windows_NT)
 	PWSH_FILE       ?= powershell -NoProfile -File
 	CXXFLAGS        ?= -std=c++17 -O2 -g -I rsrc -static -static-libgcc -static-libstdc++
 	LINK_FLAGS      ?= /DLL /ENTRY:_DllMainCRTStartup /EXPORT:crystal_godot_init
-else ifeq ($(UNAME_S),Darwin)
-	PLATFORM        = macos
-	SO_EXT          = dylib
-	EXE_EXT         =
-	GODOT           ?= ./godot
-	PWSH_CMD        ?= pwsh -NoProfile -Command
-	PWSH_FILE       ?= pwsh -NoProfile -File
-	CXX             ?= clang++
-	CXXFLAGS        ?= -std=c++17 -O2 -fPIC -I rsrc
-	LINK_FLAGS      ?= -dynamiclib -Wl,-exported_symbol,_crystal_godot_init
 else
-	PLATFORM        = linux
-	SO_EXT          = so
-	EXE_EXT         =
-	GODOT           ?= ./godot
-	PWSH_CMD        ?= pwsh -NoProfile -Command
-	PWSH_FILE       ?= pwsh -NoProfile -File
-	CXXFLAGS        ?= -std=c++17 -O2 -fPIC -I rsrc
-	LINK_FLAGS      ?= -shared
+	UNAME_S := $(shell uname -s 2>/dev/null)
+	ifeq ($(UNAME_S),Darwin)
+		PLATFORM        = macos
+		SO_EXT          = dylib
+		EXE_EXT         =
+		GODOT           ?= ./godot
+		PWSH_CMD        ?= pwsh -NoProfile -Command
+		PWSH_FILE       ?= pwsh -NoProfile -File
+		CXX             ?= clang++
+		CXXFLAGS        ?= -std=c++17 -O2 -fPIC -I rsrc
+		LINK_FLAGS      ?= -dynamiclib -Wl,-exported_symbol,_crystal_godot_init
+	else
+		PLATFORM        = linux
+		SO_EXT          = so
+		EXE_EXT         =
+		GODOT           ?= ./godot
+		PWSH_CMD        ?= pwsh -NoProfile -Command
+		PWSH_FILE       ?= pwsh -NoProfile -File
+		CXX             ?= g++
+		CXXFLAGS        ?= -std=c++17 -O2 -fPIC -I rsrc
+		LINK_FLAGS      ?= -shared -Wl,-exported_symbol,crystal_godot_init
+	endif
 endif
 
 CP           = $(PWSH_CMD) "Copy-Item -Force"

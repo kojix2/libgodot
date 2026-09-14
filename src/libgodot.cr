@@ -441,10 +441,17 @@ alias Vector2 = Godot::Vector2
 alias Vector2i = Godot::Vector2i
 alias Vector3 = Godot::Vector3
 alias Vector3i = Godot::Vector3i
+alias Vector4 = Godot::Vector4
+alias Vector4i = Godot::Vector4i
 alias Rect2 = Godot::Rect2
+alias Rect2i = Godot::Rect2i
 alias Color = Godot::Color
 alias Basis = Godot::Basis
+alias Transform2D = Godot::Transform2D
 alias Transform3D = Godot::Transform3D
+alias Quaternion = Godot::Quaternion
+alias Plane = Godot::Plane
+alias AABB = Godot::AABB
 
 # Top-level await macro for intuitive GDScript-like calling syntax
 # Usage:

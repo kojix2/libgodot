@@ -1116,9 +1116,18 @@ module Godot
   # A 2D game object with position, rotation, and scale transform.
   class Node2D < CanvasItem
     @position : Vector2 = Vector2.new
+    @global_position : Vector2 = Vector2.new
     @rotation : Float32 = 0.0_f32
+    @rotation_degrees : Float32 = 0.0_f32
+    @global_rotation : Float32 = 0.0_f32
+    @global_rotation_degrees : Float32 = 0.0_f32
     @scale : Vector2 = Vector2.new(1.0_f32, 1.0_f32)
-    property global_position : Vector2 = Vector2.new
+    @global_scale : Vector2 = Vector2.new(1.0_f32, 1.0_f32)
+    @skew : Float32 = 0.0_f32
+    @global_skew : Float32 = 0.0_f32
+    @transform : Transform2D = Transform2D.new
+    @global_transform : Transform2D = Transform2D.new
+    @visible : Bool = true
 
     def position : Vector2
       if !@pointer.null?
@@ -1132,6 +1141,975 @@ module Godot
       @position = v
       if !@pointer.null?
         set_position(v)
+      end
+    end
+
+    def global_position : Vector2
+      if !@pointer.null?
+        get_global_position
+      else
+        @global_position
+      end
+    end
+
+    def global_position=(v : Vector2)
+      @global_position = v
+      if !@pointer.null?
+        set_global_position(v)
+      end
+    end
+
+    def rotation : Float32
+      if !@pointer.null?
+        get_rotation.to_f32
+      else
+        @rotation
+      end
+    end
+
+    def rotation=(v : Float32)
+      @rotation = v
+      if !@pointer.null?
+        set_rotation(v.to_f64)
+      end
+    end
+
+    def rotation_degrees : Float32
+      if !@pointer.null?
+        get_rotation_degrees.to_f32
+      else
+        @rotation_degrees
+      end
+    end
+
+    def rotation_degrees=(v : Float32)
+      @rotation_degrees = v
+      if !@pointer.null?
+        set_rotation_degrees(v.to_f64)
+      end
+    end
+
+    def global_rotation : Float32
+      if !@pointer.null?
+        get_global_rotation.to_f32
+      else
+        @global_rotation
+      end
+    end
+
+    def global_rotation=(v : Float32)
+      @global_rotation = v
+      if !@pointer.null?
+        set_global_rotation(v.to_f64)
+      end
+    end
+
+    def global_rotation_degrees : Float32
+      if !@pointer.null?
+        get_global_rotation_degrees.to_f32
+      else
+        @global_rotation_degrees
+      end
+    end
+
+    def global_rotation_degrees=(v : Float32)
+      @global_rotation_degrees = v
+      if !@pointer.null?
+        set_global_rotation_degrees(v.to_f64)
+      end
+    end
+
+    def scale : Vector2
+      if !@pointer.null?
+        get_scale
+      else
+        @scale
+      end
+    end
+
+    def scale=(v : Vector2)
+      @scale = v
+      if !@pointer.null?
+        set_scale(v)
+      end
+    end
+
+    def global_scale : Vector2
+      if !@pointer.null?
+        get_global_scale
+      else
+        @global_scale
+      end
+    end
+
+    def global_scale=(v : Vector2)
+      @global_scale = v
+      if !@pointer.null?
+        set_global_scale(v)
+      end
+    end
+
+    def skew : Float32
+      if !@pointer.null?
+        get_skew.to_f32
+      else
+        @skew
+      end
+    end
+
+    def skew=(v : Float32)
+      @skew = v
+      if !@pointer.null?
+        set_skew(v.to_f64)
+      end
+    end
+
+    def global_skew : Float32
+      if !@pointer.null?
+        get_global_skew.to_f32
+      else
+        @global_skew
+      end
+    end
+
+    def global_skew=(v : Float32)
+      @global_skew = v
+      if !@pointer.null?
+        set_global_skew(v.to_f64)
+      end
+    end
+
+    def transform : Transform2D
+      if !@pointer.null?
+        get_transform
+      else
+        @transform
+      end
+    end
+
+    def transform=(v : Transform2D)
+      @transform = v
+      if !@pointer.null?
+        set_transform(v)
+      end
+    end
+
+    def global_transform : Transform2D
+      if !@pointer.null?
+        get_global_transform
+      else
+        @global_transform
+      end
+    end
+
+    def global_transform=(v : Transform2D)
+      @global_transform = v
+      if !@pointer.null?
+        set_global_transform(v)
+      end
+    end
+
+    def visible : Bool
+      if !@pointer.null?
+        is_visible
+      else
+        @visible
+      end
+    end
+
+    def visible=(v : Bool)
+      @visible = v
+      if !@pointer.null?
+        set_visible(v)
+      end
+    end
+
+    def visible? : Bool
+      visible
+    end
+  end
+
+  # A 3D game object with spatial position, rotation, scale, and transform matrix.
+  class Node3D < Node
+    @position : Vector3 = Vector3.new
+    @global_position : Vector3 = Vector3.new
+    @rotation : Vector3 = Vector3.new
+    @rotation_degrees : Vector3 = Vector3.new
+    @global_rotation : Vector3 = Vector3.new
+    @global_rotation_degrees : Vector3 = Vector3.new
+    @scale : Vector3 = Vector3.new(1.0_f32, 1.0_f32, 1.0_f32)
+    @transform : Transform3D = Transform3D.new
+    @global_transform : Transform3D = Transform3D.new
+    @basis : Basis = Basis.new
+    @global_basis : Basis = Basis.new
+    @visible : Bool = true
+    @top_level : Bool = false
+
+    def position : Vector3
+      if !@pointer.null?
+        get_position
+      else
+        @position
+      end
+    end
+
+    def position=(v : Vector3)
+      @position = v
+      if !@pointer.null?
+        set_position(v)
+      end
+    end
+
+    def global_position : Vector3
+      if !@pointer.null?
+        get_global_position
+      else
+        @global_position
+      end
+    end
+
+    def global_position=(v : Vector3)
+      @global_position = v
+      if !@pointer.null?
+        set_global_position(v)
+      end
+    end
+
+    def rotation : Vector3
+      if !@pointer.null?
+        get_rotation
+      else
+        @rotation
+      end
+    end
+
+    def rotation=(v : Vector3)
+      @rotation = v
+      if !@pointer.null?
+        set_rotation(v)
+      end
+    end
+
+    def rotation_degrees : Vector3
+      if !@pointer.null?
+        get_rotation_degrees
+      else
+        @rotation_degrees
+      end
+    end
+
+    def rotation_degrees=(v : Vector3)
+      @rotation_degrees = v
+      if !@pointer.null?
+        set_rotation_degrees(v)
+      end
+    end
+
+    def global_rotation : Vector3
+      if !@pointer.null?
+        get_global_rotation
+      else
+        @global_rotation
+      end
+    end
+
+    def global_rotation=(v : Vector3)
+      @global_rotation = v
+      if !@pointer.null?
+        set_global_rotation(v)
+      end
+    end
+
+    def global_rotation_degrees : Vector3
+      if !@pointer.null?
+        get_global_rotation_degrees
+      else
+        @global_rotation_degrees
+      end
+    end
+
+    def global_rotation_degrees=(v : Vector3)
+      @global_rotation_degrees = v
+      if !@pointer.null?
+        set_global_rotation_degrees(v)
+      end
+    end
+
+    def scale : Vector3
+      if !@pointer.null?
+        get_scale
+      else
+        @scale
+      end
+    end
+
+    def scale=(v : Vector3)
+      @scale = v
+      if !@pointer.null?
+        set_scale(v)
+      end
+    end
+
+    def transform : Transform3D
+      if !@pointer.null?
+        get_transform
+      else
+        @transform
+      end
+    end
+
+    def transform=(v : Transform3D)
+      @transform = v
+      if !@pointer.null?
+        set_transform(v)
+      end
+    end
+
+    def global_transform : Transform3D
+      if !@pointer.null?
+        get_global_transform
+      else
+        @global_transform
+      end
+    end
+
+    def global_transform=(v : Transform3D)
+      @global_transform = v
+      if !@pointer.null?
+        set_global_transform(v)
+      end
+    end
+
+    def basis : Basis
+      if !@pointer.null?
+        get_basis
+      else
+        @basis
+      end
+    end
+
+    def basis=(v : Basis)
+      @basis = v
+      if !@pointer.null?
+        set_basis(v)
+      end
+    end
+
+    def global_basis : Basis
+      if !@pointer.null?
+        get_global_basis
+      else
+        @global_basis
+      end
+    end
+
+    def global_basis=(v : Basis)
+      @global_basis = v
+      if !@pointer.null?
+        set_global_basis(v)
+      end
+    end
+
+    def visible : Bool
+      if !@pointer.null?
+        is_visible
+      else
+        @visible
+      end
+    end
+
+    def visible=(v : Bool)
+      @visible = v
+      if !@pointer.null?
+        set_visible(v)
+      end
+    end
+
+    def visible? : Bool
+      visible
+    end
+
+    def top_level : Bool
+      if !@pointer.null?
+        is_set_as_top_level
+      else
+        @top_level
+      end
+    end
+
+    def top_level=(v : Bool)
+      @top_level = v
+      if !@pointer.null?
+        set_as_top_level(v)
+      end
+    end
+  end
+
+  # Base class for all 2D collision and physics objects.
+  class CollisionObject2D < Node2D
+  end
+
+  # Base class for all 2D physics bodies.
+  class PhysicsBody2D < CollisionObject2D
+  end
+
+  # Specialized 2D physics body for character movement, kinematic platforming, and gravity.
+  class CharacterBody2D < PhysicsBody2D
+    @velocity : Vector2 = Vector2.new
+    @up_direction : Vector2 = Vector2.new(0.0_f32, -1.0_f32)
+    @floor_snap_length : Float64 = 0.1
+    @floor_max_angle : Float64 = 0.785398
+    @floor_stop_on_slope : Bool = true
+    @floor_constant_speed : Bool = false
+    @max_slides : Int64 = 4_i64
+
+    def velocity : Vector2
+      if !@pointer.null?
+        get_velocity
+      else
+        @velocity
+      end
+    end
+
+    def velocity=(v : Vector2)
+      @velocity = v
+      if !@pointer.null?
+        set_velocity(v)
+      end
+    end
+
+    def up_direction : Vector2
+      if !@pointer.null?
+        get_up_direction
+      else
+        @up_direction
+      end
+    end
+
+    def up_direction=(v : Vector2)
+      @up_direction = v
+      if !@pointer.null?
+        set_up_direction(v)
+      end
+    end
+
+    def floor_normal : Vector2
+      if !@pointer.null?
+        get_floor_normal
+      else
+        Vector2::UP
+      end
+    end
+
+    def real_velocity : Vector2
+      if !@pointer.null?
+        get_real_velocity
+      else
+        @velocity
+      end
+    end
+
+    def is_on_floor : Bool
+      if !@pointer.null?
+        begin
+          res = 0_u8
+          mb = Bridge.get_method_bind("CharacterBody2D", "is_on_floor", 36873697_i64)
+          Bridge.ptrcall(mb, @pointer, Pointer(Pointer(Void)).null, pointerof(res).as(Void*))
+          res != 0_u8
+        rescue
+          true
+        end
+      else
+        true
+      end
+    end
+
+    def on_floor? : Bool
+      is_on_floor
+    end
+
+    def on_wall? : Bool
+      if !@pointer.null?
+        begin
+          res = 0_u8
+          mb = Bridge.get_method_bind("CharacterBody2D", "is_on_wall", 36873697_i64)
+          Bridge.ptrcall(mb, @pointer, Pointer(Pointer(Void)).null, pointerof(res).as(Void*))
+          res != 0_u8
+        rescue
+          false
+        end
+      else
+        false
+      end
+    end
+
+    def on_ceiling? : Bool
+      if !@pointer.null?
+        begin
+          res = 0_u8
+          mb = Bridge.get_method_bind("CharacterBody2D", "is_on_ceiling", 36873697_i64)
+          Bridge.ptrcall(mb, @pointer, Pointer(Pointer(Void)).null, pointerof(res).as(Void*))
+          res != 0_u8
+        rescue
+          false
+        end
+      else
+        false
+      end
+    end
+
+    def move_and_slide : Bool
+      if !@pointer.null?
+        begin
+          res = 0_u8
+          mb = Bridge.get_method_bind("CharacterBody2D", "move_and_slide", 2240911060_i64)
+          Bridge.ptrcall(mb, @pointer, Pointer(Pointer(Void)).null, pointerof(res).as(Void*))
+          res != 0_u8
+        rescue
+          true
+        end
+      else
+        true
+      end
+    end
+  end
+
+  # Base class for all 3D collision and physics objects.
+  class CollisionObject3D < Node3D
+  end
+
+  # Base class for all 3D physics bodies.
+  class PhysicsBody3D < CollisionObject3D
+  end
+
+  # Specialized 3D physics body for characters, kinematic controllers, and navigation.
+  class CharacterBody3D < PhysicsBody3D
+    @velocity : Vector3 = Vector3.new
+    @up_direction : Vector3 = Vector3.new(0.0_f32, 1.0_f32, 0.0_f32)
+    @floor_snap_length : Float64 = 0.1
+    @floor_max_angle : Float64 = 0.785398
+    @floor_stop_on_slope : Bool = true
+    @floor_constant_speed : Bool = false
+    @max_slides : Int64 = 4_i64
+
+    # Returns true if the body is currently resting on a floor collider.
+    def is_on_floor : Bool
+      if !@pointer.null?
+        Bridge.is_on_floor(@pointer)
+      else
+        true
+      end
+    end
+
+    def on_floor? : Bool
+      is_on_floor
+    end
+
+    def on_wall? : Bool
+      if !@pointer.null?
+        begin
+          res = 0_u8
+          mb = Bridge.get_method_bind("CharacterBody3D", "is_on_wall", 36873697_i64)
+          Bridge.ptrcall(mb, @pointer, Pointer(Pointer(Void)).null, pointerof(res).as(Void*))
+          res != 0_u8
+        rescue
+          false
+        end
+      else
+        false
+      end
+    end
+
+    def on_ceiling? : Bool
+      if !@pointer.null?
+        begin
+          res = 0_u8
+          mb = Bridge.get_method_bind("CharacterBody3D", "is_on_ceiling", 36873697_i64)
+          Bridge.ptrcall(mb, @pointer, Pointer(Pointer(Void)).null, pointerof(res).as(Void*))
+          res != 0_u8
+        rescue
+          false
+        end
+      else
+        false
+      end
+    end
+
+    # Current linear velocity of the character body.
+    def velocity : Vector3
+      if !@pointer.null?
+        get_velocity
+      else
+        @velocity
+      end
+    end
+
+    def velocity=(v : Vector3)
+      @velocity = v
+      if !@pointer.null?
+        set_velocity(v)
+      end
+    end
+
+    def up_direction : Vector3
+      if !@pointer.null?
+        get_up_direction
+      else
+        @up_direction
+      end
+    end
+
+    def up_direction=(v : Vector3)
+      @up_direction = v
+      if !@pointer.null?
+        set_up_direction(v)
+      end
+    end
+
+    def floor_normal : Vector3
+      if !@pointer.null?
+        get_floor_normal
+      else
+        Vector3::UP
+      end
+    end
+
+    def real_velocity : Vector3
+      if !@pointer.null?
+        get_real_velocity
+      else
+        @velocity
+      end
+    end
+
+    def max_slides : Int64
+      if !@pointer.null?
+        get_max_slides
+      else
+        @max_slides
+      end
+    end
+
+    def max_slides=(v : Int64)
+      @max_slides = v
+      if !@pointer.null?
+        set_max_slides(v)
+      end
+    end
+
+    def floor_snap_length : Float64
+      if !@pointer.null?
+        get_floor_snap_length
+      else
+        @floor_snap_length
+      end
+    end
+
+    def floor_snap_length=(v : Float64)
+      @floor_snap_length = v
+      if !@pointer.null?
+        set_floor_snap_length(v)
+      end
+    end
+
+    def floor_max_angle : Float64
+      if !@pointer.null?
+        get_floor_max_angle
+      else
+        @floor_max_angle
+      end
+    end
+
+    def floor_max_angle=(v : Float64)
+      @floor_max_angle = v
+      if !@pointer.null?
+        set_floor_max_angle(v)
+      end
+    end
+
+    def floor_stop_on_slope : Bool
+      if !@pointer.null?
+        is_floor_stop_on_slope_enabled
+      else
+        @floor_stop_on_slope
+      end
+    end
+
+    def floor_stop_on_slope=(v : Bool)
+      @floor_stop_on_slope = v
+      if !@pointer.null?
+        set_floor_stop_on_slope_enabled(v)
+      end
+    end
+
+    def floor_constant_speed : Bool
+      if !@pointer.null?
+        is_floor_constant_speed_enabled
+      else
+        @floor_constant_speed
+      end
+    end
+
+    def floor_constant_speed=(v : Bool)
+      @floor_constant_speed = v
+      if !@pointer.null?
+        set_floor_constant_speed_enabled(v)
+      end
+    end
+
+    def slide_collision_count : Int64
+      if !@pointer.null?
+        get_slide_collision_count
+      else
+        0_i64
+      end
+    end
+
+    # Moves the body along its velocity vector and handles collisions/sliding.
+    def move_and_slide : Bool
+      if !@pointer.null?
+        Bridge.move_and_slide(@pointer)
+      else
+        true
+      end
+    end
+  end
+
+  # Camera node for 3D scenes.
+  class Camera3D < Node3D
+    @fov : Float64 = 75.0
+    @near : Float64 = 0.05
+    @far : Float64 = 4000.0
+    @current : Bool = false
+
+    def fov : Float64
+      if !@pointer.null?
+        get_fov
+      else
+        @fov
+      end
+    end
+
+    def fov=(v : Number)
+      @fov = v.to_f64
+      if !@pointer.null?
+        set_fov(v.to_f64)
+      end
+    end
+
+    def current : Bool
+      if !@pointer.null?
+        is_current
+      else
+        @current
+      end
+    end
+
+    def current=(v : Bool)
+      @current = v
+      if !@pointer.null?
+        set_current(v)
+      end
+    end
+
+    def current? : Bool
+      current
+    end
+
+    def near : Float64
+      if !@pointer.null?
+        get_near
+      else
+        @near
+      end
+    end
+
+    def near=(v : Number)
+      @near = v.to_f64
+      if !@pointer.null?
+        set_near(v.to_f64)
+      end
+    end
+
+    def far : Float64
+      if !@pointer.null?
+        get_far
+      else
+        @far
+      end
+    end
+
+    def far=(v : Number)
+      @far = v.to_f64
+      if !@pointer.null?
+        set_far(v.to_f64)
+      end
+    end
+  end
+
+  # Ray casting node for 3D physics ray intersection queries.
+  class RayCast3D < Node3D
+    @target_position : Vector3 = Vector3.new(0.0_f32, -1.0_f32, 0.0_f32)
+    @enabled : Bool = true
+
+    def target_position : Vector3
+      if !@pointer.null?
+        get_target_position
+      else
+        @target_position
+      end
+    end
+
+    def target_position=(v : Vector3)
+      @target_position = v
+      if !@pointer.null?
+        set_target_position(v)
+      end
+    end
+
+    def enabled : Bool
+      if !@pointer.null?
+        is_enabled
+      else
+        @enabled
+      end
+    end
+
+    def enabled=(v : Bool)
+      @enabled = v
+      if !@pointer.null?
+        set_enabled(v)
+      end
+    end
+
+    def enabled? : Bool
+      enabled
+    end
+
+    def colliding? : Bool
+      if !@pointer.null?
+        is_colliding
+      else
+        false
+      end
+    end
+
+    def collision_point : Vector3
+      if !@pointer.null?
+        get_collision_point
+      else
+        Vector3.new
+      end
+    end
+
+    def collision_normal : Vector3
+      if !@pointer.null?
+        get_collision_normal
+      else
+        Vector3::UP
+      end
+    end
+  end
+
+  # Node that provides a collision shape to a CollisionObject3D.
+  class CollisionShape3D < Node3D
+    @disabled : Bool = false
+
+    def disabled : Bool
+      if !@pointer.null?
+        is_disabled
+      else
+        @disabled
+      end
+    end
+
+    def disabled=(v : Bool)
+      @disabled = v
+      if !@pointer.null?
+        set_disabled(v)
+      end
+    end
+
+    def disabled? : Bool
+      disabled
+    end
+  end
+
+  # Base class for all GUI and user interface controls.
+  class Control < CanvasItem
+    @size : Vector2 = Vector2.new
+    @position : Vector2 = Vector2.new
+    @global_position : Vector2 = Vector2.new
+    @rotation : Float32 = 0.0_f32
+    @scale : Vector2 = Vector2.new(1.0_f32, 1.0_f32)
+    @visible : Bool = true
+
+    def size : Vector2
+      if !@pointer.null?
+        get_size
+      else
+        @size
+      end
+    end
+
+    def size=(v : Vector2)
+      @size = v
+      if !@pointer.null?
+        set_size(v, false)
+      end
+    end
+
+    def set_size(size : Vector2) : Void
+      if !@pointer.null?
+        set_size(size, false)
+      else
+        @size = size
+      end
+    end
+
+    def position : Vector2
+      if !@pointer.null?
+        get_position
+      else
+        @position
+      end
+    end
+
+    def position=(v : Vector2)
+      @position = v
+      if !@pointer.null?
+        set_position(v, false)
+      end
+    end
+
+    def set_position(position : Vector2) : Void
+      if !@pointer.null?
+        set_position(position, false)
+      else
+        @position = position
+      end
+    end
+
+    def global_position : Vector2
+      if !@pointer.null?
+        get_global_position
+      else
+        @global_position
+      end
+    end
+
+    def global_position=(v : Vector2)
+      @global_position = v
+      if !@pointer.null?
+        set_global_position(v, false)
+      end
+    end
+
+    def set_global_position(position : Vector2) : Void
+      if !@pointer.null?
+        set_global_position(position, false)
+      else
+        @global_position = position
       end
     end
 
@@ -1164,132 +2142,25 @@ module Godot
         set_scale(v)
       end
     end
-  end
 
-  # A 3D game object with spatial position, rotation, scale, and transform matrix.
-  class Node3D < Node
-    @position : Vector3 = Vector3.new
-    @rotation : Vector3 = Vector3.new
-    @scale : Vector3 = Vector3.new(1.0_f32, 1.0_f32, 1.0_f32)
-    property global_position : Vector3 = Vector3.new
-    property transform : Transform3D = Transform3D.new
-
-    def position : Vector3
+    def visible : Bool
       if !@pointer.null?
-        get_position
+        is_visible
       else
-        @position
+        @visible
       end
     end
 
-    def position=(v : Vector3)
-      @position = v
+    def visible=(v : Bool)
+      @visible = v
       if !@pointer.null?
-        set_position(v)
+        set_visible(v)
       end
     end
 
-    def rotation : Vector3
-      if !@pointer.null?
-        get_rotation
-      else
-        @rotation
-      end
+    def visible? : Bool
+      visible
     end
-
-    def rotation=(v : Vector3)
-      @rotation = v
-      if !@pointer.null?
-        set_rotation(v)
-      end
-    end
-
-    def scale : Vector3
-      if !@pointer.null?
-        get_scale
-      else
-        @scale
-      end
-    end
-
-    def scale=(v : Vector3)
-      @scale = v
-      if !@pointer.null?
-        set_scale(v)
-      end
-    end
-  end
-
-  # Base class for all 2D collision and physics objects.
-  class CollisionObject2D < Node2D
-  end
-
-  # Base class for all 2D physics bodies.
-  class PhysicsBody2D < CollisionObject2D
-  end
-
-  # Specialized 2D physics body for character movement, kinematic platforming, and gravity.
-  class CharacterBody2D < PhysicsBody2D
-    property velocity : Vector2 = Vector2.new
-
-    def is_on_floor : Bool
-      true
-    end
-
-    def move_and_slide : Bool
-      true
-    end
-  end
-
-  # Base class for all 3D collision and physics objects.
-  class CollisionObject3D < Node3D
-  end
-
-  # Base class for all 3D physics bodies.
-  class PhysicsBody3D < CollisionObject3D
-  end
-
-  # Specialized 3D physics body for characters, kinematic controllers, and navigation.
-  class CharacterBody3D < PhysicsBody3D
-    property velocity : Vector3 = Vector3.new
-
-    # Returns true if the body is currently resting on a floor collider.
-    def is_on_floor : Bool
-      if !@pointer.null?
-        Bridge.is_on_floor(@pointer)
-      else
-        true
-      end
-    end
-
-    # Current linear velocity of the character body.
-    def velocity : Vector3
-      if !@pointer.null?
-        Bridge.get_velocity(@pointer)
-      else
-        @velocity
-      end
-    end
-
-    def velocity=(v : Vector3)
-      @velocity = v
-      if !@pointer.null?
-        Bridge.set_velocity(@pointer, v)
-      end
-    end
-
-    # Moves the body along its velocity vector and handles collisions/sliding.
-    def move_and_slide : Bool
-      if !@pointer.null?
-        Bridge.move_and_slide(@pointer)
-      else
-        true
-      end
-    end
-  end
-
-  # Base class for all GUI and user interface controls.
-  class Control < CanvasItem
   end
 
   # Base class for numeric control elements (sliders, progress bars, spinboxes).
@@ -1389,7 +2260,10 @@ module Godot
     end
 
     def self.get_vector(negative_x : String, positive_x : String, negative_y : String, positive_y : String) : Vector2
-      Vector2.new(0.0_f32, 0.0_f32)
+      x = (is_action_pressed(positive_x) ? 1.0_f32 : 0.0_f32) - (is_action_pressed(negative_x) ? 1.0_f32 : 0.0_f32)
+      y = (is_action_pressed(positive_y) ? 1.0_f32 : 0.0_f32) - (is_action_pressed(negative_y) ? 1.0_f32 : 0.0_f32)
+      v = Vector2.new(x, y)
+      v.length_squared > 0.0001_f32 ? v.normalized : v
     end
   end
 

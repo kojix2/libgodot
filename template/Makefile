@@ -66,7 +66,7 @@ deps: dirs
 	@$(PWSH_FILE) $(SCRIPTS_DIR)/ensure_deps.ps1 -TargetBin '$(BIN_DIR)'
 
 bridge: dirs
-	@$(PWSH_CMD) "$$cands = @('$(BRIDGE_SRC)', 'addons/crystal_integration/bin/crystal_bridge.$(SO_EXT)', 'lib/libgodot/bin/crystal_bridge.$(SO_EXT)'); foreach ($$c in $$cands) { if (Test-Path $$c) { if ((Resolve-Path $$c).Path -ne (Resolve-Path '$(BIN_DIR)/crystal_bridge.$(SO_EXT)' -ErrorAction SilentlyContinue).Path) { Copy-Item $$c '$(BIN_DIR)/crystal_bridge.$(SO_EXT)' -Force -ErrorAction SilentlyContinue }; break } }"
+	@$(PWSH_CMD) "if (Test-Path '$(BRIDGE_SRC)') { Copy-Item '$(BRIDGE_SRC)' '$(BIN_DIR)/crystal_bridge.$(SO_EXT)' -Force -ErrorAction SilentlyContinue } elseif (Test-Path 'addons/crystal_integration/bin/crystal_bridge.$(SO_EXT)') { Copy-Item 'addons/crystal_integration/bin/crystal_bridge.$(SO_EXT)' '$(BIN_DIR)/crystal_bridge.$(SO_EXT)' -Force -ErrorAction SilentlyContinue } elseif (Test-Path 'lib/libgodot/bin/crystal_bridge.$(SO_EXT)') { Copy-Item 'lib/libgodot/bin/crystal_bridge.$(SO_EXT)' '$(BIN_DIR)/crystal_bridge.$(SO_EXT)' -Force -ErrorAction SilentlyContinue }"
 
 extension_list:
 	@$(PWSH_FILE) $(SCRIPTS_DIR)/ensure_extension_list.ps1 -ProjectPath .

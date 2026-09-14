@@ -4,7 +4,7 @@ module Godot
   class Object
   end
 
-  alias VariantValue = Nil | Bool | Int64 | Float64 | String | Vector2 | Vector2i | Rect2 | Vector3 | Vector3i | Color | Godot::Object
+  alias VariantValue = Nil | Bool | Int64 | Float64 | String | Vector2 | Vector2i | Rect2 | Rect2i | Vector3 | Vector3i | Vector4 | Vector4i | Color | Transform2D | Transform3D | Basis | Quaternion | Plane | AABB | Godot::Object
 
   # Represents a dynamically typed Godot Variant value in Crystal with zero-allocation
   # unboxing for primitive and engine math types.
@@ -143,6 +143,10 @@ module Godot
       @raw.as?(Rect2) || Rect2.new
     end
 
+    def as_rect2i : Rect2i
+      @raw.as?(Rect2i) || Rect2i.new
+    end
+
     def as_v3 : Vector3
       case v = @raw
       when Vector3 then v
@@ -159,8 +163,40 @@ module Godot
       end
     end
 
+    def as_v4 : Vector4
+      @raw.as?(Vector4) || Vector4.new
+    end
+
+    def as_v4i : Vector4i
+      @raw.as?(Vector4i) || Vector4i.new
+    end
+
     def as_color : Color
       @raw.as?(Color) || Color.new
+    end
+
+    def as_transform2d : Transform2D
+      @raw.as?(Transform2D) || Transform2D.new
+    end
+
+    def as_transform3d : Transform3D
+      @raw.as?(Transform3D) || Transform3D.new
+    end
+
+    def as_basis : Basis
+      @raw.as?(Basis) || Basis.new
+    end
+
+    def as_quat : Quaternion
+      @raw.as?(Quaternion) || Quaternion.new
+    end
+
+    def as_plane : Plane
+      @raw.as?(Plane) || Plane.new
+    end
+
+    def as_aabb : AABB
+      @raw.as?(AABB) || AABB.new
     end
 
     def as_obj : Godot::Object?
@@ -195,12 +231,30 @@ module Godot
         as_v2i
       {% elsif T == Godot::Rect2 %}
         as_rect2
+      {% elsif T == Godot::Rect2i %}
+        as_rect2i
       {% elsif T == Godot::Vector3 %}
         as_v3
       {% elsif T == Godot::Vector3i %}
         as_v3i
+      {% elsif T == Godot::Vector4 %}
+        as_v4
+      {% elsif T == Godot::Vector4i %}
+        as_v4i
       {% elsif T == Godot::Color %}
         as_color
+      {% elsif T == Godot::Transform2D %}
+        as_transform2d
+      {% elsif T == Godot::Transform3D %}
+        as_transform3d
+      {% elsif T == Godot::Basis %}
+        as_basis
+      {% elsif T == Godot::Quaternion %}
+        as_quat
+      {% elsif T == Godot::Plane %}
+        as_plane
+      {% elsif T == Godot::AABB %}
+        as_aabb
       {% elsif T <= Godot::Object %}
         if obj = as_obj
           obj.as(T)
@@ -228,12 +282,30 @@ module Godot
         Godot::Vector2i.new
       {% elsif T == Godot::Rect2 %}
         Godot::Rect2.new
+      {% elsif T == Godot::Rect2i %}
+        Godot::Rect2i.new
       {% elsif T == Godot::Vector3 %}
         Godot::Vector3.new
       {% elsif T == Godot::Vector3i %}
         Godot::Vector3i.new
+      {% elsif T == Godot::Vector4 %}
+        Godot::Vector4.new
+      {% elsif T == Godot::Vector4i %}
+        Godot::Vector4i.new
       {% elsif T == Godot::Color %}
         Godot::Color.new
+      {% elsif T == Godot::Transform2D %}
+        Godot::Transform2D.new
+      {% elsif T == Godot::Transform3D %}
+        Godot::Transform3D.new
+      {% elsif T == Godot::Basis %}
+        Godot::Basis.new
+      {% elsif T == Godot::Quaternion %}
+        Godot::Quaternion.new
+      {% elsif T == Godot::Plane %}
+        Godot::Plane.new
+      {% elsif T == Godot::AABB %}
+        Godot::AABB.new
       {% elsif T <= Godot::Object %}
         T.new
       {% else %}

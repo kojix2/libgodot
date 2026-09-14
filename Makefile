@@ -65,7 +65,7 @@ else
 		PWSH_FILE       ?= pwsh -NoProfile -File
 		CXX             ?= g++
 		CXXFLAGS        ?= -std=c++17 -O2 -fPIC -I rsrc
-		LINK_FLAGS      ?= -shared -Wl,-exported_symbol,crystal_godot_init
+		LINK_FLAGS      ?= -shared
 	endif
 endif
 

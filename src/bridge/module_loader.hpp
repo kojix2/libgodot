@@ -647,13 +647,9 @@ inline void load_crystal_game_library(GDExtensionClassLibraryPtr p_library = nul
             g_loaded_modules.push_back(hModule);
             CrystalInitFn init_fn = (CrystalInitFn)bridge_get_proc(hModule, "crystal_godot_init");
 #ifndef _WIN32
-            bool is_addon = g_is_addon_module ||
-                            (bridge_get_proc(hModule, "crystal_godot_is_addon") != nullptr) ||
+            bool is_addon = (bridge_get_proc(hModule, "crystal_godot_is_addon") != nullptr) ||
                             (strstr(canonical_path, "addons") != nullptr && strstr(canonical_path, "crystal_integration") == nullptr) ||
                             (strstr(candidate_path.c_str(), "addons") != nullptr && strstr(candidate_path.c_str(), "crystal_integration") == nullptr);
-            if (is_addon) {
-                g_is_addon_module = true;
-            }
             BridgeSavedSignals saved_sigs;
             bool should_restore_sigs = is_addon || (g_loaded_modules.size() > 1);
             if (should_restore_sigs) {
@@ -669,14 +665,9 @@ inline void load_crystal_game_library(GDExtensionClassLibraryPtr p_library = nul
             if (should_restore_sigs) {
                 bridge_restore_signals(saved_sigs);
             }
-            if (!is_addon) {
-                init_gc_library(hModule);
-                ensure_gc_thread_registered();
-            }
-#else
+#endif
             init_gc_library(hModule);
             ensure_gc_thread_registered();
-#endif
         }
     }
 }

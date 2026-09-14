@@ -41,7 +41,6 @@ static std::vector<GCModuleEntry> g_gc_modules;
 static std::recursive_mutex g_gc_modules_mutex;
 static thread_local size_t t_gc_registered_module_count = 0;
 static void *s_cached_game_module = nullptr;
-static bool g_is_addon_module = false;
 
 inline void unregister_gc_thread() {
     // Boehm GC automatically manages thread lifecycle via pthread key destructors
@@ -65,79 +64,79 @@ struct GCThreadRegistrationGuard {
 static thread_local GCThreadRegistrationGuard t_gc_registration_guard;
 
 #ifndef _WIN32
+struct BridgeSavedSignal {
+    int signum = 0;
+    struct sigaction sa;
+    bool valid = false;
+};
+
 struct BridgeSavedSignals {
-    struct sigaction sa_pwr;
-    struct sigaction sa_xcpu;
-    struct sigaction sa_segv;
-    struct sigaction sa_bus;
-    struct sigaction sa_rt[32];
-    int rt_min = 0;
-    int rt_max = 0;
+    std::vector<BridgeSavedSignal> signals;
 };
 
 inline BridgeSavedSignals bridge_save_signals() {
-    BridgeSavedSignals s = {};
+    BridgeSavedSignals s;
+    std::vector<int> sigs_to_check;
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_gc_modules_mutex);
+        for (const auto &mod : g_gc_modules) {
+            if (mod.get_suspend_signal) {
+                int sig = mod.get_suspend_signal();
+                if (sig > 0) sigs_to_check.push_back(sig);
+            }
+            if (mod.get_thr_restart_signal) {
+                int sig = mod.get_thr_restart_signal();
+                if (sig > 0) sigs_to_check.push_back(sig);
+            }
+        }
+    }
 #ifdef SIGPWR
-    sigaction(SIGPWR, nullptr, &s.sa_pwr);
+    sigs_to_check.push_back(SIGPWR);
 #endif
 #ifdef SIGXCPU
-    sigaction(SIGXCPU, nullptr, &s.sa_xcpu);
+    sigs_to_check.push_back(SIGXCPU);
 #endif
-#ifdef SIGSEGV
-    sigaction(SIGSEGV, nullptr, &s.sa_segv);
-#endif
-#ifdef SIGBUS
-    sigaction(SIGBUS, nullptr, &s.sa_bus);
-#endif
-#if defined(SIGRTMIN) && defined(SIGRTMAX)
-    s.rt_min = SIGRTMIN;
-    s.rt_max = SIGRTMAX;
-    for (int sig = s.rt_min; sig <= s.rt_max && (sig - s.rt_min) < 32; sig++) {
-        sigaction(sig, nullptr, &s.sa_rt[sig - s.rt_min]);
+
+    for (int sig : sigs_to_check) {
+        if (sig <= 0) continue;
+        bool already = false;
+        for (const auto &entry : s.signals) {
+            if (entry.signum == sig) {
+                already = true;
+                break;
+            }
+        }
+        if (already) continue;
+
+        struct sigaction sa = {};
+        if (sigaction(sig, nullptr, &sa) == 0) {
+            if (sa.sa_handler != nullptr && sa.sa_handler != SIG_DFL && sa.sa_handler != SIG_IGN) {
+                BridgeSavedSignal entry;
+                entry.signum = sig;
+                entry.sa = sa;
+                entry.valid = true;
+                s.signals.push_back(entry);
+            }
+        }
     }
-#elif defined(__SIGRTMIN) && defined(__SIGRTMAX)
-    s.rt_min = __SIGRTMIN;
-    s.rt_max = __SIGRTMAX;
-    for (int sig = s.rt_min; sig <= s.rt_max && (sig - s.rt_min) < 32; sig++) {
-        sigaction(sig, nullptr, &s.sa_rt[sig - s.rt_min]);
-    }
-#endif
     return s;
 }
 
 inline void bridge_restore_signals(const BridgeSavedSignals &s) {
-#ifdef SIGPWR
-    sigaction(SIGPWR, &s.sa_pwr, nullptr);
-#endif
-#ifdef SIGXCPU
-    sigaction(SIGXCPU, &s.sa_xcpu, nullptr);
-#endif
-#ifdef SIGSEGV
-    sigaction(SIGSEGV, &s.sa_segv, nullptr);
-#endif
-#ifdef SIGBUS
-    sigaction(SIGBUS, &s.sa_bus, nullptr);
-#endif
-#if defined(SIGRTMIN) && defined(SIGRTMAX)
-    for (int sig = s.rt_min; sig <= s.rt_max && (sig - s.rt_min) < 32; sig++) {
-        sigaction(sig, &s.sa_rt[sig - s.rt_min], nullptr);
+    for (const auto &entry : s.signals) {
+        if (entry.valid && entry.signum > 0) {
+            if (entry.sa.sa_handler != nullptr && entry.sa.sa_handler != SIG_DFL && entry.sa.sa_handler != SIG_IGN) {
+                sigaction(entry.signum, &entry.sa, nullptr);
+            }
+        }
     }
-#elif defined(__SIGRTMIN) && defined(__SIGRTMAX)
-    for (int sig = s.rt_min; sig <= s.rt_max && (sig - s.rt_min) < 32; sig++) {
-        sigaction(sig, &s.sa_rt[sig - s.rt_min], nullptr);
-    }
-#endif
 }
 #endif
 
 
 
 inline void bridge_register_gc_functions(const BridgeGCFunctions *funcs) {
-#ifndef _WIN32
-    if (!funcs || g_is_addon_module) return;
-#else
     if (!funcs) return;
-#endif
     std::lock_guard<std::recursive_mutex> lock(g_gc_modules_mutex);
     for (const auto &m : g_gc_modules) {
         if (funcs->register_my_thread && m.register_my_thread == (GCRegisterMyThreadFn)funcs->register_my_thread) {
@@ -159,9 +158,6 @@ inline void bridge_register_gc_functions(const BridgeGCFunctions *funcs) {
 }
 
 inline void init_gc_library(void *game_module_handle = nullptr) {
-#ifndef _WIN32
-    if (g_is_addon_module) return;
-#endif
     std::lock_guard<std::recursive_mutex> lock(g_gc_modules_mutex);
 
     if (game_module_handle) {
@@ -256,11 +252,6 @@ inline void init_gc_library(void *game_module_handle = nullptr) {
 }
 
 inline void ensure_gc_thread_registered() {
-#ifndef _WIN32
-    if (g_is_addon_module) {
-        return;
-    }
-#endif
     if (t_gc_registered_module_count >= g_gc_modules.size() && !g_gc_modules.empty()) {
         return;
     }
@@ -296,15 +287,6 @@ inline void ensure_gc_thread_registered() {
 #endif
 #ifdef SIGXCPU
     sigaddset(&set, SIGXCPU);
-#endif
-#if defined(SIGRTMIN) && defined(SIGRTMAX)
-    for (int s = SIGRTMIN; s <= SIGRTMAX; s++) {
-        sigaddset(&set, s);
-    }
-#elif defined(__SIGRTMIN) && defined(__SIGRTMAX)
-    for (int s = __SIGRTMIN; s <= __SIGRTMAX; s++) {
-        sigaddset(&set, s);
-    }
 #endif
     pthread_sigmask(SIG_UNBLOCK, &set, nullptr);
 #endif

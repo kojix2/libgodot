@@ -16,14 +16,23 @@ $projFull = if ([System.IO.Path]::IsPathRooted($ProjectPath)) {
     (Resolve-Path (Join-Path $RootDir $ProjectPath)).Path
 }
 
+$versionFile = Join-Path $RootDir "godot-version.yml"
+$targetGodotVersion = "4.8-dev5"
+if (Test-Path $versionFile) {
+    $rawVer = Get-Content $versionFile -Raw
+    if ($rawVer -match 'version:\s*[''"]?([^''"\r\n]+)[''"]?') {
+        $targetGodotVersion = $matches[1].Trim()
+    }
+}
+
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host " LibGodot - Android Cross-Compilation ($Abi / API $ApiLevel)" -ForegroundColor Cyan
 Write-Host " Target Project: $projFull" -ForegroundColor Cyan
-Write-Host " Godot Target  : 4.8-dev4" -ForegroundColor Cyan
+Write-Host " Godot Target  : $targetGodotVersion" -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
 
 
-# 1. Resolve Android NDK Root (preferred for Godot 4.8-dev4: NDK 29.x)
+# 1. Resolve Android NDK Root (preferred: NDK 29.x)
 $resolvedNdk = $NdkRoot
 if (-not $resolvedNdk -and $env:ANDROID_NDK_ROOT -and (Test-Path $env:ANDROID_NDK_ROOT)) {
     $resolvedNdk = $env:ANDROID_NDK_ROOT

@@ -218,7 +218,7 @@ if (-not $SkipVerify) {
     }
 
     if ($runExit -ne 0) {
-        Write-Warning "Packaged benchmark executable exited with code $runExit"
+        throw "Packaged benchmark executable failed with exit code $runExit"
     } else {
         Write-Host "  [OK] Packaged standalone performance benchmark verified successfully!" -ForegroundColor Green
     }

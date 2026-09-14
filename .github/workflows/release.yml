@@ -29,12 +29,21 @@ jobs:
     outputs:
       tag_name: ${{ steps.meta.outputs.tag_name }}
       release_title: ${{ steps.meta.outputs.release_title }}
+      godot_version: ${{ steps.meta.outputs.godot_version }}
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Compute Release Metadata
         id: meta
         shell: bash
         run: |
+          GODOT_VER=$(sed -n 's/.*version:[[:space:]]*["'"'"']\?\([^"'"'"']\+\)["'"'"']\?.*/\1/p' godot-version.yml | tr -d '\r\n[:space:]')
+          if [ -z "$GODOT_VER" ]; then GODOT_VER="4.8-dev5"; fi
+          echo "godot_version=$GODOT_VER" >> "$GITHUB_OUTPUT"
+          echo "Resolved Godot Version: $GODOT_VER"
+
           INPUT_TAG="${{ github.event.inputs.tag_name }}"
           REF_TYPE="${{ github.ref_type }}"
           REF_NAME="${{ github.ref_name }}"
@@ -58,10 +67,28 @@ jobs:
     needs: [init-release]
     runs-on: windows-latest
     timeout-minutes: 35
+    env:
+      GODOT_VERSION: ${{ needs.init-release.outputs.godot_version }}
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Resolve Godot Version
+        id: godot-version
+        shell: pwsh
+        run: |
+          $ver = "$env:GODOT_VERSION"
+          if ((-not $ver) -and (Test-Path "godot-version.yml")) {
+            $content = Get-Content "godot-version.yml" -Raw
+            if ($content -match 'version:\s*[''"]?([^''"\r\n]+)[''"]?') {
+              $ver = $matches[1].Trim()
+            }
+          }
+          if (-not $ver) { $ver = "4.8-dev5" }
+          Write-Host "Resolved Godot Version: $ver"
+          "version=$ver" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "GODOT_VERSION=$ver" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Install Crystal
         uses: crystal-lang/install-crystal@v1
@@ -81,11 +108,11 @@ jobs:
           crystal -v
           g++ --version
 
-      - name: Setup Godot Engine (4.8-dev4)
+      - name: Setup Godot Engine
         uses: appsinacup/action_setup_godot@main
         with:
           repo: godotengine/godot-builds
-          version: 4.8-dev4
+          version: ${{ env.GODOT_VERSION }}
           enable_cache: true
 
       - name: Configure Godot Executable
@@ -118,7 +145,7 @@ jobs:
           }
 
           if (-not (Test-Path ./godot.exe) -or ((Get-Item ./godot.exe).Length -lt 1000000)) {
-            $zipUrl = "https://github.com/godotengine/godot-builds/releases/download/4.8-dev4/Godot_v4.8-dev4_win64.exe.zip"
+            $zipUrl = "https://github.com/godotengine/godot-builds/releases/download/$($env:GODOT_VERSION)/Godot_v$($env:GODOT_VERSION)_win64.exe.zip"
             Invoke-WebRequest -Uri $zipUrl -OutFile "godot.zip"
             Expand-Archive -Path "godot.zip" -DestinationPath "godot_temp" -Force
             $foundExe = (Get-ChildItem -Path "godot_temp" -Filter "*.exe" -Recurse | Where-Object { $_.Name -notlike "*_console*" -and $_.Name -notlike "*.console*" } | Select-Object -First 1).FullName
@@ -133,16 +160,17 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~\AppData\Roaming\Godot\export_templates
-          key: godot-export-templates-4.8-dev4-win
+          key: godot-export-templates-${{ env.GODOT_VERSION }}-win
           restore-keys: |
-            godot-export-templates-4.8-dev4-
+            godot-export-templates-${{ env.GODOT_VERSION }}-
+            godot-export-templates-
 
       - name: Ensure Godot Export Templates
         shell: pwsh
         run: |
           $winBin = "bin/windows"
           if (-not (Test-Path $winBin)) { New-Item -ItemType Directory -Force -Path $winBin | Out-Null }
-          & pwsh -NoProfile -File scripts/ensure_export_templates.ps1 -PackageZip -ZipOutput "$winBin/godot-crystal-export-templates-4.8-dev4.zip"
+          & pwsh -NoProfile -File scripts/ensure_export_templates.ps1 -PackageZip -ZipOutput "$winBin/godot-crystal-export-templates-$($env:GODOT_VERSION).zip"
 
       - name: Compile Release Binaries & Run Test Suite
         timeout-minutes: 25
@@ -255,10 +283,24 @@ jobs:
     timeout-minutes: 35
     env:
       GC_MARKERS: 1
+      GODOT_VERSION: ${{ needs.init-release.outputs.godot_version }}
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Resolve Godot Version
+        id: godot-version
+        shell: bash
+        run: |
+          GODOT_VER="$GODOT_VERSION"
+          if [ -z "$GODOT_VER" ] && [ -f "godot-version.yml" ]; then
+            GODOT_VER=$(sed -n 's/.*version:[[:space:]]*["'"'"']\?\([^"'"'"']\+\)["'"'"']\?.*/\1/p' godot-version.yml | tr -d '\r\n[:space:]')
+          fi
+          if [ -z "$GODOT_VER" ]; then GODOT_VER="4.8-dev5"; fi
+          echo "Resolved Godot Version: $GODOT_VER"
+          echo "version=$GODOT_VER" >> "$GITHUB_OUTPUT"
+          echo "GODOT_VERSION=$GODOT_VER" >> "$GITHUB_ENV"
 
       - name: Install Crystal
         uses: crystal-lang/install-crystal@v1
@@ -284,11 +326,11 @@ jobs:
           g++ --version
           ld.lld --version
 
-      - name: Setup Godot Engine (4.8-dev4)
+      - name: Setup Godot Engine
         uses: appsinacup/action_setup_godot@main
         with:
           repo: godotengine/godot-builds
-          version: 4.8-dev4
+          version: ${{ env.GODOT_VERSION }}
           enable_cache: true
 
       - name: Configure Godot Executable
@@ -304,11 +346,17 @@ jobs:
             cp "$(command -v godot)" ./godot
             chmod +x ./godot
           else
-            wget -q https://github.com/godotengine/godot-builds/releases/download/4.8-dev4/Godot_v4.8-dev4_linux.x86_64.zip -O godot.zip
+            echo "Fallback: Downloading Godot ${GODOT_VERSION} linux.x86_64..."
+            wget -q "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip" -O godot.zip
             unzip -q godot.zip
-            mv Godot_v4.8-dev4_linux.x86_64 ./godot
+            found_bin=$(find . -maxdepth 2 -name "Godot_v*linux.x86_64" | head -n 1)
+            if [ -n "$found_bin" ]; then
+              mv "$found_bin" ./godot
+            else
+              mv "Godot_v${GODOT_VERSION}_linux.x86_64" ./godot
+            fi
             chmod +x ./godot
-            rm godot.zip
+            rm -f godot.zip
           fi
           ./godot --version
 
@@ -316,9 +364,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.local/share/godot/export_templates
-          key: godot-export-templates-4.8-dev4-linux
+          key: godot-export-templates-${{ env.GODOT_VERSION }}-linux
           restore-keys: |
-            godot-export-templates-4.8-dev4-
+            godot-export-templates-${{ env.GODOT_VERSION }}-
+            godot-export-templates-
 
       - name: Ensure Godot Export Templates
         shell: pwsh
@@ -421,10 +470,25 @@ jobs:
     needs: [init-release]
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    env:
+      GODOT_VERSION: ${{ needs.init-release.outputs.godot_version }}
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Resolve Godot Version
+        id: godot-version
+        shell: bash
+        run: |
+          GODOT_VER="$GODOT_VERSION"
+          if [ -z "$GODOT_VER" ] && [ -f "godot-version.yml" ]; then
+            GODOT_VER=$(sed -n 's/.*version:[[:space:]]*["'"'"']\?\([^"'"'"']\+\)["'"'"']\?.*/\1/p' godot-version.yml | tr -d '\r\n[:space:]')
+          fi
+          if [ -z "$GODOT_VER" ]; then GODOT_VER="4.8-dev5"; fi
+          echo "Resolved Godot Version: $GODOT_VER"
+          echo "version=$GODOT_VER" >> "$GITHUB_OUTPUT"
+          echo "GODOT_VERSION=$GODOT_VER" >> "$GITHUB_ENV"
 
       - name: Install Crystal
         uses: crystal-lang/install-crystal@v1
@@ -445,11 +509,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Godot Engine (4.8-dev4)
+      - name: Setup Godot Engine
         uses: appsinacup/action_setup_godot@main
         with:
           repo: godotengine/godot-builds
-          version: 4.8-dev4
+          version: ${{ env.GODOT_VERSION }}
           enable_cache: true
 
       - name: Configure Godot & Android SDK Environment
@@ -465,12 +529,17 @@ jobs:
             cp "$(command -v godot)" ./godot
             chmod +x ./godot
           else
-            echo "Fallback: Downloading Godot 4.8-dev4 linux.x86_64..."
-            wget -q https://github.com/godotengine/godot-builds/releases/download/4.8-dev4/Godot_v4.8-dev4_linux.x86_64.zip -O godot.zip
+            echo "Fallback: Downloading Godot ${GODOT_VERSION} linux.x86_64..."
+            wget -q "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip" -O godot.zip
             unzip -q godot.zip
-            mv Godot_v4.8-dev4_linux.x86_64 ./godot
+            found_bin=$(find . -maxdepth 2 -name "Godot_v*linux.x86_64" | head -n 1)
+            if [ -n "$found_bin" ]; then
+              mv "$found_bin" ./godot
+            else
+              mv "Godot_v${GODOT_VERSION}_linux.x86_64" ./godot
+            fi
             chmod +x ./godot
-            rm godot.zip
+            rm -f godot.zip
           fi
           ./godot --version
 
@@ -490,9 +559,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.local/share/godot/export_templates
-          key: godot-export-templates-4.8-dev4-android
+          key: godot-export-templates-${{ env.GODOT_VERSION }}-android
           restore-keys: |
-            godot-export-templates-4.8-dev4-
+            godot-export-templates-${{ env.GODOT_VERSION }}-
+            godot-export-templates-
 
       - name: Ensure Godot Export Templates
         shell: pwsh
@@ -566,10 +636,25 @@ jobs:
     needs: [init-release]
     runs-on: macos-latest
     timeout-minutes: 35
+    env:
+      GODOT_VERSION: ${{ needs.init-release.outputs.godot_version }}
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Resolve Godot Version
+        id: godot-version
+        shell: bash
+        run: |
+          GODOT_VER="$GODOT_VERSION"
+          if [ -z "$GODOT_VER" ] && [ -f "godot-version.yml" ]; then
+            GODOT_VER=$(sed -n 's/.*version:[[:space:]]*["'"'"']\?\([^"'"'"']\+\)["'"'"']\?.*/\1/p' godot-version.yml | tr -d '\r\n[:space:]')
+          fi
+          if [ -z "$GODOT_VER" ]; then GODOT_VER="4.8-dev5"; fi
+          echo "Resolved Godot Version: $GODOT_VER"
+          echo "version=$GODOT_VER" >> "$GITHUB_OUTPUT"
+          echo "GODOT_VERSION=$GODOT_VER" >> "$GITHUB_ENV"
 
       - name: Install Crystal
         uses: crystal-lang/install-crystal@v1
@@ -589,11 +674,11 @@ jobs:
           crystal -v
           clang++ --version
 
-      - name: Setup Godot Engine (4.8-dev4)
+      - name: Setup Godot Engine
         uses: appsinacup/action_setup_godot@main
         with:
           repo: godotengine/godot-builds
-          version: 4.8-dev4
+          version: ${{ env.GODOT_VERSION }}
           enable_cache: true
 
       - name: Configure Godot Executable
@@ -607,8 +692,8 @@ jobs:
           elif command -v godot >/dev/null 2>&1; then
             GODOT_EXEC="$(command -v godot)"
           else
-            echo "Fallback: Downloading Godot 4.8-dev4 macos.universal..."
-            curl -sSL "https://github.com/godotengine/godot-builds/releases/download/4.8-dev4/Godot_v4.8-dev4_macos.universal.zip" -o godot.zip
+            echo "Fallback: Downloading Godot ${GODOT_VERSION} macos.universal..."
+            curl -sSL "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_macos.universal.zip" -o godot.zip
             unzip -q godot.zip
             if [ -d "Godot.app" ]; then
               GODOT_EXEC="$(pwd)/Godot.app/Contents/MacOS/Godot"
@@ -633,16 +718,17 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/Library/Application Support/Godot/export_templates
-          key: godot-export-templates-4.8-dev4-macos
+          key: godot-export-templates-${{ env.GODOT_VERSION }}-macos
           restore-keys: |
-            godot-export-templates-4.8-dev4-
+            godot-export-templates-${{ env.GODOT_VERSION }}-
+            godot-export-templates-
 
       - name: Ensure Godot Export Templates
         shell: pwsh
         run: |
           $macBin = "bin/macos"
           if (-not (Test-Path $macBin)) { New-Item -ItemType Directory -Force -Path $macBin | Out-Null }
-          & pwsh -NoProfile -File scripts/ensure_export_templates.ps1 -PackageZip -ZipOutput "$macBin/godot-crystal-export-templates-4.8-dev4.zip"
+          & pwsh -NoProfile -File scripts/ensure_export_templates.ps1 -PackageZip -ZipOutput "$macBin/godot-crystal-export-templates-$($env:GODOT_VERSION).zip"
 
       - name: Compile Release Binaries & Run Test Suite
         timeout-minutes: 25
@@ -1017,6 +1103,11 @@ jobs:
         shell: bash
         run: |
           TAG="${{ needs.init-release.outputs.tag_name }}"
+          GODOT_VER="${{ needs.init-release.outputs.godot_version }}"
+          if [ -z "$GODOT_VER" ] && [ -f "godot-version.yml" ]; then
+            GODOT_VER=$(sed -n 's/.*version:[[:space:]]*["'"'"']\?\([^"'"'"']\+\)["'"'"']\?.*/\1/p' godot-version.yml | tr -d '\r\n[:space:]')
+          fi
+          if [ -z "$GODOT_VER" ]; then GODOT_VER="4.8-dev5"; fi
           cat << 'EOF' > release_body.md
           ## LibGodot Crystal Release Notes
 
@@ -1029,8 +1120,8 @@ jobs:
             A complete starter template for building and packaging redistributable GDExtension addons and editor plugins in Crystal (`template-addon`). Pre-configured with dual-plugin architecture (`crystal_addon` and embedded `crystal_integration`), pre-compiled bridge binaries, and packaging scripts to export distributable addon zips for vanilla Godot users.
 
           ### 🛠️ Export Templates
-          - **`godot-crystal-export-templates-4.8-dev4.zip`**:
-            Official Godot 4.8-dev4 export templates package ready for Crystal standalone game project distribution across Windows, macOS, and Linux.
+          - **`godot-crystal-export-templates-${GODOT_VER}.zip`**:
+            Official Godot ${GODOT_VER} export templates package ready for Crystal standalone game project distribution across Windows, macOS, and Linux.
 
           ### 📦 Standalone Toolchain Distributions
           - **`libgodot-crystal-windows-x86_64-${TAG}.zip`**:
@@ -1076,6 +1167,8 @@ jobs:
           - **`checksums.txt`**:
             SHA-256 cryptographic hashes for every release file to verify download integrity.
           EOF
+          sed -i "s/\${TAG}/$TAG/g" release_body.md
+          sed -i "s/\${GODOT_VER}/$GODOT_VER/g" release_body.md
 
       - name: Publish All Release Assets Once
         uses: softprops/action-gh-release@v2

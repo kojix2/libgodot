@@ -26,11 +26,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install Crystal compiler
 RUN curl -fsSL https://crystal-lang.org/install.sh | bash
 
-# Download Godot 4.8-dev4 headless Linux binary
+# Download Godot headless Linux binary
+ARG GODOT_VERSION=4.8-dev5
 WORKDIR /opt/godot
-RUN wget -q https://github.com/godotengine/godot-builds/releases/download/4.8-dev4/Godot_v4.8-dev4_linux.x86_64.zip -O godot.zip \
+RUN wget -q https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip -O godot.zip \
     && unzip -q godot.zip \
-    && mv Godot_v4.8-dev4_linux.x86_64 /usr/local/bin/godot \
+    && (found_bin=$(find . -maxdepth 2 -name "Godot_v*linux.x86_64" | head -n 1); if [ -n "$found_bin" ]; then mv "$found_bin" /usr/local/bin/godot; else mv "Godot_v${GODOT_VERSION}_linux.x86_64" /usr/local/bin/godot; fi) \
     && chmod +x /usr/local/bin/godot \
     && rm godot.zip
 

@@ -211,12 +211,20 @@ if ($TestRelease) {
         }
         Write-Host "  [OK] Verified examples-windows-x86_64.zip contains $entryCount entries including basic_demo/game.exe and basic_demo/game.dll." -ForegroundColor Green
 
-        # 1b. Package Export Templates (godot-crystal-export-templates-4.8-dev4.zip)
-        Write-Host "[Release] Packaging export templates (godot-crystal-export-templates-4.8-dev4.zip)..." -ForegroundColor Cyan
-        $templatesZip = Join-Path $RootDir "bin/windows/godot-crystal-export-templates-4.8-dev4.zip"
+        # 1b. Package Export Templates
+        $versionFile = Join-Path $RootDir "godot-version.yml"
+        $godotVer = "4.8-dev5"
+        if (Test-Path $versionFile) {
+            $rawVer = Get-Content $versionFile -Raw
+            if ($rawVer -match 'version:\s*[''"]?([^''"\r\n]+)[''"]?') {
+                $godotVer = $matches[1].Trim()
+            }
+        }
+        Write-Host "[Release] Packaging export templates (godot-crystal-export-templates-$godotVer.zip)..." -ForegroundColor Cyan
+        $templatesZip = Join-Path $RootDir "bin/windows/godot-crystal-export-templates-$godotVer.zip"
         & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $RootDir "scripts/ensure_export_templates.ps1") -PackageZip -ZipOutput $templatesZip
         if (-not (Test-Path $templatesZip)) {
-            throw "Failed to package godot-crystal-export-templates-4.8-dev4.zip!"
+            throw "Failed to package godot-crystal-export-templates-$godotVer.zip!"
         }
         Write-Host "  [OK] Created export templates archive: $templatesZip ($( [math]::Round((Get-Item $templatesZip).Length / 1MB, 2) ) MB)" -ForegroundColor Green
 

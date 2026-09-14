@@ -404,17 +404,11 @@ node ToolTester2D < Godot::Node2D do
 	if passed == total
 	  @test_status = "All #{total}/#{total} Tests Passed!"
 	  Godot.print("[ToolTester2D] SUCCESS: All #{total} in-editor tests passed cleanly!")
-	  Godot::SystemIO.write_file("bin/.tool_tests_passed", "All #{total} in-editor tests passed cleanly!\n")
-	  Godot::SystemIO.write_file("test/bin/.tool_tests_passed", "All #{total} in-editor tests passed cleanly!\n")
-	  Godot::SystemIO.delete_file(".tool_tests_passed") if Godot::SystemIO.file_exists?(".tool_tests_passed")
-	  Godot::SystemIO.delete_file(".tool_tests_failed") if Godot::SystemIO.file_exists?(".tool_tests_failed")
 	else
 	  @test_status = "Failed: #{total - passed}/#{total} Errors"
 	  Godot.printerr("[ToolTester2D] FAILED: #{total - passed} test(s) failed.")
 	  Godot::SystemIO.write_file("bin/.tool_tests_failed", "Failed: #{total - passed} test(s) failed.\n")
 	  Godot::SystemIO.write_file("test/bin/.tool_tests_failed", "Failed: #{total - passed} test(s) failed.\n")
-	  Godot::SystemIO.delete_file(".tool_tests_passed") if Godot::SystemIO.file_exists?(".tool_tests_passed")
-	  Godot::SystemIO.delete_file(".tool_tests_failed") if Godot::SystemIO.file_exists?(".tool_tests_failed")
 	end
   end
 
@@ -466,17 +460,11 @@ node ToolTester3D < Godot::Node3D do
 	if passed == total
 	  @test_status = "All #{total}/#{total} Tests Passed!"
 	  Godot.print("[ToolTester3D] SUCCESS: All #{total} in-editor tests passed cleanly!")
-	  Godot::SystemIO.write_file("bin/.tool_tests_passed", "All #{total} in-editor tests passed cleanly!\n")
-	  Godot::SystemIO.write_file("test/bin/.tool_tests_passed", "All #{total} in-editor tests passed cleanly!\n")
-	  Godot::SystemIO.delete_file(".tool_tests_passed") if Godot::SystemIO.file_exists?(".tool_tests_passed")
-	  Godot::SystemIO.delete_file(".tool_tests_failed") if Godot::SystemIO.file_exists?(".tool_tests_failed")
 	else
 	  @test_status = "Failed: #{total - passed}/#{total} Errors"
 	  Godot.printerr("[ToolTester3D] FAILED: #{total - passed} test(s) failed.")
 	  Godot::SystemIO.write_file("bin/.tool_tests_failed", "Failed: #{total - passed} test(s) failed.\n")
 	  Godot::SystemIO.write_file("test/bin/.tool_tests_failed", "Failed: #{total - passed} test(s) failed.\n")
-	  Godot::SystemIO.delete_file(".tool_tests_passed") if Godot::SystemIO.file_exists?(".tool_tests_passed")
-	  Godot::SystemIO.delete_file(".tool_tests_failed") if Godot::SystemIO.file_exists?(".tool_tests_failed")
 	end
   end
 

@@ -1,11 +1,29 @@
 param(
-    [string]$Version = "4.8.dev4",
-    [string]$DownloadUrl = "https://github.com/godotengine/godot-builds/releases/download/4.8-dev4/Godot_v4.8-dev4_export_templates.tpz",
+    [string]$Version = "",
+    [string]$DownloadUrl = "",
     [switch]$PackageZip,
     [string]$ZipOutput = ""
 )
 
 $ErrorActionPreference = "Stop"
+
+$RootDir = Split-Path -Parent $PSScriptRoot
+if (-not $RootDir) { $RootDir = (Get-Location).Path }
+$VersionFile = Join-Path $RootDir "godot-version.yml"
+$tagVersion = "4.8-dev5"
+if (Test-Path $VersionFile) {
+    $rawVer = Get-Content $VersionFile -Raw
+    if ($rawVer -match 'version:\s*"?([^"\r\n]+)"?') {
+        $tagVersion = $matches[1].Trim()
+    }
+}
+
+if (-not $Version) {
+    $Version = $tagVersion -replace '-', '.'
+}
+if (-not $DownloadUrl) {
+    $DownloadUrl = "https://github.com/godotengine/godot-builds/releases/download/$tagVersion/Godot_v${tagVersion}_export_templates.tpz"
+}
 
 $onWindows = ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';')
 $isMac = $false

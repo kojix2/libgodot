@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "4.8.dev4",
+    [string]$Version = "",
     [string]$DownloadUrl = "",
     [switch]$Force
 )
@@ -7,6 +7,20 @@ param(
 $ErrorActionPreference = "Stop"
 
 $projRoot = $PSScriptRoot
+if (-not $Version) {
+    $vFile = Join-Path $projRoot "godot-version.yml"
+    if (-not (Test-Path $vFile)) {
+        $vFile = Join-Path (Split-Path -Parent $projRoot) "godot-version.yml"
+    }
+    if (Test-Path $vFile) {
+        $rawVer = Get-Content $vFile -Raw
+        if ($rawVer -match 'version:\s*[''"]?([^''"\r\n]+)[''"]?') {
+            $Version = $matches[1].Trim()
+        }
+    }
+}
+if (-not $Version) { $Version = "4.8-dev5" }
+
 $onWindows = ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';')
 $isMac = $false
 try {
@@ -36,14 +50,14 @@ Write-Host "==========================================================" -Foregro
 
 # Determine default download URL based on OS and version
 if (-not $DownloadUrl) {
-    $tag = $Version -replace '\.', '-'
+    $tag = if ($Version -match '-') { $Version } else { $Version -replace '\.', '-' }
     $baseUrl = "https://github.com/godotengine/godot-builds/releases/download/$tag"
     if ($onWindows) {
-        $DownloadUrl = "$baseUrl/Godot_v${Version}_win64.exe.zip"
+        $DownloadUrl = "$baseUrl/Godot_v${tag}_win64.exe.zip"
     } elseif ($isMac) {
-        $DownloadUrl = "$baseUrl/Godot_v${Version}_macos.universal.zip"
+        $DownloadUrl = "$baseUrl/Godot_v${tag}_macos.universal.zip"
     } else {
-        $DownloadUrl = "$baseUrl/Godot_v${Version}_linux.x86_64.zip"
+        $DownloadUrl = "$baseUrl/Godot_v${tag}_linux.x86_64.zip"
     }
 }
 

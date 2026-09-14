@@ -43,32 +43,13 @@ static thread_local size_t t_gc_registered_module_count = 0;
 static void *s_cached_game_module = nullptr;
 
 inline void unregister_gc_thread() {
-#if (defined(__APPLE__) && defined(__MACH__)) || defined(_WIN32)
-    // On macOS (Darwin), Boehm GC tracks threads via mach ports / pthread key destructors.
-    // Explicitly unregistering during C++ TLS destruction causes a use-after-free SEGV
-    // in GC_unregister_my_thread_inner because the GC thread structure has already been freed.
-    // On Windows (_WIN32), Boehm GC automatically handles thread registration and teardown
-    // via DllMain(DLL_THREAD_ATTACH / DLL_THREAD_DETACH). Calling GC_unregister_my_thread
-    // from a C++ TLS destructor during thread termination is unnecessary and unsafe.
+    // Boehm GC automatically manages thread lifecycle via pthread key destructors
+    // (GC_thread_dereg_key) on POSIX/Linux/macOS and via DllMain on Windows.
+    // Explicitly invoking GC_unregister_my_thread from a C++ thread_local destructor
+    // during thread termination races with GC internal cleanup, dereferencing freed/null
+    // thread entries at offset 0x18 (SIGSEGV / signal 11), especially when multiple
+    // GDExtension shared libraries are loaded in the same process.
     t_gc_registered_module_count = 0;
-    return;
-#else
-    std::vector<GCModuleEntry> modules_snapshot;
-    {
-        std::lock_guard<std::recursive_mutex> lock(g_gc_modules_mutex);
-        modules_snapshot = g_gc_modules;
-    }
-    for (const auto &mod : modules_snapshot) {
-        if (mod.thread_is_registered && mod.thread_is_registered() == 0) {
-            continue;
-        }
-        if (mod.unregister_my_thread) {
-            mod.unregister_my_thread();
-            break; // Single shared Boehm GC runtime in the process
-        }
-    }
-    t_gc_registered_module_count = 0;
-#endif
 }
 
 struct GCThreadRegistrationGuard {

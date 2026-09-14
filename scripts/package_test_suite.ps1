@@ -233,12 +233,15 @@ if (-not $SkipVerify) {
     }
 
     if ($runExit -ne 0) {
-        Write-Warning "Packaged test executable exited with code $runExit"
+        throw "Packaged test executable failed with exit code $runExit"
     }
     if ((Test-Path $verifyFailMarker1) -or (Test-Path $verifyFailMarker2)) {
         $failFile = if (Test-Path $verifyFailMarker1) { $verifyFailMarker1 } else { $verifyFailMarker2 }
         $failText = Get-Content $failFile -Raw
         throw "Packaged standalone test suite execution reported failures:`n$failText"
+    }
+    if ((-not (Test-Path $verifyPassMarker1)) -and (-not (Test-Path $verifyPassMarker2))) {
+        throw "Packaged standalone test suite did not write completion marker (.runtime_tests_passed)"
     }
     Write-Host "  [OK] Packaged standalone test suite verified successfully with --autorun!" -ForegroundColor Green
 } else {

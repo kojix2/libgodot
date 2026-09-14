@@ -39,10 +39,20 @@ if (-not (Test-Path $outputDir)) {
     New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
 }
 
+$versionFile = Join-Path $RootDir "godot-version.yml"
+$godotVer = "4.8-dev5"
+if (Test-Path $versionFile) {
+    $rawVer = Get-Content $versionFile -Raw
+    if ($rawVer -match 'version:\s*[''"]?([^''"\r\n]+)[''"]?') {
+        $godotVer = $matches[1].Trim()
+    }
+}
+$dotVer = $godotVer -replace '-', '.'
+
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host " LibGodot - Packaging Android APK" -ForegroundColor Cyan
 Write-Host " Target Project: $projFull" -ForegroundColor Cyan
-Write-Host " Godot Version : 4.8-dev4" -ForegroundColor Cyan
+Write-Host " Godot Version : $godotVer" -ForegroundColor Cyan
 Write-Host " Output APK    : $outputFull" -ForegroundColor Cyan
 Write-Host " Mode          : $(if ($Release) { 'Release' } else { 'Debug' })" -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
@@ -132,7 +142,7 @@ if (-not (Test-Path $godotExe)) {
     throw "[PackageAndroid] Godot executable not found at '$godotExe'."
 }
 
-# 4. Check Godot 4.8-dev4 export template
+# 4. Check Godot $godotVer export template
 $onWindows = ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';')
 $templateBase = if ($onWindows) {
     Join-Path $env:APPDATA "Godot/export_templates"
@@ -140,14 +150,14 @@ $templateBase = if ($onWindows) {
     $userHome = if ($env:HOME) { $env:HOME } else { [System.Environment]::GetFolderPath('UserProfile') }
     Join-Path $userHome ".local/share/godot/export_templates"
 }
-$template48Dir = Join-Path $templateBase "4.8.dev4"
-$debugApkTemplate = Join-Path $template48Dir "android_debug.apk"
-$releaseApkTemplate = Join-Path $template48Dir "android_release.apk"
+$templateVerDir = Join-Path $templateBase $dotVer
+$debugApkTemplate = Join-Path $templateVerDir "android_debug.apk"
+$releaseApkTemplate = Join-Path $templateVerDir "android_release.apk"
 
 if (Test-Path $debugApkTemplate) {
-    Write-Host "  -> Found Godot 4.8-dev4 Android export templates at $template48Dir" -ForegroundColor Green
+    Write-Host "  -> Found Godot $godotVer Android export templates at $templateVerDir" -ForegroundColor Green
 } else {
-    Write-Warning "[PackageAndroid] Godot 4.8-dev4 Android template not found at $template48Dir. Godot will attempt auto-discovery."
+    Write-Warning "[PackageAndroid] Godot $godotVer Android template not found at $templateVerDir. Godot will attempt auto-discovery."
 }
 
 # 5. Ensure host GDExtension bridge exists so headless Godot can load the project during export

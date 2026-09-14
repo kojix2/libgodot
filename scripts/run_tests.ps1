@@ -220,7 +220,11 @@ function Invoke-TestCommand {
         if ($OutputFile) {
             $outStr = if ($stdoutTask) { $stdoutTask.Result } else { "" }
             $errStr = if ($stderrTask) { $stderrTask.Result } else { "" }
-            Set-Content -Path $OutputFile -Value ($outStr + "`n" + $errStr) -Force
+            $fullLog = ($outStr + "`n" + $errStr).Trim()
+            Set-Content -Path $OutputFile -Value $fullLog -Force
+            if ($fullLog) {
+                Write-Host $fullLog
+            }
         }
 
         $exitCode = if ($timedOut) { -1 } else { $proc.ExitCode }
@@ -239,13 +243,39 @@ function Invoke-TestCommand {
     $cmdDuration = [math]::Round(((Get-Date) - $cmdStart).TotalSeconds, 2)
     Write-Host "::endgroup::"
 
+    $crashPatterns = @(
+        "Invalid memory access",
+        "signal 11",
+        "signal 6",
+        "Segmentation fault",
+        "SIGSEGV",
+        "SIGABRT",
+        "EXCEPTION_ACCESS_VIOLATION",
+        "CRASH INTERCEPTED",
+        "0xC0000005",
+        "Stack overflow",
+        "AddressSanitizer"
+    )
+    $hasCrash = $false
+    if ($OutputFile -and (Test-Path $OutputFile)) {
+        $logCheck = Get-Content $OutputFile -Raw
+        foreach ($cp in $crashPatterns) {
+            if ($logCheck -match [regex]::Escape($cp)) {
+                $hasCrash = $true
+                break
+            }
+        }
+    }
+
+    $isSuccess = ($exitCode -eq 0 -and -not $timedOut -and -not $hasCrash)
     $item = @{
         Name = $Name
         Category = $Category
-        Success = ($exitCode -eq 0 -and -not $timedOut)
+        Success = $isSuccess
         ExitCode = $exitCode
         Duration = $cmdDuration
         TimedOut = $timedOut
+        HasCrash = $hasCrash
     }
     $RecordedResults.Add($item)
 
@@ -255,18 +285,27 @@ function Invoke-TestCommand {
         return $item
     }
 
+    if ($hasCrash) {
+        $FailedSteps.Add("$Name (Fatal crash / memory violation detected, exit code: $exitCode)")
+        Write-Host "::error::[CRASH DETECTED] '$Name' crashed with fatal signal or memory access violation! (Exit Code: $exitCode)`n" -ForegroundColor Red
+        Write-Host "[FAILED] $Name (CRASHED: signal 11 / memory violation detected, exit code: $exitCode)`n" -ForegroundColor Red
+        return $item
+    }
+
+    if ($exitCode -ne 0) {
+        if (-not $CustomVerification) {
+            $FailedSteps.Add("$Name (Exit Code: $exitCode)")
+            Write-Host "[FAILED] $Name (Exit Code: $exitCode, ${cmdDuration}s)`n" -ForegroundColor Red
+        }
+        return $item
+    }
+
     if ($CustomVerification) {
         return $item
     }
 
-    if ($exitCode -eq 0) {
-        Write-Host "[PASSED] $Name (Exit Code: $exitCode, ${cmdDuration}s)`n" -ForegroundColor Green
-        return $item
-    } else {
-        $FailedSteps.Add("$Name (Exit Code: $exitCode)")
-        Write-Host "[FAILED] $Name (Exit Code: $exitCode, ${cmdDuration}s)`n" -ForegroundColor Yellow
-        return $item
-    }
+    Write-Host "[PASSED] $Name (Exit Code: $exitCode, ${cmdDuration}s)`n" -ForegroundColor Green
+    return $item
 }
 
 # -----------------------------------------------------------------------------
@@ -343,16 +382,28 @@ if (-not $SkipToolTests) {
         & $ensureExtScript -ProjectPath $TestDir
     }
 
+    $scratchDir = Join-Path $RootDir "scratch"
+    if (-not (Test-Path $scratchDir)) { New-Item -ItemType Directory -Force -Path $scratchDir | Out-Null }
+    $toolLogFile = Join-Path $scratchDir "headless_editor_tool_tests.log"
+    if (Test-Path $toolLogFile) { Remove-Item $toolLogFile -Force }
+
     $toolResult = Invoke-TestCommand -Name "Headless Editor Tool Tests (ToolTester2D & ToolTester3D)" `
         -Executable $GodotExe `
         -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--editor", "--path", "test", "--quit-after", "300") `
         -EnvironmentVars @{ "GODOT_RUN_TOOL_TESTS" = "1"; "LIBGL_ALWAYS_SOFTWARE" = "1" } `
+        -OutputFile $toolLogFile `
         -CustomVerification
 
     $failedMarkerFound = $failMarkers | Where-Object { Test-Path $_ } | Select-Object -First 1
     $passedMarkerFound = $passMarkers | Where-Object { Test-Path $_ } | Select-Object -First 1
 
-    if ($failedMarkerFound) {
+    if (-not $toolResult["Success"] -or $toolResult["HasCrash"] -or $toolResult["ExitCode"] -ne 0 -or $toolResult["TimedOut"]) {
+        $toolResult["Success"] = $false
+        if (-not ($FailedSteps | Where-Object { $_ -like "*Headless Editor Tool Tests*" })) {
+            $FailedSteps.Add("In-Editor Tool Tests (Process crashed or exited with code $($toolResult['ExitCode']))")
+        }
+        Write-Host "[FAILED] Headless Editor Tool Tests (ToolTester2D & ToolTester3D) (Exit Code: $($toolResult['ExitCode']))`n" -ForegroundColor Red
+    } elseif ($failedMarkerFound) {
         $failContent = Get-Content $failedMarkerFound -Raw
         Write-Host "::error::In-Editor tool tests reported failures in marker file:`n$failContent" -ForegroundColor Red
         $FailedSteps.Add("In-Editor Tool Tests (ToolTester2D / ToolTester3D failed: $failContent)")
@@ -361,13 +412,10 @@ if (-not $SkipToolTests) {
     } elseif ($passedMarkerFound) {
         $toolResult["Success"] = $true
         Write-Host "[PASSED] In-Editor tool tests executed cleanly and verified via marker file.`n" -ForegroundColor Green
-    } elseif (-not $toolResult["Success"]) {
-        $FailedSteps.Add("In-Editor Tool Tests (Process exited with code $($toolResult['ExitCode']))")
-        $toolResult["Success"] = $false
-        Write-Host "[FAILED] Headless Editor Tool Tests (ToolTester2D & ToolTester3D) (Exit Code: $($toolResult['ExitCode']))`n" -ForegroundColor Red
     } else {
-        $toolResult["Success"] = $true
-        Write-Host "[PASSED] In-Editor Tool Tests verified successfully.`n" -ForegroundColor Green
+        $FailedSteps.Add("In-Editor Tool Tests (Missing completion marker file)")
+        $toolResult["Success"] = $false
+        Write-Host "[FAILED] Headless Editor Tool Tests (Missing completion marker file)`n" -ForegroundColor Red
     }
 
     # -------------------------------------------------------------------------
@@ -395,7 +443,7 @@ if (-not $SkipToolTests) {
         -CustomVerification
 
     $addonLogContent = if (Test-Path $addonLogFile) { Get-Content $addonLogFile -Raw } else { "" }
-    $hasCrash = $addonLogContent -match "CRASH INTERCEPTED" -or $addonLogContent -match "EXCEPTION_ACCESS_VIOLATION" -or $addonLogContent -match "Invalid memory access"
+    $hasCrash = $addonLogContent -match "CRASH INTERCEPTED" -or $addonLogContent -match "EXCEPTION_ACCESS_VIOLATION" -or $addonLogContent -match "Invalid memory access" -or $addonLogContent -match "signal 11" -or $addonLogContent -match "signal 6" -or $addonLogContent -match "Segmentation fault" -or $addonLogContent -match "SIGSEGV" -or $addonLogContent -match "SIGABRT" -or $addonLogContent -match "0xC0000005" -or $addonLogContent -match "Stack overflow"
     if ($addonLogContent -match [regex]::Escape($uniqueString) -and (-not $hasCrash) -and ($addonEditorResult["ExitCode"] -eq 0 -or $addonEditorResult["ExitCode"] -eq 1)) {
         $addonEditorResult["Success"] = $true
         Write-Host "[PASSED] Compiled Crystal Addon verified in Godot Editor! Found unique string: $uniqueString`n" -ForegroundColor Green
@@ -546,10 +594,14 @@ if (-not $SkipStandaloneTests) {
         }
 
         # Standalone exported templates forbid '--path', so we run directly in TestBinDir
+        $standaloneLogFile = Join-Path $scratchDir "standalone_tests.log"
+        if (Test-Path $standaloneLogFile) { Remove-Item $standaloneLogFile -Force }
+
         $standaloneResult = Invoke-TestCommand -Name "Standalone Compiled Test Runner (tests$exeExt --autorun)" `
             -Executable $runExe `
             -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--quit-after", "600", "--", "--autorun") `
             -WorkingDirectory $TestBinDir `
+            -OutputFile $standaloneLogFile `
             -CustomVerification
 
         foreach ($sf in $summaryFiles) {
@@ -563,18 +615,24 @@ if (-not $SkipStandaloneTests) {
         $failedMarkerFound = $runFailMarkers | Where-Object { Test-Path $_ } | Select-Object -First 1
         $passedMarkerFound = $runPassMarkers | Where-Object { Test-Path $_ } | Select-Object -First 1
 
-        if ($failedMarkerFound) {
+        if (-not $standaloneResult["Success"] -or $standaloneResult["HasCrash"] -or $standaloneResult["ExitCode"] -ne 0 -or $standaloneResult["TimedOut"]) {
+            $standaloneResult["Success"] = $false
+            if (-not ($FailedSteps | Where-Object { $_ -like "*Standalone Test Suite*" })) {
+                $FailedSteps.Add("Standalone Test Suite (Process crashed or exited with code $($standaloneResult['ExitCode']))")
+            }
+            Write-Host "[FAILED] Standalone Compiled Test Runner (tests$exeExt --autorun) (Exit Code: $($standaloneResult['ExitCode']))`n" -ForegroundColor Red
+        } elseif ($failedMarkerFound) {
             $standaloneResult["Success"] = $false
             Write-Host "::error::Standalone runtime test suite reported failures!" -ForegroundColor Red
             $FailedSteps.Add("Standalone Test Suite (Failures recorded in $failedMarkerFound)")
             Write-Host "[FAILED] Standalone Compiled Test Runner (tests$exeExt --autorun)`n" -ForegroundColor Red
-        } elseif (-not $standaloneResult["Success"] -and -not $passedMarkerFound) {
-            $standaloneResult["Success"] = $false
-            $FailedSteps.Add("Standalone Test Suite (Process exited with code $($standaloneResult['ExitCode']))")
-            Write-Host "[FAILED] Standalone Compiled Test Runner (tests$exeExt --autorun) (Exit Code: $($standaloneResult['ExitCode']))`n" -ForegroundColor Red
-        } else {
+        } elseif ($passedMarkerFound) {
             $standaloneResult["Success"] = $true
             Write-Host "[PASSED] Standalone compiled test runner executed and verified with --autorun.`n" -ForegroundColor Green
+        } else {
+            $standaloneResult["Success"] = $false
+            $FailedSteps.Add("Standalone Test Suite (Missing completion marker file)")
+            Write-Host "[FAILED] Standalone Compiled Test Runner (Missing completion marker file)`n" -ForegroundColor Red
         }
     } else {
         Write-Host "::error::Standalone tests executable '$runExe' was not created." -ForegroundColor Red
@@ -591,18 +649,24 @@ if (-not $SkipStandaloneTests) {
                 if (Test-Path $m) { Remove-Item $m -Force }
             }
 
+            $relLogFile = Join-Path $scratchDir "standalone_rel_tests.log"
+            if (Test-Path $relLogFile) { Remove-Item $relLogFile -Force }
+
             $relResult = Invoke-TestCommand -Name "Standalone Release Test Runner (tests$exeExt --autorun RELEASE=1)" `
                 -Executable $runExe `
                 -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--quit-after", "600", "--", "--autorun") `
                 -WorkingDirectory $TestBinDir `
+                -OutputFile $relLogFile `
                 -CustomVerification
 
             $failedRel = $runFailMarkers | Where-Object { Test-Path $_ } | Select-Object -First 1
             $passedRel = $runPassMarkers | Where-Object { Test-Path $_ } | Select-Object -First 1
 
-            if ($failedRel -or (-not $relResult["Success"] -and -not $passedRel)) {
+            if (-not $relResult["Success"] -or $relResult["HasCrash"] -or $relResult["ExitCode"] -ne 0 -or $relResult["TimedOut"] -or $failedRel -or (-not $passedRel)) {
                 $relResult["Success"] = $false
-                $FailedSteps.Add("Standalone Release Test Suite (Process exited with code $($relResult['ExitCode']))")
+                if (-not ($FailedSteps | Where-Object { $_ -like "*Standalone Release Test Suite*" })) {
+                    $FailedSteps.Add("Standalone Release Test Suite (Process crashed or exited with code $($relResult['ExitCode']))")
+                }
                 Write-Host "[FAILED] Standalone Release Test Runner`n" -ForegroundColor Red
             } else {
                 $relResult["Success"] = $true
@@ -635,10 +699,14 @@ if (-not $SkipRuntimeTests) {
         if (Test-Path $m) { Remove-Item $m -Force }
     }
 
+    $runtimeLogFile = Join-Path $scratchDir "runtime_tests.log"
+    if (Test-Path $runtimeLogFile) { Remove-Item $runtimeLogFile -Force }
+
     $runtimeResult = Invoke-TestCommand -Name "Runtime Test Runner (main_test_runner.tscn --autorun)" `
         -Executable $GodotExe `
         -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--path", ".", "--quit-after", "600", "--", "--autorun") `
         -WorkingDirectory $TestDir `
+        -OutputFile $runtimeLogFile `
         -CustomVerification
 
     foreach ($sf in $summaryFiles) {
@@ -652,7 +720,13 @@ if (-not $SkipRuntimeTests) {
     $failedMarkerFound = $runFailMarkers | Where-Object { Test-Path $_ } | Select-Object -First 1
     $passedMarkerFound = $runPassMarkers | Where-Object { Test-Path $_ } | Select-Object -First 1
 
-    if ($failedMarkerFound) {
+    if (-not $runtimeResult["Success"] -or $runtimeResult["HasCrash"] -or $runtimeResult["ExitCode"] -ne 0 -or $runtimeResult["TimedOut"]) {
+        $runtimeResult["Success"] = $false
+        if (-not ($FailedSteps | Where-Object { $_ -like "*Runtime Test Suite*" })) {
+            $FailedSteps.Add("Runtime Test Suite (Process crashed or exited with code $($runtimeResult['ExitCode']))")
+        }
+        Write-Host "[FAILED] Runtime Test Runner (main_test_runner.tscn) (Exit Code: $($runtimeResult['ExitCode']))`n" -ForegroundColor Red
+    } elseif ($failedMarkerFound) {
         $runtimeResult["Success"] = $false
         Write-Host "::error::Runtime test suite reported failures!" -ForegroundColor Red
         $FailedSteps.Add("Runtime Test Suite (Failures recorded in $failedMarkerFound)")
@@ -660,13 +734,10 @@ if (-not $SkipRuntimeTests) {
     } elseif ($passedMarkerFound) {
         $runtimeResult["Success"] = $true
         Write-Host "[PASSED] All runtime test suites executed and verified.`n" -ForegroundColor Green
-    } elseif (-not $runtimeResult["Success"]) {
-        $runtimeResult["Success"] = $false
-        $FailedSteps.Add("Runtime Test Suite (Process exited with code $($runtimeResult['ExitCode']))")
-        Write-Host "[FAILED] Runtime Test Runner (main_test_runner.tscn) (Exit Code: $($runtimeResult['ExitCode']))`n" -ForegroundColor Red
     } else {
-        $runtimeResult["Success"] = $true
-        Write-Host "[PASSED] All runtime test suites executed and verified.`n" -ForegroundColor Green
+        $runtimeResult["Success"] = $false
+        $FailedSteps.Add("Runtime Test Suite (Missing completion marker file)")
+        Write-Host "[FAILED] Runtime Test Runner (Missing completion marker file)`n" -ForegroundColor Red
     }
 }
 

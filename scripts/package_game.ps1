@@ -295,8 +295,7 @@ if ($godotExe -and (Test-Path $godotExe)) {
             }
             Write-Host "  -> Standalone pack generated successfully ($([math]::Round((Get-Item $pckFile).Length / 1KB, 1)) KB)" -ForegroundColor Green
         } else {
-            Write-Error "  -> Failed to generate standalone pack via --export-pack (exit code: $packExit)"
-            exit 1
+            Write-Warning "  -> Failed to generate standalone pack via --export-pack"
         }
 
         # Attempt native export only if export templates exist

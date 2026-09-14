@@ -65,7 +65,7 @@ struct GCThreadRegistrationGuard {
 static thread_local GCThreadRegistrationGuard t_gc_registration_guard;
 
 #ifndef _WIN32
-static std::atomic<int> s_next_gc_signal_offset{0};
+#include <cstdlib>
 
 inline void bridge_get_gc_signals(int *out_suspend, int *out_restart) {
     if (!out_suspend || !out_restart) return;
@@ -73,10 +73,26 @@ inline void bridge_get_gc_signals(int *out_suspend, int *out_restart) {
     // On macOS, Boehm GC uses Mach kernel threads (thread_suspend/thread_resume).
     *out_suspend = 0;
     *out_restart = 0;
-#elif defined(SIGRTMIN) && defined(SIGRTMAX)
+#elif (defined(SIGRTMIN) && defined(SIGRTMAX)) || (defined(__SIGRTMIN) && defined(__SIGRTMAX))
+#if defined(SIGRTMIN)
     int rt_min = SIGRTMIN;
     int rt_max = SIGRTMAX;
-    int offset = s_next_gc_signal_offset.fetch_add(1);
+#else
+    int rt_min = __SIGRTMIN;
+    int rt_max = __SIGRTMAX;
+#endif
+    // Since each GDExtension addon loads its own copy of crystal_bridge.so,
+    // static variables in memory are not shared across distinct .so files.
+    // We use libc's process-wide environment (shared across all .so in the process)
+    // keyed by PID to coordinate unique, non-overlapping real-time signals per module.
+    char env_key[64];
+    snprintf(env_key, sizeof(env_key), "LIBGODOT_GC_SIGNAL_OFFSET_%d", (int)getpid());
+    const char *env_val = getenv(env_key);
+    int offset = (env_val && *env_val) ? atoi(env_val) : 0;
+    char next_buf[16];
+    snprintf(next_buf, sizeof(next_buf), "%d", offset + 1);
+    setenv(env_key, next_buf, 1);
+
     // Boehm GC default starts at SIGRTMIN + 6.
     // Allocate distinct pairs of real-time signals for each loaded Crystal module
     // to prevent signal handler overwrites and delivery failures.
@@ -88,18 +104,8 @@ inline void bridge_get_gc_signals(int *out_suspend, int *out_restart) {
         *out_suspend = 0;
         *out_restart = 0;
     }
-#elif defined(__SIGRTMIN) && defined(__SIGRTMAX)
-    int rt_min = __SIGRTMIN;
-    int rt_max = __SIGRTMAX;
-    int offset = s_next_gc_signal_offset.fetch_add(1);
-    int base = rt_min + 6 + (offset * 2);
-    if (base + 1 <= rt_max) {
-        *out_suspend = base;
-        *out_restart = base + 1;
-    } else {
-        *out_suspend = 0;
-        *out_restart = 0;
-    }
+    fprintf(stderr, "[CrystalBridge] PID %d module GC signals: suspend=%d, restart=%d (offset=%d)\n",
+            (int)getpid(), *out_suspend, *out_restart, offset);
 #else
     *out_suspend = 0;
     *out_restart = 0;
@@ -251,6 +257,15 @@ inline void ensure_gc_thread_registered() {
     // Unmask Boehm GC thread suspend/restart signals on foreign threads before registering.
     sigset_t set;
     sigemptyset(&set);
+#if defined(SIGRTMIN) && defined(SIGRTMAX)
+    for (int sig = SIGRTMIN; sig <= SIGRTMAX; ++sig) {
+        sigaddset(&set, sig);
+    }
+#elif defined(__SIGRTMIN) && defined(__SIGRTMAX)
+    for (int sig = __SIGRTMIN; sig <= __SIGRTMAX; ++sig) {
+        sigaddset(&set, sig);
+    }
+#endif
     for (const auto &mod : modules_snapshot) {
         if (mod.get_suspend_signal) {
             int sig = mod.get_suspend_signal();

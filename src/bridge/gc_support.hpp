@@ -43,27 +43,6 @@ static std::recursive_mutex g_gc_modules_mutex;
 static thread_local size_t t_gc_registered_module_count = 0;
 static void *s_cached_game_module = nullptr;
 
-inline void unregister_gc_thread() {
-    // Boehm GC automatically manages thread lifecycle via pthread key destructors
-    // (GC_thread_dereg_key) on POSIX/Linux/macOS and via DllMain on Windows.
-    // Explicitly invoking GC_unregister_my_thread from a C++ thread_local destructor
-    // during thread termination races with GC internal cleanup, dereferencing freed/null
-    // thread entries at offset 0x18 (SIGSEGV / signal 11), especially when multiple
-    // GDExtension shared libraries are loaded in the same process.
-    t_gc_registered_module_count = 0;
-}
-
-struct GCThreadRegistrationGuard {
-    bool active = false;
-    ~GCThreadRegistrationGuard() {
-        if (active) {
-            active = false;
-            unregister_gc_thread();
-        }
-    }
-};
-static thread_local GCThreadRegistrationGuard t_gc_registration_guard;
-
 #ifndef _WIN32
 #include <cstdlib>
 
@@ -89,7 +68,46 @@ __attribute__((constructor))
 static void on_bridge_load() {
     record_main_thread();
 }
+#endif
 
+inline void unregister_gc_thread() {
+#if defined(_WIN32) || (defined(__APPLE__) && defined(__MACH__))
+    t_gc_registered_module_count = 0;
+    return;
+#else
+    if (is_main_thread()) {
+        t_gc_registered_module_count = 0;
+        return;
+    }
+    std::vector<GCModuleEntry> modules_snapshot;
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_gc_modules_mutex);
+        modules_snapshot = g_gc_modules;
+    }
+    for (const auto &mod : modules_snapshot) {
+        if (mod.thread_is_registered && mod.thread_is_registered() == 0) {
+            continue;
+        }
+        if (mod.unregister_my_thread) {
+            mod.unregister_my_thread();
+        }
+    }
+    t_gc_registered_module_count = 0;
+#endif
+}
+
+struct GCThreadRegistrationGuard {
+    bool active = false;
+    ~GCThreadRegistrationGuard() {
+        if (active) {
+            active = false;
+            unregister_gc_thread();
+        }
+    }
+};
+static thread_local GCThreadRegistrationGuard t_gc_registration_guard;
+
+#ifndef _WIN32
 inline void bridge_get_gc_signals(int *out_suspend, int *out_restart) {
     if (!out_suspend || !out_restart) return;
 #if defined(__APPLE__)
@@ -262,14 +280,6 @@ inline void init_gc_library(void *game_module_handle = nullptr) {
 inline void ensure_gc_thread_registered() {
 #ifndef _WIN32
     record_main_thread();
-    if (!is_main_thread()) {
-        // Foreign background threads (e.g. Godot EditorFileSystem, worker pools) must NOT
-        // be registered in Boehm GC on POSIX. Registering transient worker threads causes
-        // zombie entries in GC_threads because unregistering during TLS destruction races
-        // with GC cleanup. Since Crystal code only runs on the main thread or on threads
-        // spawned by Crystal (which Crystal registers itself), foreign threads should not be registered.
-        return;
-    }
 #endif
 
     if (t_gc_registered_module_count >= g_gc_modules.size() && !g_gc_modules.empty()) {
@@ -365,6 +375,12 @@ inline void ensure_gc_thread_registered() {
             }
         }
         t_gc_registered_module_count = modules_snapshot.size();
+#ifndef _WIN32
+        if (!is_main_thread()) {
+            t_gc_registration_guard.active = true;
+        }
+#else
         t_gc_registration_guard.active = true;
+#endif
     }
 }

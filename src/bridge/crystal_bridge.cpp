@@ -195,6 +195,9 @@ extern "C" GDE_EXPORT GDExtensionBool crystal_library_init(
     }
 #endif
     g_active_extension_count++;
+#ifndef _WIN32
+    record_main_thread();
+#endif
     init_gc_library();
     ensure_gc_thread_registered();
 #ifdef _WIN32

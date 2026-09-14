@@ -67,6 +67,29 @@ static thread_local GCThreadRegistrationGuard t_gc_registration_guard;
 #ifndef _WIN32
 #include <cstdlib>
 
+static pthread_t g_main_thread_id = 0;
+static std::atomic<bool> g_main_thread_initialized{false};
+
+inline void record_main_thread() {
+    if (!g_main_thread_initialized.load(std::memory_order_relaxed)) {
+        g_main_thread_id = pthread_self();
+        g_main_thread_initialized.store(true, std::memory_order_relaxed);
+    }
+}
+
+inline bool is_main_thread() {
+    if (!g_main_thread_initialized.load(std::memory_order_relaxed)) {
+        record_main_thread();
+        return true;
+    }
+    return pthread_equal(pthread_self(), g_main_thread_id) != 0;
+}
+
+__attribute__((constructor))
+static void on_bridge_load() {
+    record_main_thread();
+}
+
 inline void bridge_get_gc_signals(int *out_suspend, int *out_restart) {
     if (!out_suspend || !out_restart) return;
 #if defined(__APPLE__)
@@ -237,6 +260,18 @@ inline void init_gc_library(void *game_module_handle = nullptr) {
 }
 
 inline void ensure_gc_thread_registered() {
+#ifndef _WIN32
+    record_main_thread();
+    if (!is_main_thread()) {
+        // Foreign background threads (e.g. Godot EditorFileSystem, worker pools) must NOT
+        // be registered in Boehm GC on POSIX. Registering transient worker threads causes
+        // zombie entries in GC_threads because unregistering during TLS destruction races
+        // with GC cleanup. Since Crystal code only runs on the main thread or on threads
+        // spawned by Crystal (which Crystal registers itself), foreign threads should not be registered.
+        return;
+    }
+#endif
+
     if (t_gc_registered_module_count >= g_gc_modules.size() && !g_gc_modules.empty()) {
         return;
     }

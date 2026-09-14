@@ -189,6 +189,29 @@ module Godot
       Bridge.ptrcall(@@mb_set_format, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `feed_is_active` getter
+    def feed_is_active
+      is_active
+    end
+    def feed_is_active?
+      feed_is_active
+    end
+    # Property `feed_is_active` setter
+    def feed_is_active=(val)
+      set_active(val)
+    end
+    # Property `feed_transform` getter
+    def feed_transform
+      get_transform
+    end
+    # Property `feed_transform` setter
+    def feed_transform=(val)
+      set_transform(val)
+    end
+    # Property `formats` getter
+    def formats
+      get_formats
+    end
   end
   class CameraServer < Godot::Object
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -269,6 +292,17 @@ module Godot
       args = [arg_0]
       Bridge.ptrcall(@@mb_remove_feed, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
     end
+    # Property `monitoring_feeds` getter
+    def monitoring_feeds
+      is_monitoring_feeds
+    end
+    def monitoring_feeds?
+      monitoring_feeds
+    end
+    # Property `monitoring_feeds` setter
+    def monitoring_feeds=(val)
+      set_monitoring_feeds(val)
+    end
   end
   class CameraTexture < Godot::Texture2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -331,6 +365,33 @@ module Godot
       Bridge.ptrcall(@@mb_get_camera_active, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `camera_feed_id` getter
+    def camera_feed_id
+      get_camera_feed_id
+    end
+    # Property `camera_feed_id` setter
+    def camera_feed_id=(val : Int)
+      set_camera_feed_id(val.to_i64)
+    end
+    # Property `which_feed` getter
+    def which_feed
+      get_which_feed
+    end
+    # Property `which_feed` setter
+    def which_feed=(val : Int)
+      set_which_feed(val.to_i64)
+    end
+    # Property `camera_is_active` getter
+    def camera_is_active
+      get_camera_active
+    end
+    def camera_is_active?
+      camera_is_active
+    end
+    # Property `camera_is_active` setter
+    def camera_is_active=(val)
+      set_camera_active(val)
+    end
   end
   class CanvasGroup < Godot::Node2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -392,6 +453,33 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_using_mipmaps, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `fit_margin` getter
+    def fit_margin
+      get_fit_margin
+    end
+    # Property `fit_margin` setter
+    def fit_margin=(val : Number)
+      set_fit_margin(val.to_f64)
+    end
+    # Property `clear_margin` getter
+    def clear_margin
+      get_clear_margin
+    end
+    # Property `clear_margin` setter
+    def clear_margin=(val : Number)
+      set_clear_margin(val.to_f64)
+    end
+    # Property `use_mipmaps` getter
+    def use_mipmaps
+      is_using_mipmaps
+    end
+    def use_mipmaps?
+      use_mipmaps
+    end
+    # Property `use_mipmaps` setter
+    def use_mipmaps=(val)
+      set_use_mipmaps(val)
     end
   end
   class CanvasItemMaterial < Godot::Material
@@ -523,6 +611,60 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_get_particles_anim_loop, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `blend_mode` getter
+    def blend_mode
+      get_blend_mode
+    end
+    # Property `blend_mode` setter
+    def blend_mode=(val : Int)
+      set_blend_mode(val.to_i64)
+    end
+    # Property `light_mode` getter
+    def light_mode
+      get_light_mode
+    end
+    # Property `light_mode` setter
+    def light_mode=(val : Int)
+      set_light_mode(val.to_i64)
+    end
+    # Property `particles_animation` getter
+    def particles_animation
+      get_particles_animation
+    end
+    def particles_animation?
+      particles_animation
+    end
+    # Property `particles_animation` setter
+    def particles_animation=(val)
+      set_particles_animation(val)
+    end
+    # Property `particles_anim_h_frames` getter
+    def particles_anim_h_frames
+      get_particles_anim_h_frames
+    end
+    # Property `particles_anim_h_frames` setter
+    def particles_anim_h_frames=(val : Int)
+      set_particles_anim_h_frames(val.to_i64)
+    end
+    # Property `particles_anim_v_frames` getter
+    def particles_anim_v_frames
+      get_particles_anim_v_frames
+    end
+    # Property `particles_anim_v_frames` setter
+    def particles_anim_v_frames=(val : Int)
+      set_particles_anim_v_frames(val.to_i64)
+    end
+    # Property `particles_anim_loop` getter
+    def particles_anim_loop
+      get_particles_anim_loop
+    end
+    def particles_anim_loop?
+      particles_anim_loop
+    end
+    # Property `particles_anim_loop` setter
+    def particles_anim_loop=(val)
+      set_particles_anim_loop(val)
     end
   end
   class CanvasLayer < Godot::Node
@@ -732,6 +874,84 @@ module Godot
       Bridge.ptrcall(@@mb_get_canvas, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `layer` getter
+    def layer
+      get_layer
+    end
+    # Property `layer` setter
+    def layer=(val : Int)
+      set_layer(val.to_i64)
+    end
+    # Property `visible` getter
+    def visible
+      is_visible
+    end
+    def visible?
+      visible
+    end
+    # Property `visible` setter
+    def visible=(val)
+      set_visible(val)
+    end
+    # Property `offset` getter
+    def offset
+      get_offset
+    end
+    # Property `offset` setter
+    def offset=(val)
+      set_offset(val)
+    end
+    # Property `rotation` getter
+    def rotation
+      get_rotation
+    end
+    # Property `rotation` setter
+    def rotation=(val : Number)
+      set_rotation(val.to_f64)
+    end
+    # Property `scale` getter
+    def scale
+      get_scale
+    end
+    # Property `scale` setter
+    def scale=(val)
+      set_scale(val)
+    end
+    # Property `transform` getter
+    def transform
+      get_transform
+    end
+    # Property `transform` setter
+    def transform=(val)
+      set_transform(val)
+    end
+    # Property `custom_viewport` getter
+    def custom_viewport
+      get_custom_viewport
+    end
+    # Property `custom_viewport` setter
+    def custom_viewport=(val)
+      set_custom_viewport(val)
+    end
+    # Property `follow_viewport_enabled` getter
+    def follow_viewport_enabled
+      is_following_viewport
+    end
+    def follow_viewport_enabled?
+      follow_viewport_enabled
+    end
+    # Property `follow_viewport_enabled` setter
+    def follow_viewport_enabled=(val)
+      set_follow_viewport(val)
+    end
+    # Property `follow_viewport_scale` getter
+    def follow_viewport_scale
+      get_follow_viewport_scale
+    end
+    # Property `follow_viewport_scale` setter
+    def follow_viewport_scale=(val : Number)
+      set_follow_viewport_scale(val.to_f64)
+    end
   end
   class CanvasModulate < Godot::Node2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -755,6 +975,14 @@ module Godot
       ret = Color.new
       Bridge.ptrcall(@@mb_get_color, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `color` getter
+    def color
+      get_color
+    end
+    # Property `color` setter
+    def color=(val)
+      set_color(val)
     end
   end
   class CanvasTexture < Godot::Texture2D
@@ -894,6 +1122,62 @@ module Godot
       Bridge.ptrcall(@@mb_get_texture_repeat, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `diffuse_texture` getter
+    def diffuse_texture
+      get_diffuse_texture
+    end
+    # Property `diffuse_texture` setter
+    def diffuse_texture=(val)
+      set_diffuse_texture(val)
+    end
+    # Property `normal_texture` getter
+    def normal_texture
+      get_normal_texture
+    end
+    # Property `normal_texture` setter
+    def normal_texture=(val)
+      set_normal_texture(val)
+    end
+    # Property `specular_texture` getter
+    def specular_texture
+      get_specular_texture
+    end
+    # Property `specular_texture` setter
+    def specular_texture=(val)
+      set_specular_texture(val)
+    end
+    # Property `specular_color` getter
+    def specular_color
+      get_specular_color
+    end
+    # Property `specular_color` setter
+    def specular_color=(val)
+      set_specular_color(val)
+    end
+    # Property `specular_shininess` getter
+    def specular_shininess
+      get_specular_shininess
+    end
+    # Property `specular_shininess` setter
+    def specular_shininess=(val : Number)
+      set_specular_shininess(val.to_f64)
+    end
+    # Property `texture_filter` getter
+    def texture_filter
+      get_texture_filter
+    end
+    # Property `texture_filter` setter
+    def texture_filter=(val : Int)
+      set_texture_filter(val.to_i64)
+    end
+    # Property `texture_repeat` getter
+    def texture_repeat
+      get_texture_repeat
+    end
+    # Property `texture_repeat` setter
+    def texture_repeat=(val : Int)
+      set_texture_repeat(val.to_i64)
+    end
   end
   class CapsuleMesh < Godot::PrimitiveMesh
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -974,6 +1258,38 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_rings, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `radius` getter
+    def radius
+      get_radius
+    end
+    # Property `radius` setter
+    def radius=(val : Number)
+      set_radius(val.to_f64)
+    end
+    # Property `height` getter
+    def height
+      get_height
+    end
+    # Property `height` setter
+    def height=(val : Number)
+      set_height(val.to_f64)
+    end
+    # Property `radial_segments` getter
+    def radial_segments
+      get_radial_segments
+    end
+    # Property `radial_segments` setter
+    def radial_segments=(val : Int)
+      set_radial_segments(val.to_i64)
+    end
+    # Property `rings` getter
+    def rings
+      get_rings
+    end
+    # Property `rings` setter
+    def rings=(val : Int)
+      set_rings(val.to_i64)
     end
   end
   class Shape2D < Godot::Resource
@@ -1092,6 +1408,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_rect, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Rect2.new(ret_ptr)
     end
+    # Property `custom_solver_bias` getter
+    def custom_solver_bias
+      get_custom_solver_bias
+    end
+    # Property `custom_solver_bias` setter
+    def custom_solver_bias=(val : Number)
+      set_custom_solver_bias(val.to_f64)
+    end
   end
   class CapsuleShape2D < Godot::Shape2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -1153,6 +1477,30 @@ module Godot
       ret = 0.0_f64
       Bridge.ptrcall(@@mb_get_mid_height, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `radius` getter
+    def radius
+      get_radius
+    end
+    # Property `radius` setter
+    def radius=(val : Number)
+      set_radius(val.to_f64)
+    end
+    # Property `height` getter
+    def height
+      get_height
+    end
+    # Property `height` setter
+    def height=(val : Number)
+      set_height(val.to_f64)
+    end
+    # Property `mid_height` getter
+    def mid_height
+      get_mid_height
+    end
+    # Property `mid_height` setter
+    def mid_height=(val : Number)
+      set_mid_height(val.to_f64)
     end
   end
   class CapsuleShape3D < Godot::Shape3D
@@ -1216,6 +1564,30 @@ module Godot
       Bridge.ptrcall(@@mb_get_mid_height, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `radius` getter
+    def radius
+      get_radius
+    end
+    # Property `radius` setter
+    def radius=(val : Number)
+      set_radius(val.to_f64)
+    end
+    # Property `height` getter
+    def height
+      get_height
+    end
+    # Property `height` setter
+    def height=(val : Number)
+      set_height(val.to_f64)
+    end
+    # Property `mid_height` getter
+    def mid_height
+      get_mid_height
+    end
+    # Property `mid_height` setter
+    def mid_height=(val : Number)
+      set_mid_height(val.to_f64)
+    end
   end
   class CenterContainer < Godot::Container
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -1239,6 +1611,17 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_using_top_left, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `use_top_left` getter
+    def use_top_left
+      is_using_top_left
+    end
+    def use_top_left?
+      use_top_left
+    end
+    # Property `use_top_left` setter
+    def use_top_left=(val)
+      set_use_top_left(val)
     end
   end
   class CharFXTransform < Godot::RefCounted
@@ -1491,6 +1874,116 @@ module Godot
       arg_0 = pointerof(val_0).as(Void*)
       args = [arg_0]
       Bridge.ptrcall(@@mb_set_font, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    # Property `transform` getter
+    def transform
+      get_transform
+    end
+    # Property `transform` setter
+    def transform=(val)
+      set_transform(val)
+    end
+    # Property `range` getter
+    def range
+      get_range
+    end
+    # Property `range` setter
+    def range=(val)
+      set_range(val)
+    end
+    # Property `elapsed_time` getter
+    def elapsed_time
+      get_elapsed_time
+    end
+    # Property `elapsed_time` setter
+    def elapsed_time=(val : Number)
+      set_elapsed_time(val.to_f64)
+    end
+    # Property `visible` getter
+    def visible
+      is_visible
+    end
+    def visible?
+      visible
+    end
+    # Property `visible` setter
+    def visible=(val)
+      set_visibility(val)
+    end
+    # Property `outline` getter
+    def outline
+      is_outline
+    end
+    def outline?
+      outline
+    end
+    # Property `outline` setter
+    def outline=(val)
+      set_outline(val)
+    end
+    # Property `offset` getter
+    def offset
+      get_offset
+    end
+    # Property `offset` setter
+    def offset=(val)
+      set_offset(val)
+    end
+    # Property `color` getter
+    def color
+      get_color
+    end
+    # Property `color` setter
+    def color=(val)
+      set_color(val)
+    end
+    # Property `env` getter
+    def env
+      get_environment
+    end
+    # Property `env` setter
+    def env=(val)
+      set_environment(val)
+    end
+    # Property `glyph_index` getter
+    def glyph_index
+      get_glyph_index
+    end
+    # Property `glyph_index` setter
+    def glyph_index=(val : Int)
+      set_glyph_index(val.to_i64)
+    end
+    # Property `glyph_count` getter
+    def glyph_count
+      get_glyph_count
+    end
+    # Property `glyph_count` setter
+    def glyph_count=(val : Int)
+      set_glyph_count(val.to_i64)
+    end
+    # Property `glyph_flags` getter
+    def glyph_flags
+      get_glyph_flags
+    end
+    # Property `glyph_flags` setter
+    def glyph_flags=(val : Int)
+      set_glyph_flags(val.to_i64)
+    end
+    # Property `relative_index` getter
+    def relative_index
+      get_relative_index
+    end
+    # Property `relative_index` setter
+    def relative_index=(val : Int)
+      set_relative_index(val.to_i64)
+    end
+    # Property `font` getter
+    def font
+      get_font
+    end
+    # Property `font` setter
+    def font=(val)
+      set_font(val)
     end
   end
   class CharacterBody2D < Godot::PhysicsBody2D
@@ -1956,6 +2449,122 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_last_slide_collision, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       KinematicCollision2D.new(ret_ptr)
+    end
+    # Property `motion_mode` getter
+    def motion_mode
+      get_motion_mode
+    end
+    # Property `motion_mode` setter
+    def motion_mode=(val : Int)
+      set_motion_mode(val.to_i64)
+    end
+    # Property `slide_on_ceiling` getter
+    def slide_on_ceiling
+      is_slide_on_ceiling_enabled
+    end
+    def slide_on_ceiling?
+      slide_on_ceiling
+    end
+    # Property `slide_on_ceiling` setter
+    def slide_on_ceiling=(val)
+      set_slide_on_ceiling_enabled(val)
+    end
+    # Property `max_slides` getter
+    def max_slides
+      get_max_slides
+    end
+    # Property `max_slides` setter
+    def max_slides=(val : Int)
+      set_max_slides(val.to_i64)
+    end
+    # Property `wall_min_slide_angle` getter
+    def wall_min_slide_angle
+      get_wall_min_slide_angle
+    end
+    # Property `wall_min_slide_angle` setter
+    def wall_min_slide_angle=(val : Number)
+      set_wall_min_slide_angle(val.to_f64)
+    end
+    # Property `floor_stop_on_slope` getter
+    def floor_stop_on_slope
+      is_floor_stop_on_slope_enabled
+    end
+    def floor_stop_on_slope?
+      floor_stop_on_slope
+    end
+    # Property `floor_stop_on_slope` setter
+    def floor_stop_on_slope=(val)
+      set_floor_stop_on_slope_enabled(val)
+    end
+    # Property `floor_constant_speed` getter
+    def floor_constant_speed
+      is_floor_constant_speed_enabled
+    end
+    def floor_constant_speed?
+      floor_constant_speed
+    end
+    # Property `floor_constant_speed` setter
+    def floor_constant_speed=(val)
+      set_floor_constant_speed_enabled(val)
+    end
+    # Property `floor_block_on_wall` getter
+    def floor_block_on_wall
+      is_floor_block_on_wall_enabled
+    end
+    def floor_block_on_wall?
+      floor_block_on_wall
+    end
+    # Property `floor_block_on_wall` setter
+    def floor_block_on_wall=(val)
+      set_floor_block_on_wall_enabled(val)
+    end
+    # Property `floor_max_angle` getter
+    def floor_max_angle
+      get_floor_max_angle
+    end
+    # Property `floor_max_angle` setter
+    def floor_max_angle=(val : Number)
+      set_floor_max_angle(val.to_f64)
+    end
+    # Property `floor_snap_length` getter
+    def floor_snap_length
+      get_floor_snap_length
+    end
+    # Property `floor_snap_length` setter
+    def floor_snap_length=(val : Number)
+      set_floor_snap_length(val.to_f64)
+    end
+    # Property `platform_on_leave` getter
+    def platform_on_leave
+      get_platform_on_leave
+    end
+    # Property `platform_on_leave` setter
+    def platform_on_leave=(val : Int)
+      set_platform_on_leave(val.to_i64)
+    end
+    # Property `platform_floor_layers` getter
+    def platform_floor_layers
+      get_platform_floor_layers
+    end
+    # Property `platform_floor_layers` setter
+    def platform_floor_layers=(val : Int)
+      set_platform_floor_layers(val.to_i64)
+    end
+    # Property `platform_wall_layers` getter
+    def platform_wall_layers
+      get_platform_wall_layers
+    end
+    # Property `platform_wall_layers` setter
+    def platform_wall_layers=(val : Int)
+      set_platform_wall_layers(val.to_i64)
+    end
+    # Property `safe_margin` getter
+    def safe_margin
+      get_safe_margin
+    end
+    # Property `safe_margin` setter
+    def safe_margin=(val : Number)
+      set_safe_margin(val.to_f64)
     end
   end
   class CharacterBody3D < Godot::PhysicsBody3D
@@ -2431,6 +3040,76 @@ module Godot
       Bridge.ptrcall(@@mb_get_last_slide_collision, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       KinematicCollision3D.new(ret_ptr)
     end
+    # Property `motion_mode` getter
+    def motion_mode
+      get_motion_mode
+    end
+    # Property `motion_mode` setter
+    def motion_mode=(val : Int)
+      set_motion_mode(val.to_i64)
+    end
+    # Property `slide_on_ceiling` getter
+    def slide_on_ceiling
+      is_slide_on_ceiling_enabled
+    end
+    def slide_on_ceiling?
+      slide_on_ceiling
+    end
+    # Property `slide_on_ceiling` setter
+    def slide_on_ceiling=(val)
+      set_slide_on_ceiling_enabled(val)
+    end
+    # Property `wall_min_slide_angle` getter
+    def wall_min_slide_angle
+      get_wall_min_slide_angle
+    end
+    # Property `wall_min_slide_angle` setter
+    def wall_min_slide_angle=(val : Number)
+      set_wall_min_slide_angle(val.to_f64)
+    end
+    # Property `floor_block_on_wall` getter
+    def floor_block_on_wall
+      is_floor_block_on_wall_enabled
+    end
+    def floor_block_on_wall?
+      floor_block_on_wall
+    end
+    # Property `floor_block_on_wall` setter
+    def floor_block_on_wall=(val)
+      set_floor_block_on_wall_enabled(val)
+    end
+    # Property `platform_on_leave` getter
+    def platform_on_leave
+      get_platform_on_leave
+    end
+    # Property `platform_on_leave` setter
+    def platform_on_leave=(val : Int)
+      set_platform_on_leave(val.to_i64)
+    end
+    # Property `platform_floor_layers` getter
+    def platform_floor_layers
+      get_platform_floor_layers
+    end
+    # Property `platform_floor_layers` setter
+    def platform_floor_layers=(val : Int)
+      set_platform_floor_layers(val.to_i64)
+    end
+    # Property `platform_wall_layers` getter
+    def platform_wall_layers
+      get_platform_wall_layers
+    end
+    # Property `platform_wall_layers` setter
+    def platform_wall_layers=(val : Int)
+      set_platform_wall_layers(val.to_i64)
+    end
+    # Property `safe_margin` getter
+    def safe_margin
+      get_safe_margin
+    end
+    # Property `safe_margin` setter
+    def safe_margin=(val : Number)
+      set_safe_margin(val.to_f64)
+    end
   end
   class CheckBox < Godot::Button
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -2464,6 +3143,14 @@ module Godot
       ret = 0.0_f64
       Bridge.ptrcall(@@mb_get_radius, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `radius` getter
+    def radius
+      get_radius
+    end
+    # Property `radius` setter
+    def radius=(val : Number)
+      set_radius(val.to_f64)
     end
   end
   class ClassDB < Godot::Object
@@ -5683,6 +6370,486 @@ module Godot
       Bridge.ptrcall(@@mb_get_selection_column, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
       ret
     end
+    # Property `text` getter
+    def text
+      get_text
+    end
+    # Property `text` setter
+    def text=(val)
+      set_text(val)
+    end
+    # Property `placeholder_text` getter
+    def placeholder_text
+      get_placeholder
+    end
+    # Property `placeholder_text` setter
+    def placeholder_text=(val)
+      set_placeholder(val)
+    end
+    # Property `editable` getter
+    def editable
+      is_editable
+    end
+    def editable?
+      editable
+    end
+    # Property `editable` setter
+    def editable=(val)
+      set_editable(val)
+    end
+    # Property `context_menu_enabled` getter
+    def context_menu_enabled
+      is_context_menu_enabled
+    end
+    def context_menu_enabled?
+      context_menu_enabled
+    end
+    # Property `context_menu_enabled` setter
+    def context_menu_enabled=(val)
+      set_context_menu_enabled(val)
+    end
+    # Property `emoji_menu_enabled` getter
+    def emoji_menu_enabled
+      is_emoji_menu_enabled
+    end
+    def emoji_menu_enabled?
+      emoji_menu_enabled
+    end
+    # Property `emoji_menu_enabled` setter
+    def emoji_menu_enabled=(val)
+      set_emoji_menu_enabled(val)
+    end
+    # Property `backspace_deletes_composite_character_enabled` getter
+    def backspace_deletes_composite_character_enabled
+      is_backspace_deletes_composite_character_enabled
+    end
+    def backspace_deletes_composite_character_enabled?
+      backspace_deletes_composite_character_enabled
+    end
+    # Property `backspace_deletes_composite_character_enabled` setter
+    def backspace_deletes_composite_character_enabled=(val)
+      set_backspace_deletes_composite_character_enabled(val)
+    end
+    # Property `shortcut_keys_enabled` getter
+    def shortcut_keys_enabled
+      is_shortcut_keys_enabled
+    end
+    def shortcut_keys_enabled?
+      shortcut_keys_enabled
+    end
+    # Property `shortcut_keys_enabled` setter
+    def shortcut_keys_enabled=(val)
+      set_shortcut_keys_enabled(val)
+    end
+    # Property `selecting_enabled` getter
+    def selecting_enabled
+      is_selecting_enabled
+    end
+    def selecting_enabled?
+      selecting_enabled
+    end
+    # Property `selecting_enabled` setter
+    def selecting_enabled=(val)
+      set_selecting_enabled(val)
+    end
+    # Property `deselect_on_focus_loss_enabled` getter
+    def deselect_on_focus_loss_enabled
+      is_deselect_on_focus_loss_enabled
+    end
+    def deselect_on_focus_loss_enabled?
+      deselect_on_focus_loss_enabled
+    end
+    # Property `deselect_on_focus_loss_enabled` setter
+    def deselect_on_focus_loss_enabled=(val)
+      set_deselect_on_focus_loss_enabled(val)
+    end
+    # Property `drag_and_drop_selection_enabled` getter
+    def drag_and_drop_selection_enabled
+      is_drag_and_drop_selection_enabled
+    end
+    def drag_and_drop_selection_enabled?
+      drag_and_drop_selection_enabled
+    end
+    # Property `drag_and_drop_selection_enabled` setter
+    def drag_and_drop_selection_enabled=(val)
+      set_drag_and_drop_selection_enabled(val)
+    end
+    # Property `middle_mouse_paste_enabled` getter
+    def middle_mouse_paste_enabled
+      is_middle_mouse_paste_enabled
+    end
+    def middle_mouse_paste_enabled?
+      middle_mouse_paste_enabled
+    end
+    # Property `middle_mouse_paste_enabled` setter
+    def middle_mouse_paste_enabled=(val)
+      set_middle_mouse_paste_enabled(val)
+    end
+    # Property `empty_selection_clipboard_enabled` getter
+    def empty_selection_clipboard_enabled
+      is_empty_selection_clipboard_enabled
+    end
+    def empty_selection_clipboard_enabled?
+      empty_selection_clipboard_enabled
+    end
+    # Property `empty_selection_clipboard_enabled` setter
+    def empty_selection_clipboard_enabled=(val)
+      set_empty_selection_clipboard_enabled(val)
+    end
+    # Property `wrap_mode` getter
+    def wrap_mode
+      get_line_wrapping_mode
+    end
+    # Property `wrap_mode` setter
+    def wrap_mode=(val : Int)
+      set_line_wrapping_mode(val.to_i64)
+    end
+    # Property `autowrap_mode` getter
+    def autowrap_mode
+      get_autowrap_mode
+    end
+    # Property `autowrap_mode` setter
+    def autowrap_mode=(val : Int)
+      set_autowrap_mode(val.to_i64)
+    end
+    # Property `indent_wrapped_lines` getter
+    def indent_wrapped_lines
+      is_indent_wrapped_lines
+    end
+    def indent_wrapped_lines?
+      indent_wrapped_lines
+    end
+    # Property `indent_wrapped_lines` setter
+    def indent_wrapped_lines=(val)
+      set_indent_wrapped_lines(val)
+    end
+    # Property `tab_input_mode` getter
+    def tab_input_mode
+      get_tab_input_mode
+    end
+    def tab_input_mode?
+      tab_input_mode
+    end
+    # Property `tab_input_mode` setter
+    def tab_input_mode=(val)
+      set_tab_input_mode(val)
+    end
+    # Property `selection_handle_enabled` getter
+    def selection_handle_enabled
+      is_selection_handle_enabled
+    end
+    def selection_handle_enabled?
+      selection_handle_enabled
+    end
+    # Property `selection_handle_enabled` setter
+    def selection_handle_enabled=(val)
+      set_selection_handle_enabled(val)
+    end
+    # Property `virtual_keyboard_enabled` getter
+    def virtual_keyboard_enabled
+      is_virtual_keyboard_enabled
+    end
+    def virtual_keyboard_enabled?
+      virtual_keyboard_enabled
+    end
+    # Property `virtual_keyboard_enabled` setter
+    def virtual_keyboard_enabled=(val)
+      set_virtual_keyboard_enabled(val)
+    end
+    # Property `virtual_keyboard_show_on_focus` getter
+    def virtual_keyboard_show_on_focus
+      get_virtual_keyboard_show_on_focus
+    end
+    def virtual_keyboard_show_on_focus?
+      virtual_keyboard_show_on_focus
+    end
+    # Property `virtual_keyboard_show_on_focus` setter
+    def virtual_keyboard_show_on_focus=(val)
+      set_virtual_keyboard_show_on_focus(val)
+    end
+    # Property `scroll_smooth` getter
+    def scroll_smooth
+      is_smooth_scroll_enabled
+    end
+    def scroll_smooth?
+      scroll_smooth
+    end
+    # Property `scroll_smooth` setter
+    def scroll_smooth=(val)
+      set_smooth_scroll_enabled(val)
+    end
+    # Property `scroll_v_scroll_speed` getter
+    def scroll_v_scroll_speed
+      get_v_scroll_speed
+    end
+    # Property `scroll_v_scroll_speed` setter
+    def scroll_v_scroll_speed=(val : Number)
+      set_v_scroll_speed(val.to_f64)
+    end
+    # Property `scroll_past_end_of_file` getter
+    def scroll_past_end_of_file
+      is_scroll_past_end_of_file_enabled
+    end
+    def scroll_past_end_of_file?
+      scroll_past_end_of_file
+    end
+    # Property `scroll_past_end_of_file` setter
+    def scroll_past_end_of_file=(val)
+      set_scroll_past_end_of_file_enabled(val)
+    end
+    # Property `scroll_vertical` getter
+    def scroll_vertical
+      get_v_scroll
+    end
+    # Property `scroll_vertical` setter
+    def scroll_vertical=(val : Number)
+      set_v_scroll(val.to_f64)
+    end
+    # Property `scroll_horizontal` getter
+    def scroll_horizontal
+      get_h_scroll
+    end
+    # Property `scroll_horizontal` setter
+    def scroll_horizontal=(val : Int)
+      set_h_scroll(val.to_i64)
+    end
+    # Property `scroll_fit_content_height` getter
+    def scroll_fit_content_height
+      is_fit_content_height_enabled
+    end
+    def scroll_fit_content_height?
+      scroll_fit_content_height
+    end
+    # Property `scroll_fit_content_height` setter
+    def scroll_fit_content_height=(val)
+      set_fit_content_height_enabled(val)
+    end
+    # Property `scroll_fit_content_width` getter
+    def scroll_fit_content_width
+      is_fit_content_width_enabled
+    end
+    def scroll_fit_content_width?
+      scroll_fit_content_width
+    end
+    # Property `scroll_fit_content_width` setter
+    def scroll_fit_content_width=(val)
+      set_fit_content_width_enabled(val)
+    end
+    # Property `minimap_draw` getter
+    def minimap_draw
+      is_drawing_minimap
+    end
+    def minimap_draw?
+      minimap_draw
+    end
+    # Property `minimap_draw` setter
+    def minimap_draw=(val)
+      set_draw_minimap(val)
+    end
+    # Property `minimap_width` getter
+    def minimap_width
+      get_minimap_width
+    end
+    # Property `minimap_width` setter
+    def minimap_width=(val : Int)
+      set_minimap_width(val.to_i64)
+    end
+    # Property `caret_type` getter
+    def caret_type
+      get_caret_type
+    end
+    # Property `caret_type` setter
+    def caret_type=(val : Int)
+      set_caret_type(val.to_i64)
+    end
+    # Property `caret_blink` getter
+    def caret_blink
+      is_caret_blink_enabled
+    end
+    def caret_blink?
+      caret_blink
+    end
+    # Property `caret_blink` setter
+    def caret_blink=(val)
+      set_caret_blink_enabled(val)
+    end
+    # Property `caret_blink_interval` getter
+    def caret_blink_interval
+      get_caret_blink_interval
+    end
+    # Property `caret_blink_interval` setter
+    def caret_blink_interval=(val : Number)
+      set_caret_blink_interval(val.to_f64)
+    end
+    # Property `caret_draw_when_editable_disabled` getter
+    def caret_draw_when_editable_disabled
+      is_drawing_caret_when_editable_disabled
+    end
+    def caret_draw_when_editable_disabled?
+      caret_draw_when_editable_disabled
+    end
+    # Property `caret_draw_when_editable_disabled` setter
+    def caret_draw_when_editable_disabled=(val)
+      set_draw_caret_when_editable_disabled(val)
+    end
+    # Property `caret_move_on_right_click` getter
+    def caret_move_on_right_click
+      is_move_caret_on_right_click_enabled
+    end
+    def caret_move_on_right_click?
+      caret_move_on_right_click
+    end
+    # Property `caret_move_on_right_click` setter
+    def caret_move_on_right_click=(val)
+      set_move_caret_on_right_click_enabled(val)
+    end
+    # Property `caret_mid_grapheme` getter
+    def caret_mid_grapheme
+      is_caret_mid_grapheme_enabled
+    end
+    def caret_mid_grapheme?
+      caret_mid_grapheme
+    end
+    # Property `caret_mid_grapheme` setter
+    def caret_mid_grapheme=(val)
+      set_caret_mid_grapheme_enabled(val)
+    end
+    # Property `caret_multiple` getter
+    def caret_multiple
+      is_multiple_carets_enabled
+    end
+    def caret_multiple?
+      caret_multiple
+    end
+    # Property `caret_multiple` setter
+    def caret_multiple=(val)
+      set_multiple_carets_enabled(val)
+    end
+    # Property `use_default_word_separators` getter
+    def use_default_word_separators
+      is_default_word_separators_enabled
+    end
+    def use_default_word_separators?
+      use_default_word_separators
+    end
+    # Property `use_default_word_separators` setter
+    def use_default_word_separators=(val)
+      set_use_default_word_separators(val)
+    end
+    # Property `use_custom_word_separators` getter
+    def use_custom_word_separators
+      is_custom_word_separators_enabled
+    end
+    def use_custom_word_separators?
+      use_custom_word_separators
+    end
+    # Property `use_custom_word_separators` setter
+    def use_custom_word_separators=(val)
+      set_use_custom_word_separators(val)
+    end
+    # Property `custom_word_separators` getter
+    def custom_word_separators
+      get_custom_word_separators
+    end
+    # Property `custom_word_separators` setter
+    def custom_word_separators=(val)
+      set_custom_word_separators(val)
+    end
+    # Property `syntax_highlighter` getter
+    def syntax_highlighter
+      get_syntax_highlighter
+    end
+    # Property `syntax_highlighter` setter
+    def syntax_highlighter=(val)
+      set_syntax_highlighter(val)
+    end
+    # Property `highlight_all_occurrences` getter
+    def highlight_all_occurrences
+      is_highlight_all_occurrences_enabled
+    end
+    def highlight_all_occurrences?
+      highlight_all_occurrences
+    end
+    # Property `highlight_all_occurrences` setter
+    def highlight_all_occurrences=(val)
+      set_highlight_all_occurrences(val)
+    end
+    # Property `highlight_current_line` getter
+    def highlight_current_line
+      is_highlight_current_line_enabled
+    end
+    def highlight_current_line?
+      highlight_current_line
+    end
+    # Property `highlight_current_line` setter
+    def highlight_current_line=(val)
+      set_highlight_current_line(val)
+    end
+    # Property `draw_control_chars` getter
+    def draw_control_chars
+      get_draw_control_chars
+    end
+    def draw_control_chars?
+      draw_control_chars
+    end
+    # Property `draw_control_chars` setter
+    def draw_control_chars=(val)
+      set_draw_control_chars(val)
+    end
+    # Property `draw_tabs` getter
+    def draw_tabs
+      is_drawing_tabs
+    end
+    def draw_tabs?
+      draw_tabs
+    end
+    # Property `draw_tabs` setter
+    def draw_tabs=(val)
+      set_draw_tabs(val)
+    end
+    # Property `draw_spaces` getter
+    def draw_spaces
+      is_drawing_spaces
+    end
+    def draw_spaces?
+      draw_spaces
+    end
+    # Property `draw_spaces` setter
+    def draw_spaces=(val)
+      set_draw_spaces(val)
+    end
+    # Property `text_direction` getter
+    def text_direction
+      get_text_direction
+    end
+    # Property `text_direction` setter
+    def text_direction=(val : Int)
+      set_text_direction(val.to_i64)
+    end
+    # Property `language` getter
+    def language
+      get_language
+    end
+    # Property `language` setter
+    def language=(val)
+      set_language(val)
+    end
+    # Property `structured_text_bidi_override` getter
+    def structured_text_bidi_override
+      get_structured_text_bidi_override
+    end
+    # Property `structured_text_bidi_override` setter
+    def structured_text_bidi_override=(val : Int)
+      set_structured_text_bidi_override(val.to_i64)
+    end
+    # Property `structured_text_bidi_override_options` getter
+    def structured_text_bidi_override_options
+      get_structured_text_bidi_override_options
+    end
+    # Property `structured_text_bidi_override_options` setter
+    def structured_text_bidi_override_options=(val)
+      set_structured_text_bidi_override_options(val)
+    end
   end
   class CodeEdit < Godot::TextEdit
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -6860,6 +8027,224 @@ module Godot
       end
       Bridge.ptrcall(@@mb_duplicate_lines, @pointer, Pointer(Pointer(Void)).null, Pointer(Void).null)
     end
+    # Property `symbol_lookup_on_click` getter
+    def symbol_lookup_on_click
+      is_symbol_lookup_on_click_enabled
+    end
+    def symbol_lookup_on_click?
+      symbol_lookup_on_click
+    end
+    # Property `symbol_lookup_on_click` setter
+    def symbol_lookup_on_click=(val)
+      set_symbol_lookup_on_click_enabled(val)
+    end
+    # Property `symbol_tooltip_on_hover` getter
+    def symbol_tooltip_on_hover
+      is_symbol_tooltip_on_hover_enabled
+    end
+    def symbol_tooltip_on_hover?
+      symbol_tooltip_on_hover
+    end
+    # Property `symbol_tooltip_on_hover` setter
+    def symbol_tooltip_on_hover=(val)
+      set_symbol_tooltip_on_hover_enabled(val)
+    end
+    # Property `line_folding` getter
+    def line_folding
+      is_line_folding_enabled
+    end
+    def line_folding?
+      line_folding
+    end
+    # Property `line_folding` setter
+    def line_folding=(val)
+      set_line_folding_enabled(val)
+    end
+    # Property `line_length_guidelines` getter
+    def line_length_guidelines
+      get_line_length_guidelines
+    end
+    # Property `line_length_guidelines` setter
+    def line_length_guidelines=(val)
+      set_line_length_guidelines(val)
+    end
+    # Property `gutters_draw_breakpoints_gutter` getter
+    def gutters_draw_breakpoints_gutter
+      is_drawing_breakpoints_gutter
+    end
+    def gutters_draw_breakpoints_gutter?
+      gutters_draw_breakpoints_gutter
+    end
+    # Property `gutters_draw_breakpoints_gutter` setter
+    def gutters_draw_breakpoints_gutter=(val)
+      set_draw_breakpoints_gutter(val)
+    end
+    # Property `gutters_draw_bookmarks` getter
+    def gutters_draw_bookmarks
+      is_drawing_bookmarks_gutter
+    end
+    def gutters_draw_bookmarks?
+      gutters_draw_bookmarks
+    end
+    # Property `gutters_draw_bookmarks` setter
+    def gutters_draw_bookmarks=(val)
+      set_draw_bookmarks_gutter(val)
+    end
+    # Property `gutters_draw_executing_lines` getter
+    def gutters_draw_executing_lines
+      is_drawing_executing_lines_gutter
+    end
+    def gutters_draw_executing_lines?
+      gutters_draw_executing_lines
+    end
+    # Property `gutters_draw_executing_lines` setter
+    def gutters_draw_executing_lines=(val)
+      set_draw_executing_lines_gutter(val)
+    end
+    # Property `gutters_draw_line_numbers` getter
+    def gutters_draw_line_numbers
+      is_draw_line_numbers_enabled
+    end
+    def gutters_draw_line_numbers?
+      gutters_draw_line_numbers
+    end
+    # Property `gutters_draw_line_numbers` setter
+    def gutters_draw_line_numbers=(val)
+      set_draw_line_numbers(val)
+    end
+    # Property `gutters_zero_pad_line_numbers` getter
+    def gutters_zero_pad_line_numbers
+      is_line_numbers_zero_padded
+    end
+    def gutters_zero_pad_line_numbers?
+      gutters_zero_pad_line_numbers
+    end
+    # Property `gutters_zero_pad_line_numbers` setter
+    def gutters_zero_pad_line_numbers=(val)
+      set_line_numbers_zero_padded(val)
+    end
+    # Property `gutters_line_numbers_min_digits` getter
+    def gutters_line_numbers_min_digits
+      get_line_numbers_min_digits
+    end
+    # Property `gutters_line_numbers_min_digits` setter
+    def gutters_line_numbers_min_digits=(val : Int)
+      set_line_numbers_min_digits(val.to_i64)
+    end
+    # Property `gutters_draw_fold_gutter` getter
+    def gutters_draw_fold_gutter
+      is_drawing_fold_gutter
+    end
+    def gutters_draw_fold_gutter?
+      gutters_draw_fold_gutter
+    end
+    # Property `gutters_draw_fold_gutter` setter
+    def gutters_draw_fold_gutter=(val)
+      set_draw_fold_gutter(val)
+    end
+    # Property `delimiter_strings` getter
+    def delimiter_strings
+      get_string_delimiters
+    end
+    # Property `delimiter_strings` setter
+    def delimiter_strings=(val)
+      set_string_delimiters(val)
+    end
+    # Property `delimiter_comments` getter
+    def delimiter_comments
+      get_comment_delimiters
+    end
+    # Property `delimiter_comments` setter
+    def delimiter_comments=(val)
+      set_comment_delimiters(val)
+    end
+    # Property `code_completion_enabled` getter
+    def code_completion_enabled
+      is_code_completion_enabled
+    end
+    def code_completion_enabled?
+      code_completion_enabled
+    end
+    # Property `code_completion_enabled` setter
+    def code_completion_enabled=(val)
+      set_code_completion_enabled(val)
+    end
+    # Property `code_completion_prefixes` getter
+    def code_completion_prefixes
+      get_code_completion_prefixes
+    end
+    # Property `code_completion_prefixes` setter
+    def code_completion_prefixes=(val)
+      set_code_completion_prefixes(val)
+    end
+    # Property `indent_size` getter
+    def indent_size
+      get_indent_size
+    end
+    # Property `indent_size` setter
+    def indent_size=(val : Int)
+      set_indent_size(val.to_i64)
+    end
+    # Property `indent_use_spaces` getter
+    def indent_use_spaces
+      is_indent_using_spaces
+    end
+    def indent_use_spaces?
+      indent_use_spaces
+    end
+    # Property `indent_use_spaces` setter
+    def indent_use_spaces=(val)
+      set_indent_using_spaces(val)
+    end
+    # Property `indent_automatic` getter
+    def indent_automatic
+      is_auto_indent_enabled
+    end
+    def indent_automatic?
+      indent_automatic
+    end
+    # Property `indent_automatic` setter
+    def indent_automatic=(val)
+      set_auto_indent_enabled(val)
+    end
+    # Property `indent_automatic_prefixes` getter
+    def indent_automatic_prefixes
+      get_auto_indent_prefixes
+    end
+    # Property `indent_automatic_prefixes` setter
+    def indent_automatic_prefixes=(val)
+      set_auto_indent_prefixes(val)
+    end
+    # Property `auto_brace_completion_enabled` getter
+    def auto_brace_completion_enabled
+      is_auto_brace_completion_enabled
+    end
+    def auto_brace_completion_enabled?
+      auto_brace_completion_enabled
+    end
+    # Property `auto_brace_completion_enabled` setter
+    def auto_brace_completion_enabled=(val)
+      set_auto_brace_completion_enabled(val)
+    end
+    # Property `auto_brace_completion_highlight_matching` getter
+    def auto_brace_completion_highlight_matching
+      is_highlight_matching_braces_enabled
+    end
+    def auto_brace_completion_highlight_matching?
+      auto_brace_completion_highlight_matching
+    end
+    # Property `auto_brace_completion_highlight_matching` setter
+    def auto_brace_completion_highlight_matching=(val)
+      set_highlight_matching_braces_enabled(val)
+    end
+    # Property `auto_brace_completion_pairs` getter
+    def auto_brace_completion_pairs
+      get_auto_brace_completion_pairs
+    end
+    # Property `auto_brace_completion_pairs` setter
+    def auto_brace_completion_pairs=(val)
+      set_auto_brace_completion_pairs(val)
+    end
   end
   class SyntaxHighlighter < Godot::Resource
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -7212,6 +8597,62 @@ module Godot
       Bridge.ptrcall(@@mb_get_member_variable_color, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `number_color` getter
+    def number_color
+      get_number_color
+    end
+    # Property `number_color` setter
+    def number_color=(val)
+      set_number_color(val)
+    end
+    # Property `symbol_color` getter
+    def symbol_color
+      get_symbol_color
+    end
+    # Property `symbol_color` setter
+    def symbol_color=(val)
+      set_symbol_color(val)
+    end
+    # Property `function_color` getter
+    def function_color
+      get_function_color
+    end
+    # Property `function_color` setter
+    def function_color=(val)
+      set_function_color(val)
+    end
+    # Property `member_variable_color` getter
+    def member_variable_color
+      get_member_variable_color
+    end
+    # Property `member_variable_color` setter
+    def member_variable_color=(val)
+      set_member_variable_color(val)
+    end
+    # Property `keyword_colors` getter
+    def keyword_colors
+      get_keyword_colors
+    end
+    # Property `keyword_colors` setter
+    def keyword_colors=(val)
+      set_keyword_colors(val)
+    end
+    # Property `member_keyword_colors` getter
+    def member_keyword_colors
+      get_member_keyword_colors
+    end
+    # Property `member_keyword_colors` setter
+    def member_keyword_colors=(val)
+      set_member_keyword_colors(val)
+    end
+    # Property `color_regions` getter
+    def color_regions
+      get_color_regions
+    end
+    # Property `color_regions` setter
+    def color_regions=(val)
+      set_color_regions(val)
+    end
   end
   class CollisionPolygon2D < Godot::Node2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -7335,6 +8776,60 @@ module Godot
       Bridge.ptrcall(@@mb_get_one_way_collision_direction, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `build_mode` getter
+    def build_mode
+      get_build_mode
+    end
+    # Property `build_mode` setter
+    def build_mode=(val : Int)
+      set_build_mode(val.to_i64)
+    end
+    # Property `polygon` getter
+    def polygon
+      get_polygon
+    end
+    # Property `polygon` setter
+    def polygon=(val)
+      set_polygon(val)
+    end
+    # Property `disabled` getter
+    def disabled
+      is_disabled
+    end
+    def disabled?
+      disabled
+    end
+    # Property `disabled` setter
+    def disabled=(val)
+      set_disabled(val)
+    end
+    # Property `one_way_collision` getter
+    def one_way_collision
+      is_one_way_collision_enabled
+    end
+    def one_way_collision?
+      one_way_collision
+    end
+    # Property `one_way_collision` setter
+    def one_way_collision=(val)
+      set_one_way_collision(val)
+    end
+    # Property `one_way_collision_margin` getter
+    def one_way_collision_margin
+      get_one_way_collision_margin
+    end
+    # Property `one_way_collision_margin` setter
+    def one_way_collision_margin=(val : Number)
+      set_one_way_collision_margin(val.to_f64)
+    end
+    # Property `one_way_collision_direction` getter
+    def one_way_collision_direction
+      get_one_way_collision_direction
+    end
+    # Property `one_way_collision_direction` setter
+    def one_way_collision_direction=(val)
+      set_one_way_collision_direction(val)
+    end
   end
   class CollisionPolygon3D < Godot::Node3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -7453,6 +8948,60 @@ module Godot
       ret = 0.0_f64
       Bridge.ptrcall(@@mb_get_margin, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `depth` getter
+    def depth
+      get_depth
+    end
+    # Property `depth` setter
+    def depth=(val : Number)
+      set_depth(val.to_f64)
+    end
+    # Property `disabled` getter
+    def disabled
+      is_disabled
+    end
+    def disabled?
+      disabled
+    end
+    # Property `disabled` setter
+    def disabled=(val)
+      set_disabled(val)
+    end
+    # Property `polygon` getter
+    def polygon
+      get_polygon
+    end
+    # Property `polygon` setter
+    def polygon=(val)
+      set_polygon(val)
+    end
+    # Property `margin` getter
+    def margin
+      get_margin
+    end
+    # Property `margin` setter
+    def margin=(val : Number)
+      set_margin(val.to_f64)
+    end
+    # Property `debug_color` getter
+    def debug_color
+      get_debug_color
+    end
+    # Property `debug_color` setter
+    def debug_color=(val)
+      set_debug_color(val)
+    end
+    # Property `debug_fill` getter
+    def debug_fill
+      get_enable_debug_fill
+    end
+    def debug_fill?
+      debug_fill
+    end
+    # Property `debug_fill` setter
+    def debug_fill=(val)
+      set_enable_debug_fill(val)
     end
   end
   class CollisionShape2D < Godot::Node2D
@@ -7573,6 +9122,60 @@ module Godot
       Bridge.ptrcall(@@mb_get_debug_color, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `shape` getter
+    def shape
+      get_shape
+    end
+    # Property `shape` setter
+    def shape=(val)
+      set_shape(val)
+    end
+    # Property `disabled` getter
+    def disabled
+      is_disabled
+    end
+    def disabled?
+      disabled
+    end
+    # Property `disabled` setter
+    def disabled=(val)
+      set_disabled(val)
+    end
+    # Property `one_way_collision` getter
+    def one_way_collision
+      is_one_way_collision_enabled
+    end
+    def one_way_collision?
+      one_way_collision
+    end
+    # Property `one_way_collision` setter
+    def one_way_collision=(val)
+      set_one_way_collision(val)
+    end
+    # Property `one_way_collision_margin` getter
+    def one_way_collision_margin
+      get_one_way_collision_margin
+    end
+    # Property `one_way_collision_margin` setter
+    def one_way_collision_margin=(val : Number)
+      set_one_way_collision_margin(val.to_f64)
+    end
+    # Property `one_way_collision_direction` getter
+    def one_way_collision_direction
+      get_one_way_collision_direction
+    end
+    # Property `one_way_collision_direction` setter
+    def one_way_collision_direction=(val)
+      set_one_way_collision_direction(val)
+    end
+    # Property `debug_color` getter
+    def debug_color
+      get_debug_color
+    end
+    # Property `debug_color` setter
+    def debug_color=(val)
+      set_debug_color(val)
+    end
   end
   class CollisionShape3D < Godot::Node3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -7671,6 +9274,33 @@ module Godot
       Bridge.ptrcall(@@mb_get_enable_debug_fill, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `shape` getter
+    def shape
+      get_shape
+    end
+    # Property `shape` setter
+    def shape=(val)
+      set_shape(val)
+    end
+    # Property `debug_color` getter
+    def debug_color
+      get_debug_color
+    end
+    # Property `debug_color` setter
+    def debug_color=(val)
+      set_debug_color(val)
+    end
+    # Property `debug_fill` getter
+    def debug_fill
+      get_enable_debug_fill
+    end
+    def debug_fill?
+      debug_fill
+    end
+    # Property `debug_fill` setter
+    def debug_fill=(val)
+      set_enable_debug_fill(val)
+    end
   end
   class ColorPalette < Godot::Resource
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -7694,6 +9324,14 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_colors, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       ret_ptr
+    end
+    # Property `colors` getter
+    def colors
+      get_colors
+    end
+    # Property `colors` setter
+    def colors=(val)
+      set_colors(val)
     end
   end
   class VBoxContainer < Godot::BoxContainer
@@ -8007,6 +9645,129 @@ module Godot
       Bridge.ptrcall(@@mb_get_picker_shape, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `color` getter
+    def color
+      get_pick_color
+    end
+    # Property `color` setter
+    def color=(val)
+      set_pick_color(val)
+    end
+    # Property `edit_alpha` getter
+    def edit_alpha
+      is_editing_alpha
+    end
+    def edit_alpha?
+      edit_alpha
+    end
+    # Property `edit_alpha` setter
+    def edit_alpha=(val)
+      set_edit_alpha(val)
+    end
+    # Property `edit_intensity` getter
+    def edit_intensity
+      is_editing_intensity
+    end
+    def edit_intensity?
+      edit_intensity
+    end
+    # Property `edit_intensity` setter
+    def edit_intensity=(val)
+      set_edit_intensity(val)
+    end
+    # Property `color_mode` getter
+    def color_mode
+      get_color_mode
+    end
+    # Property `color_mode` setter
+    def color_mode=(val : Int)
+      set_color_mode(val.to_i64)
+    end
+    # Property `deferred_mode` getter
+    def deferred_mode
+      is_deferred_mode
+    end
+    def deferred_mode?
+      deferred_mode
+    end
+    # Property `deferred_mode` setter
+    def deferred_mode=(val)
+      set_deferred_mode(val)
+    end
+    # Property `picker_shape` getter
+    def picker_shape
+      get_picker_shape
+    end
+    # Property `picker_shape` setter
+    def picker_shape=(val : Int)
+      set_picker_shape(val.to_i64)
+    end
+    # Property `can_add_swatches` getter
+    def can_add_swatches
+      are_swatches_enabled
+    end
+    def can_add_swatches?
+      can_add_swatches
+    end
+    # Property `can_add_swatches` setter
+    def can_add_swatches=(val)
+      set_can_add_swatches(val)
+    end
+    # Property `sampler_visible` getter
+    def sampler_visible
+      is_sampler_visible
+    end
+    def sampler_visible?
+      sampler_visible
+    end
+    # Property `sampler_visible` setter
+    def sampler_visible=(val)
+      set_sampler_visible(val)
+    end
+    # Property `color_modes_visible` getter
+    def color_modes_visible
+      are_modes_visible
+    end
+    def color_modes_visible?
+      color_modes_visible
+    end
+    # Property `color_modes_visible` setter
+    def color_modes_visible=(val)
+      set_modes_visible(val)
+    end
+    # Property `sliders_visible` getter
+    def sliders_visible
+      are_sliders_visible
+    end
+    def sliders_visible?
+      sliders_visible
+    end
+    # Property `sliders_visible` setter
+    def sliders_visible=(val)
+      set_sliders_visible(val)
+    end
+    # Property `hex_visible` getter
+    def hex_visible
+      is_hex_visible
+    end
+    def hex_visible?
+      hex_visible
+    end
+    # Property `hex_visible` setter
+    def hex_visible=(val)
+      set_hex_visible(val)
+    end
+    # Property `presets_visible` getter
+    def presets_visible
+      are_presets_visible
+    end
+    def presets_visible?
+      presets_visible
+    end
+    # Property `presets_visible` setter
+    def presets_visible=(val)
+      set_presets_visible(val)
+    end
   end
   class ColorPickerButton < Godot::Button
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -8087,6 +9848,36 @@ module Godot
       Bridge.ptrcall(@@mb_is_editing_intensity, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `color` getter
+    def color
+      get_pick_color
+    end
+    # Property `color` setter
+    def color=(val)
+      set_pick_color(val)
+    end
+    # Property `edit_alpha` getter
+    def edit_alpha
+      is_editing_alpha
+    end
+    def edit_alpha?
+      edit_alpha
+    end
+    # Property `edit_alpha` setter
+    def edit_alpha=(val)
+      set_edit_alpha(val)
+    end
+    # Property `edit_intensity` getter
+    def edit_intensity
+      is_editing_intensity
+    end
+    def edit_intensity?
+      edit_intensity
+    end
+    # Property `edit_intensity` setter
+    def edit_intensity=(val)
+      set_edit_intensity(val)
+    end
   end
   class ColorRect < Godot::Control
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -8111,6 +9902,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_color, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `color` getter
+    def color
+      get_color
+    end
+    # Property `color` setter
+    def color=(val)
+      set_color(val)
+    end
   end
   class Compositor < Godot::Resource
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -8134,6 +9933,14 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_compositor_effects, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Godot::Array.new(ret_ptr)
+    end
+    # Property `compositor_effects` getter
+    def compositor_effects
+      get_compositor_effects
+    end
+    # Property `compositor_effects` setter
+    def compositor_effects=(val)
+      set_compositor_effects(val)
     end
   end
   class CompositorEffect < Godot::Resource
@@ -8281,6 +10088,80 @@ module Godot
       Bridge.ptrcall(@@mb_get_needs_separate_specular, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `enabled` getter
+    def enabled
+      get_enabled
+    end
+    def enabled?
+      enabled
+    end
+    # Property `enabled` setter
+    def enabled=(val)
+      set_enabled(val)
+    end
+    # Property `effect_callback_type` getter
+    def effect_callback_type
+      get_effect_callback_type
+    end
+    # Property `effect_callback_type` setter
+    def effect_callback_type=(val : Int)
+      set_effect_callback_type(val.to_i64)
+    end
+    # Property `access_resolved_color` getter
+    def access_resolved_color
+      get_access_resolved_color
+    end
+    def access_resolved_color?
+      access_resolved_color
+    end
+    # Property `access_resolved_color` setter
+    def access_resolved_color=(val)
+      set_access_resolved_color(val)
+    end
+    # Property `access_resolved_depth` getter
+    def access_resolved_depth
+      get_access_resolved_depth
+    end
+    def access_resolved_depth?
+      access_resolved_depth
+    end
+    # Property `access_resolved_depth` setter
+    def access_resolved_depth=(val)
+      set_access_resolved_depth(val)
+    end
+    # Property `needs_motion_vectors` getter
+    def needs_motion_vectors
+      get_needs_motion_vectors
+    end
+    def needs_motion_vectors?
+      needs_motion_vectors
+    end
+    # Property `needs_motion_vectors` setter
+    def needs_motion_vectors=(val)
+      set_needs_motion_vectors(val)
+    end
+    # Property `needs_normal_roughness` getter
+    def needs_normal_roughness
+      get_needs_normal_roughness
+    end
+    def needs_normal_roughness?
+      needs_normal_roughness
+    end
+    # Property `needs_normal_roughness` setter
+    def needs_normal_roughness=(val)
+      set_needs_normal_roughness(val)
+    end
+    # Property `needs_separate_specular` getter
+    def needs_separate_specular
+      get_needs_separate_specular
+    end
+    def needs_separate_specular?
+      needs_separate_specular
+    end
+    # Property `needs_separate_specular` setter
+    def needs_separate_specular=(val)
+      set_needs_separate_specular(val)
+    end
   end
   class TextureLayered < Godot::Texture
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -8383,6 +10264,14 @@ module Godot
       end
       ""
     end
+    # Property `load_path` getter
+    def load_path
+      get_load_path
+    end
+    # Property `load_path` setter
+    def load_path=(val)
+      load(val)
+    end
   end
   class CompressedCubemap < Godot::CompressedTextureLayered
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -8418,6 +10307,14 @@ module Godot
         @@mb_get_load_path = Bridge.get_method_bind("CompressedTexture2D", "get_load_path", 201670096_i64)
       end
       ""
+    end
+    # Property `load_path` getter
+    def load_path
+      get_load_path
+    end
+    # Property `load_path` setter
+    def load_path=(val)
+      load(val)
     end
   end
   class CompressedTexture2DArray < Godot::CompressedTextureLayered
@@ -8518,6 +10415,14 @@ module Godot
       end
       ""
     end
+    # Property `load_path` getter
+    def load_path
+      get_load_path
+    end
+    # Property `load_path` setter
+    def load_path=(val)
+      load(val)
+    end
   end
   class ConcavePolygonShape2D < Godot::Shape2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -8541,6 +10446,14 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_segments, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       ret_ptr
+    end
+    # Property `segments` getter
+    def segments
+      get_segments
+    end
+    # Property `segments` setter
+    def segments=(val)
+      set_segments(val)
     end
   end
   class ConcavePolygonShape3D < Godot::Shape3D
@@ -8584,6 +10497,25 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_backface_collision_enabled, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `data` getter
+    def data
+      get_faces
+    end
+    # Property `data` setter
+    def data=(val)
+      set_faces(val)
+    end
+    # Property `backface_collision` getter
+    def backface_collision
+      is_backface_collision_enabled
+    end
+    def backface_collision?
+      backface_collision
+    end
+    # Property `backface_collision` setter
+    def backface_collision=(val)
+      set_backface_collision_enabled(val)
     end
   end
   class Joint3D < Godot::Node3D
@@ -8675,6 +10607,41 @@ module Godot
       Bridge.ptrcall(@@mb_get_rid, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `node_a` getter
+    def node_a
+      get_node_a
+    end
+    # Property `node_a` setter
+    def node_a=(val)
+      set_node_a(val)
+    end
+    # Property `node_b` getter
+    def node_b
+      get_node_b
+    end
+    # Property `node_b` setter
+    def node_b=(val)
+      set_node_b(val)
+    end
+    # Property `solver_priority` getter
+    def solver_priority
+      get_solver_priority
+    end
+    # Property `solver_priority` setter
+    def solver_priority=(val : Int)
+      set_solver_priority(val.to_i64)
+    end
+    # Property `exclude_nodes_from_collision` getter
+    def exclude_nodes_from_collision
+      get_exclude_nodes_from_collision
+    end
+    def exclude_nodes_from_collision?
+      exclude_nodes_from_collision
+    end
+    # Property `exclude_nodes_from_collision` setter
+    def exclude_nodes_from_collision=(val)
+      set_exclude_nodes_from_collision(val)
+    end
   end
   class ConeTwistJoint3D < Godot::Joint3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -8711,6 +10678,46 @@ module Godot
       ret = 0.0_f64
       Bridge.ptrcall(@@mb_get_param, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
       ret
+    end
+    # Property `swing_span` getter
+    def swing_span
+      get_param(0_i64)
+    end
+    # Property `swing_span` setter
+    def swing_span=(val : Number)
+      set_param(0_i64, val.to_f64)
+    end
+    # Property `twist_span` getter
+    def twist_span
+      get_param(1_i64)
+    end
+    # Property `twist_span` setter
+    def twist_span=(val : Number)
+      set_param(1_i64, val.to_f64)
+    end
+    # Property `bias` getter
+    def bias
+      get_param(2_i64)
+    end
+    # Property `bias` setter
+    def bias=(val : Number)
+      set_param(2_i64, val.to_f64)
+    end
+    # Property `softness` getter
+    def softness
+      get_param(3_i64)
+    end
+    # Property `softness` setter
+    def softness=(val : Number)
+      set_param(3_i64, val.to_f64)
+    end
+    # Property `relaxation` getter
+    def relaxation
+      get_param(4_i64)
+    end
+    # Property `relaxation` setter
+    def relaxation=(val : Number)
+      set_param(4_i64, val.to_f64)
     end
   end
   class ConfigFile < Godot::RefCounted
@@ -8991,6 +10998,14 @@ module Godot
       end
       ""
     end
+    # Property `cancel_button_text` getter
+    def cancel_button_text
+      get_cancel_button_text
+    end
+    # Property `cancel_button_text` setter
+    def cancel_button_text=(val)
+      set_cancel_button_text(val)
+    end
   end
   class ConvertTransformModifier3D < Godot::BoneConstraint3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -9265,6 +11280,14 @@ module Godot
       Bridge.ptrcall(@@mb_is_additive, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `setting_count` getter
+    def setting_count
+      get_setting_count
+    end
+    # Property `setting_count` setter
+    def setting_count=(val : Int)
+      set_setting_count(val.to_i64)
+    end
   end
   class ConvexPolygonShape2D < Godot::Shape2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -9299,6 +11322,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_points, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       ret_ptr
     end
+    # Property `points` getter
+    def points
+      get_points
+    end
+    # Property `points` setter
+    def points=(val)
+      set_points(val)
+    end
   end
   class ConvexPolygonShape3D < Godot::Shape3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -9322,6 +11353,14 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_points, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       ret_ptr
+    end
+    # Property `points` getter
+    def points
+      get_points
+    end
+    # Property `points` setter
+    def points=(val)
+      set_points(val)
     end
   end
   class CopyTransformModifier3D < Godot::BoneConstraint3D
@@ -9699,6 +11738,14 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_additive, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `setting_count` getter
+    def setting_count
+      get_setting_count
+    end
+    # Property `setting_count` setter
+    def setting_count=(val : Int)
+      set_setting_count(val.to_i64)
     end
   end
   class Crypto < Godot::RefCounted
@@ -10323,6 +12370,54 @@ module Godot
       args = [arg_0]
       Bridge.ptrcall(@@mb_set_bake_resolution, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
     end
+    # Property `min_domain` getter
+    def min_domain
+      get_min_domain
+    end
+    # Property `min_domain` setter
+    def min_domain=(val : Number)
+      set_min_domain(val.to_f64)
+    end
+    # Property `max_domain` getter
+    def max_domain
+      get_max_domain
+    end
+    # Property `max_domain` setter
+    def max_domain=(val : Number)
+      set_max_domain(val.to_f64)
+    end
+    # Property `min_value` getter
+    def min_value
+      get_min_value
+    end
+    # Property `min_value` setter
+    def min_value=(val : Number)
+      set_min_value(val.to_f64)
+    end
+    # Property `max_value` getter
+    def max_value
+      get_max_value
+    end
+    # Property `max_value` setter
+    def max_value=(val : Number)
+      set_max_value(val.to_f64)
+    end
+    # Property `bake_resolution` getter
+    def bake_resolution
+      get_bake_resolution
+    end
+    # Property `bake_resolution` setter
+    def bake_resolution=(val : Int)
+      set_bake_resolution(val.to_i64)
+    end
+    # Property `point_count` getter
+    def point_count
+      get_point_count
+    end
+    # Property `point_count` setter
+    def point_count=(val : Int)
+      set_point_count(val.to_i64)
+    end
   end
   class Curve2D < Godot::Resource
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -10594,6 +12689,22 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_tessellate_even_length, @pointer, args.to_unsafe.as(Void**), pointerof(ret_ptr).as(Void*))
       ret_ptr
+    end
+    # Property `bake_interval` getter
+    def bake_interval
+      get_bake_interval
+    end
+    # Property `bake_interval` setter
+    def bake_interval=(val : Number)
+      set_bake_interval(val.to_f64)
+    end
+    # Property `point_count` getter
+    def point_count
+      get_point_count
+    end
+    # Property `point_count` setter
+    def point_count=(val : Int)
+      set_point_count(val.to_i64)
     end
   end
   class Curve3D < Godot::Resource
@@ -10963,6 +13074,44 @@ module Godot
       Bridge.ptrcall(@@mb_tessellate_even_length, @pointer, args.to_unsafe.as(Void**), pointerof(ret_ptr).as(Void*))
       ret_ptr
     end
+    # Property `closed` getter
+    def closed
+      is_closed
+    end
+    def closed?
+      closed
+    end
+    # Property `closed` setter
+    def closed=(val)
+      set_closed(val)
+    end
+    # Property `bake_interval` getter
+    def bake_interval
+      get_bake_interval
+    end
+    # Property `bake_interval` setter
+    def bake_interval=(val : Number)
+      set_bake_interval(val.to_f64)
+    end
+    # Property `point_count` getter
+    def point_count
+      get_point_count
+    end
+    # Property `point_count` setter
+    def point_count=(val : Int)
+      set_point_count(val.to_i64)
+    end
+    # Property `up_vector_enabled` getter
+    def up_vector_enabled
+      is_up_vector_enabled
+    end
+    def up_vector_enabled?
+      up_vector_enabled
+    end
+    # Property `up_vector_enabled` setter
+    def up_vector_enabled=(val)
+      set_up_vector_enabled(val)
+    end
   end
   class CurveTexture < Godot::Texture2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -11019,6 +13168,30 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_texture_mode, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `width` getter
+    def width
+      get_width
+    end
+    # Property `width` setter
+    def width=(val : Int)
+      set_width(val.to_i64)
+    end
+    # Property `texture_mode` getter
+    def texture_mode
+      get_texture_mode
+    end
+    # Property `texture_mode` setter
+    def texture_mode=(val : Int)
+      set_texture_mode(val.to_i64)
+    end
+    # Property `curve` getter
+    def curve
+      get_curve
+    end
+    # Property `curve` setter
+    def curve=(val)
+      set_curve(val)
     end
   end
   class CurveXYZTexture < Godot::Texture2D
@@ -11091,6 +13264,38 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_curve_z, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Curve.new(ret_ptr)
+    end
+    # Property `width` getter
+    def width
+      get_width
+    end
+    # Property `width` setter
+    def width=(val : Int)
+      set_width(val.to_i64)
+    end
+    # Property `curve_x` getter
+    def curve_x
+      get_curve_x
+    end
+    # Property `curve_x` setter
+    def curve_x=(val)
+      set_curve_x(val)
+    end
+    # Property `curve_y` getter
+    def curve_y
+      get_curve_y
+    end
+    # Property `curve_y` setter
+    def curve_y=(val)
+      set_curve_y(val)
+    end
+    # Property `curve_z` getter
+    def curve_z
+      get_curve_z
+    end
+    # Property `curve_z` setter
+    def curve_z=(val)
+      set_curve_z(val)
     end
   end
   class CylinderMesh < Godot::PrimitiveMesh
@@ -11230,6 +13435,68 @@ module Godot
       Bridge.ptrcall(@@mb_is_cap_bottom, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `top_radius` getter
+    def top_radius
+      get_top_radius
+    end
+    # Property `top_radius` setter
+    def top_radius=(val : Number)
+      set_top_radius(val.to_f64)
+    end
+    # Property `bottom_radius` getter
+    def bottom_radius
+      get_bottom_radius
+    end
+    # Property `bottom_radius` setter
+    def bottom_radius=(val : Number)
+      set_bottom_radius(val.to_f64)
+    end
+    # Property `height` getter
+    def height
+      get_height
+    end
+    # Property `height` setter
+    def height=(val : Number)
+      set_height(val.to_f64)
+    end
+    # Property `radial_segments` getter
+    def radial_segments
+      get_radial_segments
+    end
+    # Property `radial_segments` setter
+    def radial_segments=(val : Int)
+      set_radial_segments(val.to_i64)
+    end
+    # Property `rings` getter
+    def rings
+      get_rings
+    end
+    # Property `rings` setter
+    def rings=(val : Int)
+      set_rings(val.to_i64)
+    end
+    # Property `cap_top` getter
+    def cap_top
+      is_cap_top
+    end
+    def cap_top?
+      cap_top
+    end
+    # Property `cap_top` setter
+    def cap_top=(val)
+      set_cap_top(val)
+    end
+    # Property `cap_bottom` getter
+    def cap_bottom
+      is_cap_bottom
+    end
+    def cap_bottom?
+      cap_bottom
+    end
+    # Property `cap_bottom` setter
+    def cap_bottom=(val)
+      set_cap_bottom(val)
+    end
   end
   class CylinderShape3D < Godot::Shape3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -11272,6 +13539,22 @@ module Godot
       ret = 0.0_f64
       Bridge.ptrcall(@@mb_get_height, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `height` getter
+    def height
+      get_height
+    end
+    # Property `height` setter
+    def height=(val : Number)
+      set_height(val.to_f64)
+    end
+    # Property `radius` getter
+    def radius
+      get_radius
+    end
+    # Property `radius` setter
+    def radius=(val : Number)
+      set_radius(val.to_f64)
     end
   end
   class DPITexture < Godot::Texture2D
@@ -11431,6 +13714,52 @@ module Godot
       Bridge.ptrcall(@@mb_get_scaled_rid, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `fix_alpha_border` getter
+    def fix_alpha_border
+      get_fix_alpha_border
+    end
+    def fix_alpha_border?
+      fix_alpha_border
+    end
+    # Property `fix_alpha_border` setter
+    def fix_alpha_border=(val)
+      set_fix_alpha_border(val)
+    end
+    # Property `premult_alpha` getter
+    def premult_alpha
+      get_premult_alpha
+    end
+    def premult_alpha?
+      premult_alpha
+    end
+    # Property `premult_alpha` setter
+    def premult_alpha=(val)
+      set_premult_alpha(val)
+    end
+    # Property `base_scale` getter
+    def base_scale
+      get_base_scale
+    end
+    # Property `base_scale` setter
+    def base_scale=(val : Number)
+      set_base_scale(val.to_f64)
+    end
+    # Property `saturation` getter
+    def saturation
+      get_saturation
+    end
+    # Property `saturation` setter
+    def saturation=(val : Number)
+      set_saturation(val.to_f64)
+    end
+    # Property `color_map` getter
+    def color_map
+      get_color_map
+    end
+    # Property `color_map` setter
+    def color_map=(val)
+      set_color_map(val)
+    end
   end
   class DTLSServer < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -11550,6 +13879,41 @@ module Godot
       Bridge.ptrcall(@@mb_get_rid, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `node_a` getter
+    def node_a
+      get_node_a
+    end
+    # Property `node_a` setter
+    def node_a=(val)
+      set_node_a(val)
+    end
+    # Property `node_b` getter
+    def node_b
+      get_node_b
+    end
+    # Property `node_b` setter
+    def node_b=(val)
+      set_node_b(val)
+    end
+    # Property `bias` getter
+    def bias
+      get_bias
+    end
+    # Property `bias` setter
+    def bias=(val : Number)
+      set_bias(val.to_f64)
+    end
+    # Property `disable_collision` getter
+    def disable_collision
+      get_exclude_nodes_from_collision
+    end
+    def disable_collision?
+      disable_collision
+    end
+    # Property `disable_collision` setter
+    def disable_collision=(val)
+      set_exclude_nodes_from_collision(val)
+    end
   end
   class DampedSpringJoint2D < Godot::Joint2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -11630,6 +13994,38 @@ module Godot
       ret = 0.0_f64
       Bridge.ptrcall(@@mb_get_damping, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `length` getter
+    def length
+      get_length
+    end
+    # Property `length` setter
+    def length=(val : Number)
+      set_length(val.to_f64)
+    end
+    # Property `rest_length` getter
+    def rest_length
+      get_rest_length
+    end
+    # Property `rest_length` setter
+    def rest_length=(val : Number)
+      set_rest_length(val.to_f64)
+    end
+    # Property `stiffness` getter
+    def stiffness
+      get_stiffness
+    end
+    # Property `stiffness` setter
+    def stiffness=(val : Number)
+      set_stiffness(val.to_f64)
+    end
+    # Property `damping` getter
+    def damping
+      get_damping
+    end
+    # Property `damping` setter
+    def damping=(val : Number)
+      set_damping(val.to_f64)
     end
   end
   class Decal < Godot::VisualInstance3D
@@ -11875,6 +14271,129 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_cull_mask, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `size` getter
+    def size
+      get_size
+    end
+    # Property `size` setter
+    def size=(val)
+      set_size(val)
+    end
+    # Property `texture_albedo` getter
+    def texture_albedo
+      get_texture(0_i64)
+    end
+    # Property `texture_albedo` setter
+    def texture_albedo=(val)
+      set_texture(0_i64, val)
+    end
+    # Property `texture_normal` getter
+    def texture_normal
+      get_texture(1_i64)
+    end
+    # Property `texture_normal` setter
+    def texture_normal=(val)
+      set_texture(1_i64, val)
+    end
+    # Property `texture_orm` getter
+    def texture_orm
+      get_texture(2_i64)
+    end
+    # Property `texture_orm` setter
+    def texture_orm=(val)
+      set_texture(2_i64, val)
+    end
+    # Property `texture_emission` getter
+    def texture_emission
+      get_texture(3_i64)
+    end
+    # Property `texture_emission` setter
+    def texture_emission=(val)
+      set_texture(3_i64, val)
+    end
+    # Property `emission_energy` getter
+    def emission_energy
+      get_emission_energy
+    end
+    # Property `emission_energy` setter
+    def emission_energy=(val : Number)
+      set_emission_energy(val.to_f64)
+    end
+    # Property `modulate` getter
+    def modulate
+      get_modulate
+    end
+    # Property `modulate` setter
+    def modulate=(val)
+      set_modulate(val)
+    end
+    # Property `albedo_mix` getter
+    def albedo_mix
+      get_albedo_mix
+    end
+    # Property `albedo_mix` setter
+    def albedo_mix=(val : Number)
+      set_albedo_mix(val.to_f64)
+    end
+    # Property `normal_fade` getter
+    def normal_fade
+      get_normal_fade
+    end
+    # Property `normal_fade` setter
+    def normal_fade=(val : Number)
+      set_normal_fade(val.to_f64)
+    end
+    # Property `upper_fade` getter
+    def upper_fade
+      get_upper_fade
+    end
+    # Property `upper_fade` setter
+    def upper_fade=(val : Number)
+      set_upper_fade(val.to_f64)
+    end
+    # Property `lower_fade` getter
+    def lower_fade
+      get_lower_fade
+    end
+    # Property `lower_fade` setter
+    def lower_fade=(val : Number)
+      set_lower_fade(val.to_f64)
+    end
+    # Property `distance_fade_enabled` getter
+    def distance_fade_enabled
+      is_distance_fade_enabled
+    end
+    def distance_fade_enabled?
+      distance_fade_enabled
+    end
+    # Property `distance_fade_enabled` setter
+    def distance_fade_enabled=(val)
+      set_enable_distance_fade(val)
+    end
+    # Property `distance_fade_begin` getter
+    def distance_fade_begin
+      get_distance_fade_begin
+    end
+    # Property `distance_fade_begin` setter
+    def distance_fade_begin=(val : Number)
+      set_distance_fade_begin(val.to_f64)
+    end
+    # Property `distance_fade_length` getter
+    def distance_fade_length
+      get_distance_fade_length
+    end
+    # Property `distance_fade_length` setter
+    def distance_fade_length=(val : Number)
+      set_distance_fade_length(val.to_f64)
+    end
+    # Property `cull_mask` getter
+    def cull_mask
+      get_cull_mask
+    end
+    # Property `cull_mask` setter
+    def cull_mask=(val : Int)
+      set_cull_mask(val.to_i64)
     end
   end
   class DirAccess < Godot::RefCounted
@@ -12400,6 +14919,28 @@ module Godot
       Bridge.free_string(str_0)
       Bridge.free_string(str_1)
     end
+    # Property `include_navigational` getter
+    def include_navigational
+      get_include_navigational
+    end
+    def include_navigational?
+      include_navigational
+    end
+    # Property `include_navigational` setter
+    def include_navigational=(val)
+      set_include_navigational(val)
+    end
+    # Property `include_hidden` getter
+    def include_hidden
+      get_include_hidden
+    end
+    def include_hidden?
+      include_hidden
+    end
+    # Property `include_hidden` setter
+    def include_hidden=(val)
+      set_include_hidden(val)
+    end
   end
   class Light2D < Godot::Node2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -12719,6 +15260,135 @@ module Godot
       Bridge.ptrcall(@@mb_get_height, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `enabled` getter
+    def enabled
+      is_enabled
+    end
+    def enabled?
+      enabled
+    end
+    # Property `enabled` setter
+    def enabled=(val)
+      set_enabled(val)
+    end
+    # Property `editor_only` getter
+    def editor_only
+      is_editor_only
+    end
+    def editor_only?
+      editor_only
+    end
+    # Property `editor_only` setter
+    def editor_only=(val)
+      set_editor_only(val)
+    end
+    # Property `color` getter
+    def color
+      get_color
+    end
+    # Property `color` setter
+    def color=(val)
+      set_color(val)
+    end
+    # Property `energy` getter
+    def energy
+      get_energy
+    end
+    # Property `energy` setter
+    def energy=(val : Number)
+      set_energy(val.to_f64)
+    end
+    # Property `blend_mode` getter
+    def blend_mode
+      get_blend_mode
+    end
+    # Property `blend_mode` setter
+    def blend_mode=(val : Int)
+      set_blend_mode(val.to_i64)
+    end
+    # Property `range_z_min` getter
+    def range_z_min
+      get_z_range_min
+    end
+    # Property `range_z_min` setter
+    def range_z_min=(val : Int)
+      set_z_range_min(val.to_i64)
+    end
+    # Property `range_z_max` getter
+    def range_z_max
+      get_z_range_max
+    end
+    # Property `range_z_max` setter
+    def range_z_max=(val : Int)
+      set_z_range_max(val.to_i64)
+    end
+    # Property `range_layer_min` getter
+    def range_layer_min
+      get_layer_range_min
+    end
+    # Property `range_layer_min` setter
+    def range_layer_min=(val : Int)
+      set_layer_range_min(val.to_i64)
+    end
+    # Property `range_layer_max` getter
+    def range_layer_max
+      get_layer_range_max
+    end
+    # Property `range_layer_max` setter
+    def range_layer_max=(val : Int)
+      set_layer_range_max(val.to_i64)
+    end
+    # Property `range_item_cull_mask` getter
+    def range_item_cull_mask
+      get_item_cull_mask
+    end
+    # Property `range_item_cull_mask` setter
+    def range_item_cull_mask=(val : Int)
+      set_item_cull_mask(val.to_i64)
+    end
+    # Property `shadow_enabled` getter
+    def shadow_enabled
+      is_shadow_enabled
+    end
+    def shadow_enabled?
+      shadow_enabled
+    end
+    # Property `shadow_enabled` setter
+    def shadow_enabled=(val)
+      set_shadow_enabled(val)
+    end
+    # Property `shadow_color` getter
+    def shadow_color
+      get_shadow_color
+    end
+    # Property `shadow_color` setter
+    def shadow_color=(val)
+      set_shadow_color(val)
+    end
+    # Property `shadow_filter` getter
+    def shadow_filter
+      get_shadow_filter
+    end
+    # Property `shadow_filter` setter
+    def shadow_filter=(val : Int)
+      set_shadow_filter(val.to_i64)
+    end
+    # Property `shadow_filter_smooth` getter
+    def shadow_filter_smooth
+      get_shadow_smooth
+    end
+    # Property `shadow_filter_smooth` setter
+    def shadow_filter_smooth=(val : Number)
+      set_shadow_smooth(val.to_f64)
+    end
+    # Property `shadow_item_cull_mask` getter
+    def shadow_item_cull_mask
+      get_item_shadow_cull_mask
+    end
+    # Property `shadow_item_cull_mask` setter
+    def shadow_item_cull_mask=(val : Int)
+      set_item_shadow_cull_mask(val.to_i64)
+    end
   end
   class DirectionalLight2D < Godot::Light2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -12742,6 +15412,22 @@ module Godot
       ret = 0.0_f64
       Bridge.ptrcall(@@mb_get_max_distance, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `height` getter
+    def height
+      get_height
+    end
+    # Property `height` setter
+    def height=(val : Number)
+      set_height(val.to_f64)
+    end
+    # Property `max_distance` getter
+    def max_distance
+      get_max_distance
+    end
+    # Property `max_distance` setter
+    def max_distance=(val : Number)
+      set_max_distance(val.to_f64)
     end
   end
   class DirectionalLight3D < Godot::Light3D
@@ -12814,6 +15500,81 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_sky_mode, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `directional_shadow_mode` getter
+    def directional_shadow_mode
+      get_shadow_mode
+    end
+    # Property `directional_shadow_mode` setter
+    def directional_shadow_mode=(val : Int)
+      set_shadow_mode(val.to_i64)
+    end
+    # Property `directional_shadow_split_1` getter
+    def directional_shadow_split_1
+      get_param(10_i64)
+    end
+    # Property `directional_shadow_split_1` setter
+    def directional_shadow_split_1=(val : Number)
+      set_param(10_i64, val.to_f64)
+    end
+    # Property `directional_shadow_split_2` getter
+    def directional_shadow_split_2
+      get_param(11_i64)
+    end
+    # Property `directional_shadow_split_2` setter
+    def directional_shadow_split_2=(val : Number)
+      set_param(11_i64, val.to_f64)
+    end
+    # Property `directional_shadow_split_3` getter
+    def directional_shadow_split_3
+      get_param(12_i64)
+    end
+    # Property `directional_shadow_split_3` setter
+    def directional_shadow_split_3=(val : Number)
+      set_param(12_i64, val.to_f64)
+    end
+    # Property `directional_shadow_blend_splits` getter
+    def directional_shadow_blend_splits
+      is_blend_splits_enabled
+    end
+    def directional_shadow_blend_splits?
+      directional_shadow_blend_splits
+    end
+    # Property `directional_shadow_blend_splits` setter
+    def directional_shadow_blend_splits=(val)
+      set_blend_splits(val)
+    end
+    # Property `directional_shadow_fade_start` getter
+    def directional_shadow_fade_start
+      get_param(13_i64)
+    end
+    # Property `directional_shadow_fade_start` setter
+    def directional_shadow_fade_start=(val : Number)
+      set_param(13_i64, val.to_f64)
+    end
+    # Property `directional_shadow_max_distance` getter
+    def directional_shadow_max_distance
+      get_param(9_i64)
+    end
+    # Property `directional_shadow_max_distance` setter
+    def directional_shadow_max_distance=(val : Number)
+      set_param(9_i64, val.to_f64)
+    end
+    # Property `directional_shadow_pancake_size` getter
+    def directional_shadow_pancake_size
+      get_param(16_i64)
+    end
+    # Property `directional_shadow_pancake_size` setter
+    def directional_shadow_pancake_size=(val : Number)
+      set_param(16_i64, val.to_f64)
+    end
+    # Property `sky_mode` getter
+    def sky_mode
+      get_sky_mode
+    end
+    # Property `sky_mode` setter
+    def sky_mode=(val : Int)
+      set_sky_mode(val.to_i64)
     end
   end
   class DisplayServer < Godot::Object
@@ -17261,6 +20022,14 @@ module Godot
       args = [arg_0]
       Bridge.ptrcall(@@mb_set_encode_buffer_max_size, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
     end
+    # Property `encode_buffer_max_size` getter
+    def encode_buffer_max_size
+      get_encode_buffer_max_size
+    end
+    # Property `encode_buffer_max_size` setter
+    def encode_buffer_max_size=(val : Int)
+      set_encode_buffer_max_size(val.to_i64)
+    end
   end
   class MultiplayerPeer < Godot::PacketPeer
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -17432,6 +20201,33 @@ module Godot
       Bridge.ptrcall(@@mb_is_server_relay_supported, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `refuse_new_connections` getter
+    def refuse_new_connections
+      is_refusing_new_connections
+    end
+    def refuse_new_connections?
+      refuse_new_connections
+    end
+    # Property `refuse_new_connections` setter
+    def refuse_new_connections=(val)
+      set_refuse_new_connections(val)
+    end
+    # Property `transfer_mode` getter
+    def transfer_mode
+      get_transfer_mode
+    end
+    # Property `transfer_mode` setter
+    def transfer_mode=(val : Int)
+      set_transfer_mode(val.to_i64)
+    end
+    # Property `transfer_channel` getter
+    def transfer_channel
+      get_transfer_channel
+    end
+    # Property `transfer_channel` setter
+    def transfer_channel=(val : Int)
+      set_transfer_channel(val.to_i64)
+    end
   end
   class ENetMultiplayerPeer < Godot::MultiplayerPeer
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -17539,6 +20335,10 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_peer, @pointer, args.to_unsafe.as(Void**), pointerof(ret_ptr).as(Void*))
       ENetPacketPeer.new(ret_ptr)
+    end
+    # Property `host` getter
+    def host
+      get_host
     end
   end
   class ENetPacketPeer < Godot::PacketPeer
@@ -18271,6 +21071,125 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_available_layouts, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `title` getter
+    def title
+      get_title
+    end
+    # Property `title` setter
+    def title=(val)
+      set_title(val)
+    end
+    # Property `layout_key` getter
+    def layout_key
+      get_layout_key
+    end
+    # Property `layout_key` setter
+    def layout_key=(val)
+      set_layout_key(val)
+    end
+    # Property `global` getter
+    def global
+      is_global
+    end
+    def global?
+      global
+    end
+    # Property `global` setter
+    def global=(val)
+      set_global(val)
+    end
+    # Property `transient` getter
+    def transient
+      is_transient
+    end
+    def transient?
+      transient
+    end
+    # Property `transient` setter
+    def transient=(val)
+      set_transient(val)
+    end
+    # Property `closable` getter
+    def closable
+      is_closable
+    end
+    def closable?
+      closable
+    end
+    # Property `closable` setter
+    def closable=(val)
+      set_closable(val)
+    end
+    # Property `allow_switch_screen` getter
+    def allow_switch_screen
+      is_allow_switch_screen
+    end
+    def allow_switch_screen?
+      allow_switch_screen
+    end
+    # Property `allow_switch_screen` setter
+    def allow_switch_screen=(val)
+      set_allow_switch_screen(val)
+    end
+    # Property `icon_name` getter
+    def icon_name
+      get_icon_name
+    end
+    # Property `icon_name` setter
+    def icon_name=(val)
+      set_icon_name(val)
+    end
+    # Property `dock_icon` getter
+    def dock_icon
+      get_dock_icon
+    end
+    # Property `dock_icon` setter
+    def dock_icon=(val)
+      set_dock_icon(val)
+    end
+    # Property `force_show_icon` getter
+    def force_show_icon
+      get_force_show_icon
+    end
+    def force_show_icon?
+      force_show_icon
+    end
+    # Property `force_show_icon` setter
+    def force_show_icon=(val)
+      set_force_show_icon(val)
+    end
+    # Property `title_color` getter
+    def title_color
+      get_title_color
+    end
+    # Property `title_color` setter
+    def title_color=(val)
+      set_title_color(val)
+    end
+    # Property `dock_shortcut` getter
+    def dock_shortcut
+      get_dock_shortcut
+    end
+    # Property `dock_shortcut` setter
+    def dock_shortcut=(val)
+      set_dock_shortcut(val)
+    end
+    # Property `default_slot` getter
+    def default_slot
+      get_default_slot
+    end
+    # Property `default_slot` setter
+    def default_slot=(val : Int)
+      set_default_slot(val.to_i64)
+    end
+    # Property `available_layouts` getter
+    def available_layouts
+      get_available_layouts
+    end
+    # Property `available_layouts` setter
+    def available_layouts=(val : Int)
+      set_available_layouts(val.to_i64)
     end
   end
   class EditorExportPlatform < Godot::RefCounted
@@ -20058,6 +22977,218 @@ module Godot
       end
       Bridge.ptrcall(@@mb_invalidate, @pointer, Pointer(Pointer(Void)).null, Pointer(Void).null)
     end
+    # Property `mode_overrides_title` getter
+    def mode_overrides_title
+      is_mode_overriding_title
+    end
+    def mode_overrides_title?
+      mode_overrides_title
+    end
+    # Property `mode_overrides_title` setter
+    def mode_overrides_title=(val)
+      set_mode_overrides_title(val)
+    end
+    # Property `file_mode` getter
+    def file_mode
+      get_file_mode
+    end
+    # Property `file_mode` setter
+    def file_mode=(val : Int)
+      set_file_mode(val.to_i64)
+    end
+    # Property `display_mode` getter
+    def display_mode
+      get_display_mode
+    end
+    # Property `display_mode` setter
+    def display_mode=(val : Int)
+      set_display_mode(val.to_i64)
+    end
+    # Property `access` getter
+    def access
+      get_access
+    end
+    # Property `access` setter
+    def access=(val : Int)
+      set_access(val.to_i64)
+    end
+    # Property `root_subfolder` getter
+    def root_subfolder
+      get_root_subfolder
+    end
+    # Property `root_subfolder` setter
+    def root_subfolder=(val)
+      set_root_subfolder(val)
+    end
+    # Property `filters` getter
+    def filters
+      get_filters
+    end
+    # Property `filters` setter
+    def filters=(val)
+      set_filters(val)
+    end
+    # Property `filename_filter` getter
+    def filename_filter
+      get_filename_filter
+    end
+    # Property `filename_filter` setter
+    def filename_filter=(val)
+      set_filename_filter(val)
+    end
+    # Property `show_hidden_files` getter
+    def show_hidden_files
+      is_showing_hidden_files
+    end
+    def show_hidden_files?
+      show_hidden_files
+    end
+    # Property `show_hidden_files` setter
+    def show_hidden_files=(val)
+      set_show_hidden_files(val)
+    end
+    # Property `use_native_dialog` getter
+    def use_native_dialog
+      get_use_native_dialog
+    end
+    def use_native_dialog?
+      use_native_dialog
+    end
+    # Property `use_native_dialog` setter
+    def use_native_dialog=(val)
+      set_use_native_dialog(val)
+    end
+    # Property `option_count` getter
+    def option_count
+      get_option_count
+    end
+    # Property `option_count` setter
+    def option_count=(val : Int)
+      set_option_count(val.to_i64)
+    end
+    # Property `hidden_files_toggle_enabled` getter
+    def hidden_files_toggle_enabled
+      is_customization_flag_enabled(0_i64)
+    end
+    def hidden_files_toggle_enabled?
+      hidden_files_toggle_enabled
+    end
+    # Property `hidden_files_toggle_enabled` setter
+    def hidden_files_toggle_enabled=(val)
+      set_customization_flag_enabled(0_i64, val)
+    end
+    # Property `file_filter_toggle_enabled` getter
+    def file_filter_toggle_enabled
+      is_customization_flag_enabled(2_i64)
+    end
+    def file_filter_toggle_enabled?
+      file_filter_toggle_enabled
+    end
+    # Property `file_filter_toggle_enabled` setter
+    def file_filter_toggle_enabled=(val)
+      set_customization_flag_enabled(2_i64, val)
+    end
+    # Property `file_sort_options_enabled` getter
+    def file_sort_options_enabled
+      is_customization_flag_enabled(3_i64)
+    end
+    def file_sort_options_enabled?
+      file_sort_options_enabled
+    end
+    # Property `file_sort_options_enabled` setter
+    def file_sort_options_enabled=(val)
+      set_customization_flag_enabled(3_i64, val)
+    end
+    # Property `folder_creation_enabled` getter
+    def folder_creation_enabled
+      is_customization_flag_enabled(1_i64)
+    end
+    def folder_creation_enabled?
+      folder_creation_enabled
+    end
+    # Property `folder_creation_enabled` setter
+    def folder_creation_enabled=(val)
+      set_customization_flag_enabled(1_i64, val)
+    end
+    # Property `favorites_enabled` getter
+    def favorites_enabled
+      is_customization_flag_enabled(4_i64)
+    end
+    def favorites_enabled?
+      favorites_enabled
+    end
+    # Property `favorites_enabled` setter
+    def favorites_enabled=(val)
+      set_customization_flag_enabled(4_i64, val)
+    end
+    # Property `recent_list_enabled` getter
+    def recent_list_enabled
+      is_customization_flag_enabled(5_i64)
+    end
+    def recent_list_enabled?
+      recent_list_enabled
+    end
+    # Property `recent_list_enabled` setter
+    def recent_list_enabled=(val)
+      set_customization_flag_enabled(5_i64, val)
+    end
+    # Property `layout_toggle_enabled` getter
+    def layout_toggle_enabled
+      is_customization_flag_enabled(6_i64)
+    end
+    def layout_toggle_enabled?
+      layout_toggle_enabled
+    end
+    # Property `layout_toggle_enabled` setter
+    def layout_toggle_enabled=(val)
+      set_customization_flag_enabled(6_i64, val)
+    end
+    # Property `overwrite_warning_enabled` getter
+    def overwrite_warning_enabled
+      is_customization_flag_enabled(7_i64)
+    end
+    def overwrite_warning_enabled?
+      overwrite_warning_enabled
+    end
+    # Property `overwrite_warning_enabled` setter
+    def overwrite_warning_enabled=(val)
+      set_customization_flag_enabled(7_i64, val)
+    end
+    # Property `deleting_enabled` getter
+    def deleting_enabled
+      is_customization_flag_enabled(8_i64)
+    end
+    def deleting_enabled?
+      deleting_enabled
+    end
+    # Property `deleting_enabled` setter
+    def deleting_enabled=(val)
+      set_customization_flag_enabled(8_i64, val)
+    end
+    # Property `current_dir` getter
+    def current_dir
+      get_current_dir
+    end
+    # Property `current_dir` setter
+    def current_dir=(val)
+      set_current_dir(val)
+    end
+    # Property `current_file` getter
+    def current_file
+      get_current_file
+    end
+    # Property `current_file` setter
+    def current_file=(val)
+      set_current_file(val)
+    end
+    # Property `current_path` getter
+    def current_path
+      get_current_path
+    end
+    # Property `current_path` setter
+    def current_path=(val)
+      set_current_path(val)
+    end
   end
   class EditorFileDialog < Godot::FileDialog
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -20095,6 +23226,17 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_overwrite_warning_disabled, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `disable_overwrite_warning` getter
+    def disable_overwrite_warning
+      is_overwrite_warning_disabled
+    end
+    def disable_overwrite_warning?
+      disable_overwrite_warning
+    end
+    # Property `disable_overwrite_warning` setter
+    def disable_overwrite_warning=(val)
+      set_disable_overwrite_warning(val)
     end
   end
   class EditorFileSystem < Godot::Node
@@ -20661,6 +23803,114 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_get_draw_focus_border, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `follow_focus` getter
+    def follow_focus
+      is_following_focus
+    end
+    def follow_focus?
+      follow_focus
+    end
+    # Property `follow_focus` setter
+    def follow_focus=(val)
+      set_follow_focus(val)
+    end
+    # Property `draw_focus_border` getter
+    def draw_focus_border
+      get_draw_focus_border
+    end
+    def draw_focus_border?
+      draw_focus_border
+    end
+    # Property `draw_focus_border` setter
+    def draw_focus_border=(val)
+      set_draw_focus_border(val)
+    end
+    # Property `scroll_horizontal` getter
+    def scroll_horizontal
+      get_h_scroll
+    end
+    # Property `scroll_horizontal` setter
+    def scroll_horizontal=(val : Int)
+      set_h_scroll(val.to_i64)
+    end
+    # Property `scroll_vertical` getter
+    def scroll_vertical
+      get_v_scroll
+    end
+    # Property `scroll_vertical` setter
+    def scroll_vertical=(val : Int)
+      set_v_scroll(val.to_i64)
+    end
+    # Property `scroll_horizontal_custom_step` getter
+    def scroll_horizontal_custom_step
+      get_horizontal_custom_step
+    end
+    # Property `scroll_horizontal_custom_step` setter
+    def scroll_horizontal_custom_step=(val : Number)
+      set_horizontal_custom_step(val.to_f64)
+    end
+    # Property `scroll_vertical_custom_step` getter
+    def scroll_vertical_custom_step
+      get_vertical_custom_step
+    end
+    # Property `scroll_vertical_custom_step` setter
+    def scroll_vertical_custom_step=(val : Number)
+      set_vertical_custom_step(val.to_f64)
+    end
+    # Property `horizontal_scroll_mode` getter
+    def horizontal_scroll_mode
+      get_horizontal_scroll_mode
+    end
+    # Property `horizontal_scroll_mode` setter
+    def horizontal_scroll_mode=(val : Int)
+      set_horizontal_scroll_mode(val.to_i64)
+    end
+    # Property `vertical_scroll_mode` getter
+    def vertical_scroll_mode
+      get_vertical_scroll_mode
+    end
+    # Property `vertical_scroll_mode` setter
+    def vertical_scroll_mode=(val : Int)
+      set_vertical_scroll_mode(val.to_i64)
+    end
+    # Property `scroll_horizontal_by_default` getter
+    def scroll_horizontal_by_default
+      is_scroll_horizontal_by_default
+    end
+    def scroll_horizontal_by_default?
+      scroll_horizontal_by_default
+    end
+    # Property `scroll_horizontal_by_default` setter
+    def scroll_horizontal_by_default=(val)
+      set_scroll_horizontal_by_default(val)
+    end
+    # Property `scroll_deadzone` getter
+    def scroll_deadzone
+      get_deadzone
+    end
+    # Property `scroll_deadzone` setter
+    def scroll_deadzone=(val : Int)
+      set_deadzone(val.to_i64)
+    end
+    # Property `scroll_hint_mode` getter
+    def scroll_hint_mode
+      get_scroll_hint_mode
+    end
+    # Property `scroll_hint_mode` setter
+    def scroll_hint_mode=(val : Int)
+      set_scroll_hint_mode(val.to_i64)
+    end
+    # Property `tile_scroll_hint` getter
+    def tile_scroll_hint
+      is_scroll_hint_tiled
+    end
+    def tile_scroll_hint?
+      tile_scroll_hint
+    end
+    # Property `tile_scroll_hint` setter
+    def tile_scroll_hint=(val)
+      set_tile_scroll_hint(val)
     end
   end
   class EditorInspector < Godot::ScrollContainer
@@ -21599,6 +24849,28 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_movie_maker_enabled, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `distraction_free_mode` getter
+    def distraction_free_mode
+      is_distraction_free_mode_enabled
+    end
+    def distraction_free_mode?
+      distraction_free_mode
+    end
+    # Property `distraction_free_mode` setter
+    def distraction_free_mode=(val)
+      set_distraction_free_mode(val)
+    end
+    # Property `movie_maker_enabled` getter
+    def movie_maker_enabled
+      is_movie_maker_enabled
+    end
+    def movie_maker_enabled?
+      movie_maker_enabled
+    end
+    # Property `movie_maker_enabled` setter
+    def movie_maker_enabled=(val)
+      set_movie_maker_enabled(val)
     end
   end
   class Node3DGizmo < Godot::RefCounted
@@ -22833,6 +26105,132 @@ module Godot
       Bridge.free_string_name(sn_0)
       Bridge.free_string_name(sn_2)
     end
+    # Property `label` getter
+    def label
+      get_label
+    end
+    # Property `label` setter
+    def label=(val)
+      set_label(val)
+    end
+    # Property `read_only` getter
+    def read_only
+      is_read_only
+    end
+    def read_only?
+      read_only
+    end
+    # Property `read_only` setter
+    def read_only=(val)
+      set_read_only(val)
+    end
+    # Property `draw_label` getter
+    def draw_label
+      is_draw_label
+    end
+    def draw_label?
+      draw_label
+    end
+    # Property `draw_label` setter
+    def draw_label=(val)
+      set_draw_label(val)
+    end
+    # Property `draw_background` getter
+    def draw_background
+      is_draw_background
+    end
+    def draw_background?
+      draw_background
+    end
+    # Property `draw_background` setter
+    def draw_background=(val)
+      set_draw_background(val)
+    end
+    # Property `checkable` getter
+    def checkable
+      is_checkable
+    end
+    def checkable?
+      checkable
+    end
+    # Property `checkable` setter
+    def checkable=(val)
+      set_checkable(val)
+    end
+    # Property `checked` getter
+    def checked
+      is_checked
+    end
+    def checked?
+      checked
+    end
+    # Property `checked` setter
+    def checked=(val)
+      set_checked(val)
+    end
+    # Property `draw_warning` getter
+    def draw_warning
+      is_draw_warning
+    end
+    def draw_warning?
+      draw_warning
+    end
+    # Property `draw_warning` setter
+    def draw_warning=(val)
+      set_draw_warning(val)
+    end
+    # Property `keying` getter
+    def keying
+      is_keying
+    end
+    def keying?
+      keying
+    end
+    # Property `keying` setter
+    def keying=(val)
+      set_keying(val)
+    end
+    # Property `deletable` getter
+    def deletable
+      is_deletable
+    end
+    def deletable?
+      deletable
+    end
+    # Property `deletable` setter
+    def deletable=(val)
+      set_deletable(val)
+    end
+    # Property `selectable` getter
+    def selectable
+      is_selectable
+    end
+    def selectable?
+      selectable
+    end
+    # Property `selectable` setter
+    def selectable=(val)
+      set_selectable(val)
+    end
+    # Property `use_folding` getter
+    def use_folding
+      is_using_folding
+    end
+    def use_folding?
+      use_folding
+    end
+    # Property `use_folding` setter
+    def use_folding=(val)
+      set_use_folding(val)
+    end
+    # Property `name_split_ratio` getter
+    def name_split_ratio
+      get_name_split_ratio
+    end
+    # Property `name_split_ratio` setter
+    def name_split_ratio=(val : Number)
+      set_name_split_ratio(val.to_f64)
+    end
   end
   class EditorResourceConversionPlugin < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -22942,6 +26340,44 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_editable, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `base_type` getter
+    def base_type
+      get_base_type
+    end
+    # Property `base_type` setter
+    def base_type=(val)
+      set_base_type(val)
+    end
+    # Property `edited_resource` getter
+    def edited_resource
+      get_edited_resource
+    end
+    # Property `edited_resource` setter
+    def edited_resource=(val)
+      set_edited_resource(val)
+    end
+    # Property `editable` getter
+    def editable
+      is_editable
+    end
+    def editable?
+      editable
+    end
+    # Property `editable` setter
+    def editable=(val)
+      set_editable(val)
+    end
+    # Property `toggle_mode` getter
+    def toggle_mode
+      is_toggle_mode
+    end
+    def toggle_mode?
+      toggle_mode
+    end
+    # Property `toggle_mode` setter
+    def toggle_mode=(val)
+      set_toggle_mode(val)
     end
   end
   class EditorResourcePreview < Godot::Node
@@ -23258,6 +26694,14 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_script_owner, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Node.new(ret_ptr)
+    end
+    # Property `script_owner` getter
+    def script_owner
+      get_script_owner
+    end
+    # Property `script_owner` setter
+    def script_owner=(val)
+      set_script_owner(val)
     end
   end
   class EditorSelection < Godot::Object
@@ -23831,6 +27275,50 @@ module Godot
       end
       Bridge.ptrcall(@@mb_unshare, @pointer, Pointer(Pointer(Void)).null, Pointer(Void).null)
     end
+    # Property `exp_edit` getter
+    def exp_edit
+      is_ratio_exp
+    end
+    def exp_edit?
+      exp_edit
+    end
+    # Property `exp_edit` setter
+    def exp_edit=(val)
+      set_exp_ratio(val)
+    end
+    # Property `rounded` getter
+    def rounded
+      is_using_rounded_values
+    end
+    def rounded?
+      rounded
+    end
+    # Property `rounded` setter
+    def rounded=(val)
+      set_use_rounded_values(val)
+    end
+    # Property `allow_greater` getter
+    def allow_greater
+      is_greater_allowed
+    end
+    def allow_greater?
+      allow_greater
+    end
+    # Property `allow_greater` setter
+    def allow_greater=(val)
+      set_allow_greater(val)
+    end
+    # Property `allow_lesser` getter
+    def allow_lesser
+      is_lesser_allowed
+    end
+    def allow_lesser?
+      allow_lesser
+    end
+    # Property `allow_lesser` setter
+    def allow_lesser=(val)
+      set_allow_lesser(val)
+    end
   end
   class EditorSpinSlider < Godot::Range
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -23992,6 +27480,88 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_deferred_drag_mode_enabled, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `label` getter
+    def label
+      get_label
+    end
+    # Property `label` setter
+    def label=(val)
+      set_label(val)
+    end
+    # Property `suffix` getter
+    def suffix
+      get_suffix
+    end
+    # Property `suffix` setter
+    def suffix=(val)
+      set_suffix(val)
+    end
+    # Property `read_only` getter
+    def read_only
+      is_read_only
+    end
+    def read_only?
+      read_only
+    end
+    # Property `read_only` setter
+    def read_only=(val)
+      set_read_only(val)
+    end
+    # Property `flat` getter
+    def flat
+      is_flat
+    end
+    def flat?
+      flat
+    end
+    # Property `flat` setter
+    def flat=(val)
+      set_flat(val)
+    end
+    # Property `control_state` getter
+    def control_state
+      get_control_state
+    end
+    def control_state?
+      control_state
+    end
+    # Property `control_state` setter
+    def control_state=(val)
+      set_control_state(val)
+    end
+    # Property `hide_slider` getter
+    def hide_slider
+      is_hiding_slider
+    end
+    def hide_slider?
+      hide_slider
+    end
+    # Property `hide_slider` setter
+    def hide_slider=(val)
+      set_hide_slider(val)
+    end
+    # Property `editing_integer` getter
+    def editing_integer
+      is_editing_integer
+    end
+    def editing_integer?
+      editing_integer
+    end
+    # Property `editing_integer` setter
+    def editing_integer=(val)
+      set_editing_integer(val)
+    end
+    # Property `deferred_drag_mode` getter
+    def deferred_drag_mode
+      is_deferred_drag_mode_enabled
+    end
+    def deferred_drag_mode?
+      deferred_drag_mode
+    end
+    # Property `deferred_drag_mode` setter
+    def deferred_drag_mode=(val)
+      set_deferred_drag_mode_enabled(val)
     end
   end
   class EditorSyntaxHighlighter < Godot::SyntaxHighlighter
@@ -24353,6 +27923,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_object_id, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `object_id` getter
+    def godot_object_id
+      get_object_id
+    end
+    # Property `object_id` setter
+    def godot_object_id=(val : Int)
+      set_object_id(val.to_i64)
     end
   end
   class Engine < Godot::Object
@@ -24758,6 +28336,68 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_printing_error_messages, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `print_error_messages` getter
+    def print_error_messages
+      is_printing_error_messages
+    end
+    def print_error_messages?
+      print_error_messages
+    end
+    # Property `print_error_messages` setter
+    def print_error_messages=(val)
+      set_print_error_messages(val)
+    end
+    # Property `print_to_stdout` getter
+    def print_to_stdout
+      is_printing_to_stdout
+    end
+    def print_to_stdout?
+      print_to_stdout
+    end
+    # Property `print_to_stdout` setter
+    def print_to_stdout=(val)
+      set_print_to_stdout(val)
+    end
+    # Property `physics_ticks_per_second` getter
+    def physics_ticks_per_second
+      get_physics_ticks_per_second
+    end
+    # Property `physics_ticks_per_second` setter
+    def physics_ticks_per_second=(val : Int)
+      set_physics_ticks_per_second(val.to_i64)
+    end
+    # Property `max_physics_steps_per_frame` getter
+    def max_physics_steps_per_frame
+      get_max_physics_steps_per_frame
+    end
+    # Property `max_physics_steps_per_frame` setter
+    def max_physics_steps_per_frame=(val : Int)
+      set_max_physics_steps_per_frame(val.to_i64)
+    end
+    # Property `max_fps` getter
+    def max_fps
+      get_max_fps
+    end
+    # Property `max_fps` setter
+    def max_fps=(val : Int)
+      set_max_fps(val.to_i64)
+    end
+    # Property `time_scale` getter
+    def time_scale
+      get_time_scale
+    end
+    # Property `time_scale` setter
+    def time_scale=(val : Number)
+      set_time_scale(val.to_f64)
+    end
+    # Property `physics_jitter_fix` getter
+    def physics_jitter_fix
+      get_physics_jitter_fix
+    end
+    # Property `physics_jitter_fix` setter
+    def physics_jitter_fix=(val : Number)
+      set_physics_jitter_fix(val.to_f64)
     end
   end
   class EngineDebugger < Godot::Object
@@ -26886,6 +30526,786 @@ module Godot
       Bridge.ptrcall(@@mb_get_adjustment_color_correction, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Texture.new(ret_ptr)
     end
+    # Property `background_mode` getter
+    def background_mode
+      get_background
+    end
+    # Property `background_mode` setter
+    def background_mode=(val : Int)
+      set_background(val.to_i64)
+    end
+    # Property `background_color` getter
+    def background_color
+      get_bg_color
+    end
+    # Property `background_color` setter
+    def background_color=(val)
+      set_bg_color(val)
+    end
+    # Property `background_energy_multiplier` getter
+    def background_energy_multiplier
+      get_bg_energy_multiplier
+    end
+    # Property `background_energy_multiplier` setter
+    def background_energy_multiplier=(val : Number)
+      set_bg_energy_multiplier(val.to_f64)
+    end
+    # Property `background_intensity` getter
+    def background_intensity
+      get_bg_intensity
+    end
+    # Property `background_intensity` setter
+    def background_intensity=(val : Number)
+      set_bg_intensity(val.to_f64)
+    end
+    # Property `background_canvas_max_layer` getter
+    def background_canvas_max_layer
+      get_canvas_max_layer
+    end
+    # Property `background_canvas_max_layer` setter
+    def background_canvas_max_layer=(val : Int)
+      set_canvas_max_layer(val.to_i64)
+    end
+    # Property `background_camera_feed_id` getter
+    def background_camera_feed_id
+      get_camera_feed_id
+    end
+    # Property `background_camera_feed_id` setter
+    def background_camera_feed_id=(val : Int)
+      set_camera_feed_id(val.to_i64)
+    end
+    # Property `sky` getter
+    def sky
+      get_sky
+    end
+    # Property `sky` setter
+    def sky=(val)
+      set_sky(val)
+    end
+    # Property `sky_custom_fov` getter
+    def sky_custom_fov
+      get_sky_custom_fov
+    end
+    # Property `sky_custom_fov` setter
+    def sky_custom_fov=(val : Number)
+      set_sky_custom_fov(val.to_f64)
+    end
+    # Property `sky_rotation` getter
+    def sky_rotation
+      get_sky_rotation
+    end
+    # Property `sky_rotation` setter
+    def sky_rotation=(val)
+      set_sky_rotation(val)
+    end
+    # Property `ambient_light_source` getter
+    def ambient_light_source
+      get_ambient_source
+    end
+    # Property `ambient_light_source` setter
+    def ambient_light_source=(val : Int)
+      set_ambient_source(val.to_i64)
+    end
+    # Property `ambient_light_color` getter
+    def ambient_light_color
+      get_ambient_light_color
+    end
+    # Property `ambient_light_color` setter
+    def ambient_light_color=(val)
+      set_ambient_light_color(val)
+    end
+    # Property `ambient_light_sky_contribution` getter
+    def ambient_light_sky_contribution
+      get_ambient_light_sky_contribution
+    end
+    # Property `ambient_light_sky_contribution` setter
+    def ambient_light_sky_contribution=(val : Number)
+      set_ambient_light_sky_contribution(val.to_f64)
+    end
+    # Property `ambient_light_energy` getter
+    def ambient_light_energy
+      get_ambient_light_energy
+    end
+    # Property `ambient_light_energy` setter
+    def ambient_light_energy=(val : Number)
+      set_ambient_light_energy(val.to_f64)
+    end
+    # Property `reflected_light_source` getter
+    def reflected_light_source
+      get_reflection_source
+    end
+    # Property `reflected_light_source` setter
+    def reflected_light_source=(val : Int)
+      set_reflection_source(val.to_i64)
+    end
+    # Property `tonemap_mode` getter
+    def tonemap_mode
+      get_tonemapper
+    end
+    # Property `tonemap_mode` setter
+    def tonemap_mode=(val : Int)
+      set_tonemapper(val.to_i64)
+    end
+    # Property `tonemap_exposure` getter
+    def tonemap_exposure
+      get_tonemap_exposure
+    end
+    # Property `tonemap_exposure` setter
+    def tonemap_exposure=(val : Number)
+      set_tonemap_exposure(val.to_f64)
+    end
+    # Property `tonemap_white` getter
+    def tonemap_white
+      get_tonemap_white
+    end
+    # Property `tonemap_white` setter
+    def tonemap_white=(val : Number)
+      set_tonemap_white(val.to_f64)
+    end
+    # Property `tonemap_agx_white` getter
+    def tonemap_agx_white
+      get_tonemap_agx_white
+    end
+    # Property `tonemap_agx_white` setter
+    def tonemap_agx_white=(val : Number)
+      set_tonemap_agx_white(val.to_f64)
+    end
+    # Property `tonemap_agx_contrast` getter
+    def tonemap_agx_contrast
+      get_tonemap_agx_contrast
+    end
+    # Property `tonemap_agx_contrast` setter
+    def tonemap_agx_contrast=(val : Number)
+      set_tonemap_agx_contrast(val.to_f64)
+    end
+    # Property `ssr_enabled` getter
+    def ssr_enabled
+      is_ssr_enabled
+    end
+    def ssr_enabled?
+      ssr_enabled
+    end
+    # Property `ssr_enabled` setter
+    def ssr_enabled=(val)
+      set_ssr_enabled(val)
+    end
+    # Property `ssr_max_steps` getter
+    def ssr_max_steps
+      get_ssr_max_steps
+    end
+    # Property `ssr_max_steps` setter
+    def ssr_max_steps=(val : Int)
+      set_ssr_max_steps(val.to_i64)
+    end
+    # Property `ssr_fade_in` getter
+    def ssr_fade_in
+      get_ssr_fade_in
+    end
+    # Property `ssr_fade_in` setter
+    def ssr_fade_in=(val : Number)
+      set_ssr_fade_in(val.to_f64)
+    end
+    # Property `ssr_fade_out` getter
+    def ssr_fade_out
+      get_ssr_fade_out
+    end
+    # Property `ssr_fade_out` setter
+    def ssr_fade_out=(val : Number)
+      set_ssr_fade_out(val.to_f64)
+    end
+    # Property `ssr_depth_tolerance` getter
+    def ssr_depth_tolerance
+      get_ssr_depth_tolerance
+    end
+    # Property `ssr_depth_tolerance` setter
+    def ssr_depth_tolerance=(val : Number)
+      set_ssr_depth_tolerance(val.to_f64)
+    end
+    # Property `ssao_enabled` getter
+    def ssao_enabled
+      is_ssao_enabled
+    end
+    def ssao_enabled?
+      ssao_enabled
+    end
+    # Property `ssao_enabled` setter
+    def ssao_enabled=(val)
+      set_ssao_enabled(val)
+    end
+    # Property `ssao_radius` getter
+    def ssao_radius
+      get_ssao_radius
+    end
+    # Property `ssao_radius` setter
+    def ssao_radius=(val : Number)
+      set_ssao_radius(val.to_f64)
+    end
+    # Property `ssao_intensity` getter
+    def ssao_intensity
+      get_ssao_intensity
+    end
+    # Property `ssao_intensity` setter
+    def ssao_intensity=(val : Number)
+      set_ssao_intensity(val.to_f64)
+    end
+    # Property `ssao_power` getter
+    def ssao_power
+      get_ssao_power
+    end
+    # Property `ssao_power` setter
+    def ssao_power=(val : Number)
+      set_ssao_power(val.to_f64)
+    end
+    # Property `ssao_detail` getter
+    def ssao_detail
+      get_ssao_detail
+    end
+    # Property `ssao_detail` setter
+    def ssao_detail=(val : Number)
+      set_ssao_detail(val.to_f64)
+    end
+    # Property `ssao_horizon` getter
+    def ssao_horizon
+      get_ssao_horizon
+    end
+    # Property `ssao_horizon` setter
+    def ssao_horizon=(val : Number)
+      set_ssao_horizon(val.to_f64)
+    end
+    # Property `ssao_sharpness` getter
+    def ssao_sharpness
+      get_ssao_sharpness
+    end
+    # Property `ssao_sharpness` setter
+    def ssao_sharpness=(val : Number)
+      set_ssao_sharpness(val.to_f64)
+    end
+    # Property `ssao_light_affect` getter
+    def ssao_light_affect
+      get_ssao_direct_light_affect
+    end
+    # Property `ssao_light_affect` setter
+    def ssao_light_affect=(val : Number)
+      set_ssao_direct_light_affect(val.to_f64)
+    end
+    # Property `ssao_ao_channel_affect` getter
+    def ssao_ao_channel_affect
+      get_ssao_ao_channel_affect
+    end
+    # Property `ssao_ao_channel_affect` setter
+    def ssao_ao_channel_affect=(val : Number)
+      set_ssao_ao_channel_affect(val.to_f64)
+    end
+    # Property `ssil_enabled` getter
+    def ssil_enabled
+      is_ssil_enabled
+    end
+    def ssil_enabled?
+      ssil_enabled
+    end
+    # Property `ssil_enabled` setter
+    def ssil_enabled=(val)
+      set_ssil_enabled(val)
+    end
+    # Property `ssil_radius` getter
+    def ssil_radius
+      get_ssil_radius
+    end
+    # Property `ssil_radius` setter
+    def ssil_radius=(val : Number)
+      set_ssil_radius(val.to_f64)
+    end
+    # Property `ssil_intensity` getter
+    def ssil_intensity
+      get_ssil_intensity
+    end
+    # Property `ssil_intensity` setter
+    def ssil_intensity=(val : Number)
+      set_ssil_intensity(val.to_f64)
+    end
+    # Property `ssil_sharpness` getter
+    def ssil_sharpness
+      get_ssil_sharpness
+    end
+    # Property `ssil_sharpness` setter
+    def ssil_sharpness=(val : Number)
+      set_ssil_sharpness(val.to_f64)
+    end
+    # Property `ssil_normal_rejection` getter
+    def ssil_normal_rejection
+      get_ssil_normal_rejection
+    end
+    # Property `ssil_normal_rejection` setter
+    def ssil_normal_rejection=(val : Number)
+      set_ssil_normal_rejection(val.to_f64)
+    end
+    # Property `sdfgi_enabled` getter
+    def sdfgi_enabled
+      is_sdfgi_enabled
+    end
+    def sdfgi_enabled?
+      sdfgi_enabled
+    end
+    # Property `sdfgi_enabled` setter
+    def sdfgi_enabled=(val)
+      set_sdfgi_enabled(val)
+    end
+    # Property `sdfgi_use_occlusion` getter
+    def sdfgi_use_occlusion
+      is_sdfgi_using_occlusion
+    end
+    def sdfgi_use_occlusion?
+      sdfgi_use_occlusion
+    end
+    # Property `sdfgi_use_occlusion` setter
+    def sdfgi_use_occlusion=(val)
+      set_sdfgi_use_occlusion(val)
+    end
+    # Property `sdfgi_read_sky_light` getter
+    def sdfgi_read_sky_light
+      is_sdfgi_reading_sky_light
+    end
+    def sdfgi_read_sky_light?
+      sdfgi_read_sky_light
+    end
+    # Property `sdfgi_read_sky_light` setter
+    def sdfgi_read_sky_light=(val)
+      set_sdfgi_read_sky_light(val)
+    end
+    # Property `sdfgi_bounce_feedback` getter
+    def sdfgi_bounce_feedback
+      get_sdfgi_bounce_feedback
+    end
+    # Property `sdfgi_bounce_feedback` setter
+    def sdfgi_bounce_feedback=(val : Number)
+      set_sdfgi_bounce_feedback(val.to_f64)
+    end
+    # Property `sdfgi_cascades` getter
+    def sdfgi_cascades
+      get_sdfgi_cascades
+    end
+    # Property `sdfgi_cascades` setter
+    def sdfgi_cascades=(val : Int)
+      set_sdfgi_cascades(val.to_i64)
+    end
+    # Property `sdfgi_min_cell_size` getter
+    def sdfgi_min_cell_size
+      get_sdfgi_min_cell_size
+    end
+    # Property `sdfgi_min_cell_size` setter
+    def sdfgi_min_cell_size=(val : Number)
+      set_sdfgi_min_cell_size(val.to_f64)
+    end
+    # Property `sdfgi_cascade0_distance` getter
+    def sdfgi_cascade0_distance
+      get_sdfgi_cascade0_distance
+    end
+    # Property `sdfgi_cascade0_distance` setter
+    def sdfgi_cascade0_distance=(val : Number)
+      set_sdfgi_cascade0_distance(val.to_f64)
+    end
+    # Property `sdfgi_max_distance` getter
+    def sdfgi_max_distance
+      get_sdfgi_max_distance
+    end
+    # Property `sdfgi_max_distance` setter
+    def sdfgi_max_distance=(val : Number)
+      set_sdfgi_max_distance(val.to_f64)
+    end
+    # Property `sdfgi_y_scale` getter
+    def sdfgi_y_scale
+      get_sdfgi_y_scale
+    end
+    # Property `sdfgi_y_scale` setter
+    def sdfgi_y_scale=(val : Int)
+      set_sdfgi_y_scale(val.to_i64)
+    end
+    # Property `sdfgi_energy` getter
+    def sdfgi_energy
+      get_sdfgi_energy
+    end
+    # Property `sdfgi_energy` setter
+    def sdfgi_energy=(val : Number)
+      set_sdfgi_energy(val.to_f64)
+    end
+    # Property `sdfgi_normal_bias` getter
+    def sdfgi_normal_bias
+      get_sdfgi_normal_bias
+    end
+    # Property `sdfgi_normal_bias` setter
+    def sdfgi_normal_bias=(val : Number)
+      set_sdfgi_normal_bias(val.to_f64)
+    end
+    # Property `sdfgi_probe_bias` getter
+    def sdfgi_probe_bias
+      get_sdfgi_probe_bias
+    end
+    # Property `sdfgi_probe_bias` setter
+    def sdfgi_probe_bias=(val : Number)
+      set_sdfgi_probe_bias(val.to_f64)
+    end
+    # Property `glow_enabled` getter
+    def glow_enabled
+      is_glow_enabled
+    end
+    def glow_enabled?
+      glow_enabled
+    end
+    # Property `glow_enabled` setter
+    def glow_enabled=(val)
+      set_glow_enabled(val)
+    end
+    # Property `glow_normalized` getter
+    def glow_normalized
+      is_glow_normalized
+    end
+    def glow_normalized?
+      glow_normalized
+    end
+    # Property `glow_normalized` setter
+    def glow_normalized=(val)
+      set_glow_normalized(val)
+    end
+    # Property `glow_intensity` getter
+    def glow_intensity
+      get_glow_intensity
+    end
+    # Property `glow_intensity` setter
+    def glow_intensity=(val : Number)
+      set_glow_intensity(val.to_f64)
+    end
+    # Property `glow_strength` getter
+    def glow_strength
+      get_glow_strength
+    end
+    # Property `glow_strength` setter
+    def glow_strength=(val : Number)
+      set_glow_strength(val.to_f64)
+    end
+    # Property `glow_mix` getter
+    def glow_mix
+      get_glow_mix
+    end
+    # Property `glow_mix` setter
+    def glow_mix=(val : Number)
+      set_glow_mix(val.to_f64)
+    end
+    # Property `glow_bloom` getter
+    def glow_bloom
+      get_glow_bloom
+    end
+    # Property `glow_bloom` setter
+    def glow_bloom=(val : Number)
+      set_glow_bloom(val.to_f64)
+    end
+    # Property `glow_blend_mode` getter
+    def glow_blend_mode
+      get_glow_blend_mode
+    end
+    # Property `glow_blend_mode` setter
+    def glow_blend_mode=(val : Int)
+      set_glow_blend_mode(val.to_i64)
+    end
+    # Property `glow_hdr_threshold` getter
+    def glow_hdr_threshold
+      get_glow_hdr_bleed_threshold
+    end
+    # Property `glow_hdr_threshold` setter
+    def glow_hdr_threshold=(val : Number)
+      set_glow_hdr_bleed_threshold(val.to_f64)
+    end
+    # Property `glow_hdr_scale` getter
+    def glow_hdr_scale
+      get_glow_hdr_bleed_scale
+    end
+    # Property `glow_hdr_scale` setter
+    def glow_hdr_scale=(val : Number)
+      set_glow_hdr_bleed_scale(val.to_f64)
+    end
+    # Property `glow_hdr_luminance_cap` getter
+    def glow_hdr_luminance_cap
+      get_glow_hdr_luminance_cap
+    end
+    # Property `glow_hdr_luminance_cap` setter
+    def glow_hdr_luminance_cap=(val : Number)
+      set_glow_hdr_luminance_cap(val.to_f64)
+    end
+    # Property `glow_map_strength` getter
+    def glow_map_strength
+      get_glow_map_strength
+    end
+    # Property `glow_map_strength` setter
+    def glow_map_strength=(val : Number)
+      set_glow_map_strength(val.to_f64)
+    end
+    # Property `glow_map` getter
+    def glow_map
+      get_glow_map
+    end
+    # Property `glow_map` setter
+    def glow_map=(val)
+      set_glow_map(val)
+    end
+    # Property `fog_enabled` getter
+    def fog_enabled
+      is_fog_enabled
+    end
+    def fog_enabled?
+      fog_enabled
+    end
+    # Property `fog_enabled` setter
+    def fog_enabled=(val)
+      set_fog_enabled(val)
+    end
+    # Property `fog_mode` getter
+    def fog_mode
+      get_fog_mode
+    end
+    # Property `fog_mode` setter
+    def fog_mode=(val : Int)
+      set_fog_mode(val.to_i64)
+    end
+    # Property `fog_light_color` getter
+    def fog_light_color
+      get_fog_light_color
+    end
+    # Property `fog_light_color` setter
+    def fog_light_color=(val)
+      set_fog_light_color(val)
+    end
+    # Property `fog_light_energy` getter
+    def fog_light_energy
+      get_fog_light_energy
+    end
+    # Property `fog_light_energy` setter
+    def fog_light_energy=(val : Number)
+      set_fog_light_energy(val.to_f64)
+    end
+    # Property `fog_sun_scatter` getter
+    def fog_sun_scatter
+      get_fog_sun_scatter
+    end
+    # Property `fog_sun_scatter` setter
+    def fog_sun_scatter=(val : Number)
+      set_fog_sun_scatter(val.to_f64)
+    end
+    # Property `fog_density` getter
+    def fog_density
+      get_fog_density
+    end
+    # Property `fog_density` setter
+    def fog_density=(val : Number)
+      set_fog_density(val.to_f64)
+    end
+    # Property `fog_aerial_perspective` getter
+    def fog_aerial_perspective
+      get_fog_aerial_perspective
+    end
+    # Property `fog_aerial_perspective` setter
+    def fog_aerial_perspective=(val : Number)
+      set_fog_aerial_perspective(val.to_f64)
+    end
+    # Property `fog_sky_affect` getter
+    def fog_sky_affect
+      get_fog_sky_affect
+    end
+    # Property `fog_sky_affect` setter
+    def fog_sky_affect=(val : Number)
+      set_fog_sky_affect(val.to_f64)
+    end
+    # Property `fog_height` getter
+    def fog_height
+      get_fog_height
+    end
+    # Property `fog_height` setter
+    def fog_height=(val : Number)
+      set_fog_height(val.to_f64)
+    end
+    # Property `fog_height_density` getter
+    def fog_height_density
+      get_fog_height_density
+    end
+    # Property `fog_height_density` setter
+    def fog_height_density=(val : Number)
+      set_fog_height_density(val.to_f64)
+    end
+    # Property `fog_depth_curve` getter
+    def fog_depth_curve
+      get_fog_depth_curve
+    end
+    # Property `fog_depth_curve` setter
+    def fog_depth_curve=(val : Number)
+      set_fog_depth_curve(val.to_f64)
+    end
+    # Property `fog_depth_begin` getter
+    def fog_depth_begin
+      get_fog_depth_begin
+    end
+    # Property `fog_depth_begin` setter
+    def fog_depth_begin=(val : Number)
+      set_fog_depth_begin(val.to_f64)
+    end
+    # Property `fog_depth_end` getter
+    def fog_depth_end
+      get_fog_depth_end
+    end
+    # Property `fog_depth_end` setter
+    def fog_depth_end=(val : Number)
+      set_fog_depth_end(val.to_f64)
+    end
+    # Property `volumetric_fog_enabled` getter
+    def volumetric_fog_enabled
+      is_volumetric_fog_enabled
+    end
+    def volumetric_fog_enabled?
+      volumetric_fog_enabled
+    end
+    # Property `volumetric_fog_enabled` setter
+    def volumetric_fog_enabled=(val)
+      set_volumetric_fog_enabled(val)
+    end
+    # Property `volumetric_fog_density` getter
+    def volumetric_fog_density
+      get_volumetric_fog_density
+    end
+    # Property `volumetric_fog_density` setter
+    def volumetric_fog_density=(val : Number)
+      set_volumetric_fog_density(val.to_f64)
+    end
+    # Property `volumetric_fog_albedo` getter
+    def volumetric_fog_albedo
+      get_volumetric_fog_albedo
+    end
+    # Property `volumetric_fog_albedo` setter
+    def volumetric_fog_albedo=(val)
+      set_volumetric_fog_albedo(val)
+    end
+    # Property `volumetric_fog_emission` getter
+    def volumetric_fog_emission
+      get_volumetric_fog_emission
+    end
+    # Property `volumetric_fog_emission` setter
+    def volumetric_fog_emission=(val)
+      set_volumetric_fog_emission(val)
+    end
+    # Property `volumetric_fog_emission_energy` getter
+    def volumetric_fog_emission_energy
+      get_volumetric_fog_emission_energy
+    end
+    # Property `volumetric_fog_emission_energy` setter
+    def volumetric_fog_emission_energy=(val : Number)
+      set_volumetric_fog_emission_energy(val.to_f64)
+    end
+    # Property `volumetric_fog_gi_inject` getter
+    def volumetric_fog_gi_inject
+      get_volumetric_fog_gi_inject
+    end
+    # Property `volumetric_fog_gi_inject` setter
+    def volumetric_fog_gi_inject=(val : Number)
+      set_volumetric_fog_gi_inject(val.to_f64)
+    end
+    # Property `volumetric_fog_anisotropy` getter
+    def volumetric_fog_anisotropy
+      get_volumetric_fog_anisotropy
+    end
+    # Property `volumetric_fog_anisotropy` setter
+    def volumetric_fog_anisotropy=(val : Number)
+      set_volumetric_fog_anisotropy(val.to_f64)
+    end
+    # Property `volumetric_fog_length` getter
+    def volumetric_fog_length
+      get_volumetric_fog_length
+    end
+    # Property `volumetric_fog_length` setter
+    def volumetric_fog_length=(val : Number)
+      set_volumetric_fog_length(val.to_f64)
+    end
+    # Property `volumetric_fog_detail_spread` getter
+    def volumetric_fog_detail_spread
+      get_volumetric_fog_detail_spread
+    end
+    # Property `volumetric_fog_detail_spread` setter
+    def volumetric_fog_detail_spread=(val : Number)
+      set_volumetric_fog_detail_spread(val.to_f64)
+    end
+    # Property `volumetric_fog_ambient_inject` getter
+    def volumetric_fog_ambient_inject
+      get_volumetric_fog_ambient_inject
+    end
+    # Property `volumetric_fog_ambient_inject` setter
+    def volumetric_fog_ambient_inject=(val : Number)
+      set_volumetric_fog_ambient_inject(val.to_f64)
+    end
+    # Property `volumetric_fog_sky_affect` getter
+    def volumetric_fog_sky_affect
+      get_volumetric_fog_sky_affect
+    end
+    # Property `volumetric_fog_sky_affect` setter
+    def volumetric_fog_sky_affect=(val : Number)
+      set_volumetric_fog_sky_affect(val.to_f64)
+    end
+    # Property `volumetric_fog_temporal_reprojection_enabled` getter
+    def volumetric_fog_temporal_reprojection_enabled
+      is_volumetric_fog_temporal_reprojection_enabled
+    end
+    def volumetric_fog_temporal_reprojection_enabled?
+      volumetric_fog_temporal_reprojection_enabled
+    end
+    # Property `volumetric_fog_temporal_reprojection_enabled` setter
+    def volumetric_fog_temporal_reprojection_enabled=(val)
+      set_volumetric_fog_temporal_reprojection_enabled(val)
+    end
+    # Property `volumetric_fog_temporal_reprojection_amount` getter
+    def volumetric_fog_temporal_reprojection_amount
+      get_volumetric_fog_temporal_reprojection_amount
+    end
+    # Property `volumetric_fog_temporal_reprojection_amount` setter
+    def volumetric_fog_temporal_reprojection_amount=(val : Number)
+      set_volumetric_fog_temporal_reprojection_amount(val.to_f64)
+    end
+    # Property `adjustment_enabled` getter
+    def adjustment_enabled
+      is_adjustment_enabled
+    end
+    def adjustment_enabled?
+      adjustment_enabled
+    end
+    # Property `adjustment_enabled` setter
+    def adjustment_enabled=(val)
+      set_adjustment_enabled(val)
+    end
+    # Property `adjustment_brightness` getter
+    def adjustment_brightness
+      get_adjustment_brightness
+    end
+    # Property `adjustment_brightness` setter
+    def adjustment_brightness=(val : Number)
+      set_adjustment_brightness(val.to_f64)
+    end
+    # Property `adjustment_contrast` getter
+    def adjustment_contrast
+      get_adjustment_contrast
+    end
+    # Property `adjustment_contrast` setter
+    def adjustment_contrast=(val : Number)
+      set_adjustment_contrast(val.to_f64)
+    end
+    # Property `adjustment_saturation` getter
+    def adjustment_saturation
+      get_adjustment_saturation
+    end
+    # Property `adjustment_saturation` setter
+    def adjustment_saturation=(val : Number)
+      set_adjustment_saturation(val.to_f64)
+    end
+    # Property `adjustment_color_correction` getter
+    def adjustment_color_correction
+      get_adjustment_color_correction
+    end
+    # Property `adjustment_color_correction` setter
+    def adjustment_color_correction=(val)
+      set_adjustment_color_correction(val)
+    end
   end
   class Expression < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -26976,6 +31396,14 @@ module Godot
       arg_0 = pointerof(val_0).as(Void*)
       args = [arg_0]
       Bridge.ptrcall(@@mb_set_external_buffer_id, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    # Property `size` getter
+    def size
+      get_size
+    end
+    # Property `size` setter
+    def size=(val)
+      set_size(val)
     end
   end
   class FABRIK3D < Godot::IterateIK3D
@@ -27307,6 +31735,62 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_supported_gltf_extensions, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       ret_ptr
+    end
+    # Property `image_format` getter
+    def image_format
+      get_image_format
+    end
+    # Property `image_format` setter
+    def image_format=(val)
+      set_image_format(val)
+    end
+    # Property `lossy_quality` getter
+    def lossy_quality
+      get_lossy_quality
+    end
+    # Property `lossy_quality` setter
+    def lossy_quality=(val : Number)
+      set_lossy_quality(val.to_f64)
+    end
+    # Property `fallback_image_format` getter
+    def fallback_image_format
+      get_fallback_image_format
+    end
+    # Property `fallback_image_format` setter
+    def fallback_image_format=(val)
+      set_fallback_image_format(val)
+    end
+    # Property `fallback_image_quality` getter
+    def fallback_image_quality
+      get_fallback_image_quality
+    end
+    # Property `fallback_image_quality` setter
+    def fallback_image_quality=(val : Number)
+      set_fallback_image_quality(val.to_f64)
+    end
+    # Property `root_node_mode` getter
+    def root_node_mode
+      get_root_node_mode
+    end
+    # Property `root_node_mode` setter
+    def root_node_mode=(val : Int)
+      set_root_node_mode(val.to_i64)
+    end
+    # Property `texture_map_mode` getter
+    def texture_map_mode
+      get_texture_map_mode
+    end
+    # Property `texture_map_mode` setter
+    def texture_map_mode=(val : Int)
+      set_texture_map_mode(val.to_i64)
+    end
+    # Property `visibility_mode` getter
+    def visibility_mode
+      get_visibility_mode
+    end
+    # Property `visibility_mode` setter
+    def visibility_mode=(val : Int)
+      set_visibility_mode(val.to_i64)
     end
   end
   class FBXDocument < Godot::GLTFDocument
@@ -28035,6 +32519,263 @@ module Godot
       args = [arg_0]
       Bridge.ptrcall(@@mb_set_handle_binary_image, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
     end
+    # Property `json` getter
+    def json
+      get_json
+    end
+    # Property `json` setter
+    def json=(val)
+      set_json(val)
+    end
+    # Property `major_version` getter
+    def major_version
+      get_major_version
+    end
+    # Property `major_version` setter
+    def major_version=(val : Int)
+      set_major_version(val.to_i64)
+    end
+    # Property `minor_version` getter
+    def minor_version
+      get_minor_version
+    end
+    # Property `minor_version` setter
+    def minor_version=(val : Int)
+      set_minor_version(val.to_i64)
+    end
+    # Property `copyright` getter
+    def copyright
+      get_copyright
+    end
+    # Property `copyright` setter
+    def copyright=(val)
+      set_copyright(val)
+    end
+    # Property `glb_data` getter
+    def glb_data
+      get_glb_data
+    end
+    # Property `glb_data` setter
+    def glb_data=(val)
+      set_glb_data(val)
+    end
+    # Property `use_named_skin_binds` getter
+    def use_named_skin_binds
+      get_use_named_skin_binds
+    end
+    def use_named_skin_binds?
+      use_named_skin_binds
+    end
+    # Property `use_named_skin_binds` setter
+    def use_named_skin_binds=(val)
+      set_use_named_skin_binds(val)
+    end
+    # Property `nodes` getter
+    def nodes
+      get_nodes
+    end
+    # Property `nodes` setter
+    def nodes=(val)
+      set_nodes(val)
+    end
+    # Property `buffers` getter
+    def buffers
+      get_buffers
+    end
+    # Property `buffers` setter
+    def buffers=(val)
+      set_buffers(val)
+    end
+    # Property `buffer_views` getter
+    def buffer_views
+      get_buffer_views
+    end
+    # Property `buffer_views` setter
+    def buffer_views=(val)
+      set_buffer_views(val)
+    end
+    # Property `accessors` getter
+    def accessors
+      get_accessors
+    end
+    # Property `accessors` setter
+    def accessors=(val)
+      set_accessors(val)
+    end
+    # Property `meshes` getter
+    def meshes
+      get_meshes
+    end
+    # Property `meshes` setter
+    def meshes=(val)
+      set_meshes(val)
+    end
+    # Property `materials` getter
+    def materials
+      get_materials
+    end
+    # Property `materials` setter
+    def materials=(val)
+      set_materials(val)
+    end
+    # Property `scene_name` getter
+    def scene_name
+      get_scene_name
+    end
+    # Property `scene_name` setter
+    def scene_name=(val)
+      set_scene_name(val)
+    end
+    # Property `base_path` getter
+    def base_path
+      get_base_path
+    end
+    # Property `base_path` setter
+    def base_path=(val)
+      set_base_path(val)
+    end
+    # Property `filename` getter
+    def filename
+      get_filename
+    end
+    # Property `filename` setter
+    def filename=(val)
+      set_filename(val)
+    end
+    # Property `root_nodes` getter
+    def root_nodes
+      get_root_nodes
+    end
+    # Property `root_nodes` setter
+    def root_nodes=(val)
+      set_root_nodes(val)
+    end
+    # Property `textures` getter
+    def textures
+      get_textures
+    end
+    # Property `textures` setter
+    def textures=(val)
+      set_textures(val)
+    end
+    # Property `texture_samplers` getter
+    def texture_samplers
+      get_texture_samplers
+    end
+    # Property `texture_samplers` setter
+    def texture_samplers=(val)
+      set_texture_samplers(val)
+    end
+    # Property `images` getter
+    def images
+      get_images
+    end
+    # Property `images` setter
+    def images=(val)
+      set_images(val)
+    end
+    # Property `skins` getter
+    def skins
+      get_skins
+    end
+    # Property `skins` setter
+    def skins=(val)
+      set_skins(val)
+    end
+    # Property `cameras` getter
+    def cameras
+      get_cameras
+    end
+    # Property `cameras` setter
+    def cameras=(val)
+      set_cameras(val)
+    end
+    # Property `lights` getter
+    def lights
+      get_lights
+    end
+    # Property `lights` setter
+    def lights=(val)
+      set_lights(val)
+    end
+    # Property `unique_names` getter
+    def unique_names
+      get_unique_names
+    end
+    # Property `unique_names` setter
+    def unique_names=(val)
+      set_unique_names(val)
+    end
+    # Property `unique_animation_names` getter
+    def unique_animation_names
+      get_unique_animation_names
+    end
+    # Property `unique_animation_names` setter
+    def unique_animation_names=(val)
+      set_unique_animation_names(val)
+    end
+    # Property `skeletons` getter
+    def skeletons
+      get_skeletons
+    end
+    # Property `skeletons` setter
+    def skeletons=(val)
+      set_skeletons(val)
+    end
+    # Property `create_animations` getter
+    def create_animations
+      get_create_animations
+    end
+    def create_animations?
+      create_animations
+    end
+    # Property `create_animations` setter
+    def create_animations=(val)
+      set_create_animations(val)
+    end
+    # Property `import_as_skeleton_bones` getter
+    def import_as_skeleton_bones
+      get_import_as_skeleton_bones
+    end
+    def import_as_skeleton_bones?
+      import_as_skeleton_bones
+    end
+    # Property `import_as_skeleton_bones` setter
+    def import_as_skeleton_bones=(val)
+      set_import_as_skeleton_bones(val)
+    end
+    # Property `animations` getter
+    def animations
+      get_animations
+    end
+    # Property `animations` setter
+    def animations=(val)
+      set_animations(val)
+    end
+    # Property `handle_binary_image_mode` getter
+    def handle_binary_image_mode
+      get_handle_binary_image_mode
+    end
+    # Property `handle_binary_image_mode` setter
+    def handle_binary_image_mode=(val : Int)
+      set_handle_binary_image_mode(val.to_i64)
+    end
+    # Property `bake_fps` getter
+    def bake_fps
+      get_bake_fps
+    end
+    # Property `bake_fps` setter
+    def bake_fps=(val : Number)
+      set_bake_fps(val.to_f64)
+    end
+    # Property `handle_binary_image` getter
+    def handle_binary_image
+      get_handle_binary_image
+    end
+    # Property `handle_binary_image` setter
+    def handle_binary_image=(val : Int)
+      set_handle_binary_image(val.to_i64)
+    end
   end
   class FBXState < Godot::GLTFState
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -28058,6 +32799,17 @@ module Godot
       arg_0 = pointerof(val_0).as(Void*)
       args = [arg_0]
       Bridge.ptrcall(@@mb_set_allow_geometry_helper_nodes, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    # Property `allow_geometry_helper_nodes` getter
+    def allow_geometry_helper_nodes
+      get_allow_geometry_helper_nodes
+    end
+    def allow_geometry_helper_nodes?
+      allow_geometry_helper_nodes
+    end
+    # Property `allow_geometry_helper_nodes` setter
+    def allow_geometry_helper_nodes=(val)
+      set_allow_geometry_helper_nodes(val)
     end
   end
   class Noise < Godot::Resource
@@ -28656,6 +33408,177 @@ module Godot
       ret = 0.0_f64
       Bridge.ptrcall(@@mb_get_domain_warp_fractal_gain, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `noise_type` getter
+    def noise_type
+      get_noise_type
+    end
+    # Property `noise_type` setter
+    def noise_type=(val : Int)
+      set_noise_type(val.to_i64)
+    end
+    # Property `seed` getter
+    def seed
+      get_seed
+    end
+    # Property `seed` setter
+    def seed=(val : Int)
+      set_seed(val.to_i64)
+    end
+    # Property `frequency` getter
+    def frequency
+      get_frequency
+    end
+    # Property `frequency` setter
+    def frequency=(val : Number)
+      set_frequency(val.to_f64)
+    end
+    # Property `offset` getter
+    def offset
+      get_offset
+    end
+    # Property `offset` setter
+    def offset=(val)
+      set_offset(val)
+    end
+    # Property `fractal_type` getter
+    def fractal_type
+      get_fractal_type
+    end
+    # Property `fractal_type` setter
+    def fractal_type=(val : Int)
+      set_fractal_type(val.to_i64)
+    end
+    # Property `fractal_octaves` getter
+    def fractal_octaves
+      get_fractal_octaves
+    end
+    # Property `fractal_octaves` setter
+    def fractal_octaves=(val : Int)
+      set_fractal_octaves(val.to_i64)
+    end
+    # Property `fractal_lacunarity` getter
+    def fractal_lacunarity
+      get_fractal_lacunarity
+    end
+    # Property `fractal_lacunarity` setter
+    def fractal_lacunarity=(val : Number)
+      set_fractal_lacunarity(val.to_f64)
+    end
+    # Property `fractal_gain` getter
+    def fractal_gain
+      get_fractal_gain
+    end
+    # Property `fractal_gain` setter
+    def fractal_gain=(val : Number)
+      set_fractal_gain(val.to_f64)
+    end
+    # Property `fractal_weighted_strength` getter
+    def fractal_weighted_strength
+      get_fractal_weighted_strength
+    end
+    # Property `fractal_weighted_strength` setter
+    def fractal_weighted_strength=(val : Number)
+      set_fractal_weighted_strength(val.to_f64)
+    end
+    # Property `fractal_ping_pong_strength` getter
+    def fractal_ping_pong_strength
+      get_fractal_ping_pong_strength
+    end
+    # Property `fractal_ping_pong_strength` setter
+    def fractal_ping_pong_strength=(val : Number)
+      set_fractal_ping_pong_strength(val.to_f64)
+    end
+    # Property `cellular_distance_function` getter
+    def cellular_distance_function
+      get_cellular_distance_function
+    end
+    # Property `cellular_distance_function` setter
+    def cellular_distance_function=(val : Int)
+      set_cellular_distance_function(val.to_i64)
+    end
+    # Property `cellular_jitter` getter
+    def cellular_jitter
+      get_cellular_jitter
+    end
+    # Property `cellular_jitter` setter
+    def cellular_jitter=(val : Number)
+      set_cellular_jitter(val.to_f64)
+    end
+    # Property `cellular_return_type` getter
+    def cellular_return_type
+      get_cellular_return_type
+    end
+    # Property `cellular_return_type` setter
+    def cellular_return_type=(val : Int)
+      set_cellular_return_type(val.to_i64)
+    end
+    # Property `domain_warp_enabled` getter
+    def domain_warp_enabled
+      is_domain_warp_enabled
+    end
+    def domain_warp_enabled?
+      domain_warp_enabled
+    end
+    # Property `domain_warp_enabled` setter
+    def domain_warp_enabled=(val)
+      set_domain_warp_enabled(val)
+    end
+    # Property `domain_warp_type` getter
+    def domain_warp_type
+      get_domain_warp_type
+    end
+    # Property `domain_warp_type` setter
+    def domain_warp_type=(val : Int)
+      set_domain_warp_type(val.to_i64)
+    end
+    # Property `domain_warp_amplitude` getter
+    def domain_warp_amplitude
+      get_domain_warp_amplitude
+    end
+    # Property `domain_warp_amplitude` setter
+    def domain_warp_amplitude=(val : Number)
+      set_domain_warp_amplitude(val.to_f64)
+    end
+    # Property `domain_warp_frequency` getter
+    def domain_warp_frequency
+      get_domain_warp_frequency
+    end
+    # Property `domain_warp_frequency` setter
+    def domain_warp_frequency=(val : Number)
+      set_domain_warp_frequency(val.to_f64)
+    end
+    # Property `domain_warp_fractal_type` getter
+    def domain_warp_fractal_type
+      get_domain_warp_fractal_type
+    end
+    # Property `domain_warp_fractal_type` setter
+    def domain_warp_fractal_type=(val : Int)
+      set_domain_warp_fractal_type(val.to_i64)
+    end
+    # Property `domain_warp_fractal_octaves` getter
+    def domain_warp_fractal_octaves
+      get_domain_warp_fractal_octaves
+    end
+    # Property `domain_warp_fractal_octaves` setter
+    def domain_warp_fractal_octaves=(val : Int)
+      set_domain_warp_fractal_octaves(val.to_i64)
+    end
+    # Property `domain_warp_fractal_lacunarity` getter
+    def domain_warp_fractal_lacunarity
+      get_domain_warp_fractal_lacunarity
+    end
+    # Property `domain_warp_fractal_lacunarity` setter
+    def domain_warp_fractal_lacunarity=(val : Number)
+      set_domain_warp_fractal_lacunarity(val.to_f64)
+    end
+    # Property `domain_warp_fractal_gain` getter
+    def domain_warp_fractal_gain
+      get_domain_warp_fractal_gain
+    end
+    # Property `domain_warp_fractal_gain` setter
+    def domain_warp_fractal_gain=(val : Number)
+      set_domain_warp_fractal_gain(val.to_f64)
     end
   end
   class FileAccess < Godot::RefCounted
@@ -29527,6 +34450,17 @@ module Godot
     ensure
       Bridge.free_string(str_0)
     end
+    # Property `big_endian` getter
+    def big_endian
+      is_big_endian
+    end
+    def big_endian?
+      big_endian
+    end
+    # Property `big_endian` setter
+    def big_endian=(val)
+      set_big_endian(val)
+    end
   end
   class FileSystemDock < Godot::EditorDock
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -29665,6 +34599,44 @@ module Godot
       Bridge.ptrcall(@@mb_is_reverse_fill, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `alignment` getter
+    def alignment
+      get_alignment
+    end
+    # Property `alignment` setter
+    def alignment=(val : Int)
+      set_alignment(val.to_i64)
+    end
+    # Property `last_wrap_alignment` getter
+    def last_wrap_alignment
+      get_last_wrap_alignment
+    end
+    # Property `last_wrap_alignment` setter
+    def last_wrap_alignment=(val : Int)
+      set_last_wrap_alignment(val.to_i64)
+    end
+    # Property `vertical` getter
+    def vertical
+      is_vertical
+    end
+    def vertical?
+      vertical
+    end
+    # Property `vertical` setter
+    def vertical=(val)
+      set_vertical(val)
+    end
+    # Property `reverse_fill` getter
+    def reverse_fill
+      is_reverse_fill
+    end
+    def reverse_fill?
+      reverse_fill
+    end
+    # Property `reverse_fill` setter
+    def reverse_fill=(val)
+      set_reverse_fill(val)
+    end
   end
   class FogMaterial < Godot::Material
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -29784,6 +34756,54 @@ module Godot
       Bridge.ptrcall(@@mb_get_density_texture, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Texture3D.new(ret_ptr)
     end
+    # Property `density` getter
+    def density
+      get_density
+    end
+    # Property `density` setter
+    def density=(val : Number)
+      set_density(val.to_f64)
+    end
+    # Property `albedo` getter
+    def albedo
+      get_albedo
+    end
+    # Property `albedo` setter
+    def albedo=(val)
+      set_albedo(val)
+    end
+    # Property `emission` getter
+    def emission
+      get_emission
+    end
+    # Property `emission` setter
+    def emission=(val)
+      set_emission(val)
+    end
+    # Property `height_falloff` getter
+    def height_falloff
+      get_height_falloff
+    end
+    # Property `height_falloff` setter
+    def height_falloff=(val : Number)
+      set_height_falloff(val.to_f64)
+    end
+    # Property `edge_fade` getter
+    def edge_fade
+      get_edge_fade
+    end
+    # Property `edge_fade` setter
+    def edge_fade=(val : Number)
+      set_edge_fade(val.to_f64)
+    end
+    # Property `density_texture` getter
+    def density_texture
+      get_density_texture
+    end
+    # Property `density_texture` setter
+    def density_texture=(val)
+      set_density_texture(val)
+    end
   end
   class FogVolume < Godot::VisualInstance3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -29845,6 +34865,30 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_material, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Material.new(ret_ptr)
+    end
+    # Property `size` getter
+    def size
+      get_size
+    end
+    # Property `size` setter
+    def size=(val)
+      set_size(val)
+    end
+    # Property `shape` getter
+    def shape
+      get_shape
+    end
+    # Property `shape` setter
+    def shape=(val : Int)
+      set_shape(val.to_i64)
+    end
+    # Property `material` getter
+    def material
+      get_material
+    end
+    # Property `material` setter
+    def material=(val)
+      set_material(val)
     end
   end
   class FoldableContainer < Godot::Container
@@ -30041,6 +35085,73 @@ module Godot
       args = [arg_0]
       Bridge.ptrcall(@@mb_remove_title_bar_control, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
     end
+    # Property `folded` getter
+    def folded
+      is_folded
+    end
+    def folded?
+      folded
+    end
+    # Property `folded` setter
+    def folded=(val)
+      set_folded(val)
+    end
+    # Property `title` getter
+    def title
+      get_title
+    end
+    # Property `title` setter
+    def title=(val)
+      set_title(val)
+    end
+    # Property `title_alignment` getter
+    def title_alignment
+      get_title_alignment
+    end
+    # Property `title_alignment` setter
+    def title_alignment=(val : Int)
+      set_title_alignment(val.to_i64)
+    end
+    # Property `title_position` getter
+    def title_position
+      get_title_position
+    end
+    # Property `title_position` setter
+    def title_position=(val : Int)
+      set_title_position(val.to_i64)
+    end
+    # Property `title_text_overrun_behavior` getter
+    def title_text_overrun_behavior
+      get_title_text_overrun_behavior
+    end
+    # Property `title_text_overrun_behavior` setter
+    def title_text_overrun_behavior=(val : Int)
+      set_title_text_overrun_behavior(val.to_i64)
+    end
+    # Property `foldable_group` getter
+    def foldable_group
+      get_foldable_group
+    end
+    # Property `foldable_group` setter
+    def foldable_group=(val)
+      set_foldable_group(val)
+    end
+    # Property `title_text_direction` getter
+    def title_text_direction
+      get_title_text_direction
+    end
+    # Property `title_text_direction` setter
+    def title_text_direction=(val : Int)
+      set_title_text_direction(val.to_i64)
+    end
+    # Property `language` getter
+    def language
+      get_language
+    end
+    # Property `language` setter
+    def language=(val)
+      set_language(val)
+    end
   end
   class FoldableGroup < Godot::Resource
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -30082,6 +35193,17 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_allow_folding_all, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `allow_folding_all` getter
+    def allow_folding_all
+      is_allow_folding_all
+    end
+    def allow_folding_all?
+      allow_folding_all
+    end
+    # Property `allow_folding_all` setter
+    def allow_folding_all=(val)
+      set_allow_folding_all(val)
     end
   end
   class Font < Godot::Resource
@@ -30651,6 +35773,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_face_count, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `fallbacks` getter
+    def fallbacks
+      get_fallbacks
+    end
+    # Property `fallbacks` setter
+    def fallbacks=(val)
+      set_fallbacks(val)
     end
   end
   class FontFile < Godot::Font
@@ -31944,6 +37074,203 @@ module Godot
       Bridge.ptrcall(@@mb_get_char_from_glyph_index, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
       ret
     end
+    # Property `data` getter
+    def data
+      get_data
+    end
+    # Property `data` setter
+    def data=(val)
+      set_data(val)
+    end
+    # Property `generate_mipmaps` getter
+    def generate_mipmaps
+      get_generate_mipmaps
+    end
+    def generate_mipmaps?
+      generate_mipmaps
+    end
+    # Property `generate_mipmaps` setter
+    def generate_mipmaps=(val)
+      set_generate_mipmaps(val)
+    end
+    # Property `disable_embedded_bitmaps` getter
+    def disable_embedded_bitmaps
+      get_disable_embedded_bitmaps
+    end
+    def disable_embedded_bitmaps?
+      disable_embedded_bitmaps
+    end
+    # Property `disable_embedded_bitmaps` setter
+    def disable_embedded_bitmaps=(val)
+      set_disable_embedded_bitmaps(val)
+    end
+    # Property `antialiasing` getter
+    def antialiasing
+      get_antialiasing
+    end
+    # Property `antialiasing` setter
+    def antialiasing=(val : Int)
+      set_antialiasing(val.to_i64)
+    end
+    # Property `font_name` getter
+    def font_name
+      get_font_name
+    end
+    # Property `font_name` setter
+    def font_name=(val)
+      set_font_name(val)
+    end
+    # Property `style_name` getter
+    def style_name
+      get_font_style_name
+    end
+    # Property `style_name` setter
+    def style_name=(val)
+      set_font_style_name(val)
+    end
+    # Property `font_style` getter
+    def font_style
+      get_font_style
+    end
+    # Property `font_style` setter
+    def font_style=(val : Int)
+      set_font_style(val.to_i64)
+    end
+    # Property `font_weight` getter
+    def font_weight
+      get_font_weight
+    end
+    # Property `font_weight` setter
+    def font_weight=(val : Int)
+      set_font_weight(val.to_i64)
+    end
+    # Property `font_stretch` getter
+    def font_stretch
+      get_font_stretch
+    end
+    # Property `font_stretch` setter
+    def font_stretch=(val : Int)
+      set_font_stretch(val.to_i64)
+    end
+    # Property `subpixel_positioning` getter
+    def subpixel_positioning
+      get_subpixel_positioning
+    end
+    # Property `subpixel_positioning` setter
+    def subpixel_positioning=(val : Int)
+      set_subpixel_positioning(val.to_i64)
+    end
+    # Property `keep_rounding_remainders` getter
+    def keep_rounding_remainders
+      get_keep_rounding_remainders
+    end
+    def keep_rounding_remainders?
+      keep_rounding_remainders
+    end
+    # Property `keep_rounding_remainders` setter
+    def keep_rounding_remainders=(val)
+      set_keep_rounding_remainders(val)
+    end
+    # Property `multichannel_signed_distance_field` getter
+    def multichannel_signed_distance_field
+      is_multichannel_signed_distance_field
+    end
+    def multichannel_signed_distance_field?
+      multichannel_signed_distance_field
+    end
+    # Property `multichannel_signed_distance_field` setter
+    def multichannel_signed_distance_field=(val)
+      set_multichannel_signed_distance_field(val)
+    end
+    # Property `msdf_pixel_range` getter
+    def msdf_pixel_range
+      get_msdf_pixel_range
+    end
+    # Property `msdf_pixel_range` setter
+    def msdf_pixel_range=(val : Int)
+      set_msdf_pixel_range(val.to_i64)
+    end
+    # Property `msdf_size` getter
+    def msdf_size
+      get_msdf_size
+    end
+    # Property `msdf_size` setter
+    def msdf_size=(val : Int)
+      set_msdf_size(val.to_i64)
+    end
+    # Property `allow_system_fallback` getter
+    def allow_system_fallback
+      is_allow_system_fallback
+    end
+    def allow_system_fallback?
+      allow_system_fallback
+    end
+    # Property `allow_system_fallback` setter
+    def allow_system_fallback=(val)
+      set_allow_system_fallback(val)
+    end
+    # Property `force_autohinter` getter
+    def force_autohinter
+      is_force_autohinter
+    end
+    def force_autohinter?
+      force_autohinter
+    end
+    # Property `force_autohinter` setter
+    def force_autohinter=(val)
+      set_force_autohinter(val)
+    end
+    # Property `modulate_color_glyphs` getter
+    def modulate_color_glyphs
+      is_modulate_color_glyphs
+    end
+    def modulate_color_glyphs?
+      modulate_color_glyphs
+    end
+    # Property `modulate_color_glyphs` setter
+    def modulate_color_glyphs=(val)
+      set_modulate_color_glyphs(val)
+    end
+    # Property `hinting` getter
+    def hinting
+      get_hinting
+    end
+    # Property `hinting` setter
+    def hinting=(val : Int)
+      set_hinting(val.to_i64)
+    end
+    # Property `fixed_size` getter
+    def fixed_size
+      get_fixed_size
+    end
+    # Property `fixed_size` setter
+    def fixed_size=(val : Int)
+      set_fixed_size(val.to_i64)
+    end
+    # Property `fixed_size_scale_mode` getter
+    def fixed_size_scale_mode
+      get_fixed_size_scale_mode
+    end
+    # Property `fixed_size_scale_mode` setter
+    def fixed_size_scale_mode=(val : Int)
+      set_fixed_size_scale_mode(val.to_i64)
+    end
+    # Property `opentype_feature_overrides` getter
+    def opentype_feature_overrides
+      get_opentype_feature_overrides
+    end
+    # Property `opentype_feature_overrides` setter
+    def opentype_feature_overrides=(val)
+      set_opentype_feature_overrides(val)
+    end
+    # Property `oversampling` getter
+    def oversampling
+      get_oversampling
+    end
+    # Property `oversampling` setter
+    def oversampling=(val : Number)
+      set_oversampling(val.to_f64)
+    end
   end
   class FontVariation < Godot::Font
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -32122,6 +37449,110 @@ module Godot
       arg_0 = pointerof(val_0).as(Void*)
       args = [arg_0]
       Bridge.ptrcall(@@mb_set_palette_custom_colors, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    # Property `base_font` getter
+    def base_font
+      get_base_font
+    end
+    # Property `base_font` setter
+    def base_font=(val)
+      set_base_font(val)
+    end
+    # Property `variation_opentype` getter
+    def variation_opentype
+      get_variation_opentype
+    end
+    # Property `variation_opentype` setter
+    def variation_opentype=(val)
+      set_variation_opentype(val)
+    end
+    # Property `variation_face_index` getter
+    def variation_face_index
+      get_variation_face_index
+    end
+    # Property `variation_face_index` setter
+    def variation_face_index=(val : Int)
+      set_variation_face_index(val.to_i64)
+    end
+    # Property `variation_embolden` getter
+    def variation_embolden
+      get_variation_embolden
+    end
+    # Property `variation_embolden` setter
+    def variation_embolden=(val : Number)
+      set_variation_embolden(val.to_f64)
+    end
+    # Property `variation_transform` getter
+    def variation_transform
+      get_variation_transform
+    end
+    # Property `variation_transform` setter
+    def variation_transform=(val)
+      set_variation_transform(val)
+    end
+    # Property `opentype_features` getter
+    def opentype_features
+      get_opentype_features
+    end
+    # Property `opentype_features` setter
+    def opentype_features=(val)
+      set_opentype_features(val)
+    end
+    # Property `spacing_glyph` getter
+    def spacing_glyph
+      get_spacing(0_i64)
+    end
+    # Property `spacing_glyph` setter
+    def spacing_glyph=(val : Int)
+      set_spacing(0_i64, val.to_i64)
+    end
+    # Property `spacing_space` getter
+    def spacing_space
+      get_spacing(1_i64)
+    end
+    # Property `spacing_space` setter
+    def spacing_space=(val : Int)
+      set_spacing(1_i64, val.to_i64)
+    end
+    # Property `spacing_top` getter
+    def spacing_top
+      get_spacing(2_i64)
+    end
+    # Property `spacing_top` setter
+    def spacing_top=(val : Int)
+      set_spacing(2_i64, val.to_i64)
+    end
+    # Property `spacing_bottom` getter
+    def spacing_bottom
+      get_spacing(3_i64)
+    end
+    # Property `spacing_bottom` setter
+    def spacing_bottom=(val : Int)
+      set_spacing(3_i64, val.to_i64)
+    end
+    # Property `baseline_offset` getter
+    def baseline_offset
+      get_baseline_offset
+    end
+    # Property `baseline_offset` setter
+    def baseline_offset=(val : Number)
+      set_baseline_offset(val.to_f64)
+    end
+    # Property `palette_index` getter
+    def palette_index
+      get_palette_index
+    end
+    # Property `palette_index` setter
+    def palette_index=(val : Int)
+      set_palette_index(val.to_i64)
+    end
+    # Property `palette_custom_colors` getter
+    def palette_custom_colors
+      get_palette_custom_colors
+    end
+    # Property `palette_custom_colors` setter
+    def palette_custom_colors=(val)
+      set_palette_custom_colors(val)
     end
   end
   class FramebufferCacheRD < Godot::Object
@@ -32334,6 +37765,79 @@ module Godot
     ensure
       Bridge.free_string(str_0)
     end
+    # Property `start_offset` getter
+    def start_offset
+      get_start_offset
+    end
+    # Property `start_offset` setter
+    def start_offset=(val : Int)
+      set_start_offset(val.to_i64)
+    end
+    # Property `max_results` getter
+    def max_results
+      get_max_results
+    end
+    # Property `max_results` setter
+    def max_results=(val : Int)
+      set_max_results(val.to_i64)
+    end
+    # Property `max_misses` getter
+    def max_misses
+      get_max_misses
+    end
+    # Property `max_misses` setter
+    def max_misses=(val : Int)
+      set_max_misses(val.to_i64)
+    end
+    # Property `use_exact_tokens` getter
+    def use_exact_tokens
+      get_use_exact_tokens
+    end
+    def use_exact_tokens?
+      use_exact_tokens
+    end
+    # Property `use_exact_tokens` setter
+    def use_exact_tokens=(val)
+      set_use_exact_tokens(val)
+    end
+    # Property `case_sensitive` getter
+    def case_sensitive
+      get_case_sensitive
+    end
+    def case_sensitive?
+      case_sensitive
+    end
+    # Property `case_sensitive` setter
+    def case_sensitive=(val)
+      set_case_sensitive(val)
+    end
+    # Property `filter_low_scores` getter
+    def filter_low_scores
+      get_filter_low_scores
+    end
+    def filter_low_scores?
+      filter_low_scores
+    end
+    # Property `filter_low_scores` setter
+    def filter_low_scores=(val)
+      set_filter_low_scores(val)
+    end
+    # Property `filter_factor` getter
+    def filter_factor
+      get_filter_factor
+    end
+    # Property `filter_factor` setter
+    def filter_factor=(val : Number)
+      set_filter_factor(val.to_f64)
+    end
+    # Property `filter_cutoff` getter
+    def filter_cutoff
+      get_filter_cutoff
+    end
+    # Property `filter_cutoff` setter
+    def filter_cutoff=(val : Number)
+      set_filter_cutoff(val.to_f64)
+    end
   end
   class FuzzySearchMatch < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -32404,6 +37908,30 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_matched_substrings, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Godot::Array.new(ret_ptr)
+    end
+    # Property `target` getter
+    def target
+      get_target
+    end
+    # Property `target` setter
+    def target=(val)
+      set_target(val)
+    end
+    # Property `score` getter
+    def score
+      get_score
+    end
+    # Property `score` setter
+    def score=(val : Int)
+      set_score(val.to_i64)
+    end
+    # Property `original_index` getter
+    def original_index
+      get_original_index
+    end
+    # Property `original_index` setter
+    def original_index=(val : Int)
+      set_original_index(val.to_i64)
     end
   end
   class GDExtension < Godot::Resource
@@ -32738,6 +38266,14 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_instance_has, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `source_code` getter
+    def source_code
+      get_source_code
+    end
+    # Property `source_code` setter
+    def source_code=(val)
+      set_source_code(val)
     end
   end
   class GDScript < Godot::Script

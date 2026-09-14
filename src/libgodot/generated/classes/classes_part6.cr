@@ -91,6 +91,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_max_pending_connections, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `max_pending_connections` getter
+    def max_pending_connections
+      get_max_pending_connections
+    end
+    # Property `max_pending_connections` setter
+    def max_pending_connections=(val : Int)
+      set_max_pending_connections(val.to_i64)
+    end
   end
   class UDSServer < Godot::SocketServer
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -345,6 +353,33 @@ module Godot
       Bridge.ptrcall(@@mb_is_discover_ipv6, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `discover_multicast_if` getter
+    def discover_multicast_if
+      get_discover_multicast_if
+    end
+    # Property `discover_multicast_if` setter
+    def discover_multicast_if=(val)
+      set_discover_multicast_if(val)
+    end
+    # Property `discover_local_port` getter
+    def discover_local_port
+      get_discover_local_port
+    end
+    # Property `discover_local_port` setter
+    def discover_local_port=(val : Int)
+      set_discover_local_port(val.to_i64)
+    end
+    # Property `discover_ipv6` getter
+    def discover_ipv6
+      is_discover_ipv6
+    end
+    def discover_ipv6?
+      discover_ipv6
+    end
+    # Property `discover_ipv6` setter
+    def discover_ipv6=(val)
+      set_discover_ipv6(val)
+    end
   end
   class UPNPDevice < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -530,6 +565,54 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_igd_status, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `description_url` getter
+    def description_url
+      get_description_url
+    end
+    # Property `description_url` setter
+    def description_url=(val)
+      set_description_url(val)
+    end
+    # Property `service_type` getter
+    def service_type
+      get_service_type
+    end
+    # Property `service_type` setter
+    def service_type=(val)
+      set_service_type(val)
+    end
+    # Property `igd_control_url` getter
+    def igd_control_url
+      get_igd_control_url
+    end
+    # Property `igd_control_url` setter
+    def igd_control_url=(val)
+      set_igd_control_url(val)
+    end
+    # Property `igd_service_type` getter
+    def igd_service_type
+      get_igd_service_type
+    end
+    # Property `igd_service_type` setter
+    def igd_service_type=(val)
+      set_igd_service_type(val)
+    end
+    # Property `igd_our_addr` getter
+    def igd_our_addr
+      get_igd_our_addr
+    end
+    # Property `igd_our_addr` setter
+    def igd_our_addr=(val)
+      set_igd_our_addr(val)
+    end
+    # Property `igd_status` getter
+    def igd_status
+      get_igd_status
+    end
+    # Property `igd_status` setter
+    def igd_status=(val : Int)
+      set_igd_status(val.to_i64)
     end
   end
   class UndoRedo < Godot::Object
@@ -771,6 +854,14 @@ module Godot
       Bridge.ptrcall(@@mb_undo, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `max_steps` getter
+    def max_steps
+      get_max_steps
+    end
+    # Property `max_steps` setter
+    def max_steps=(val : Int)
+      set_max_steps(val.to_i64)
+    end
   end
   class UniformSetCacheRD < Godot::Object
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -878,6 +969,30 @@ module Godot
       ret = 0.0_f64
       Bridge.ptrcall(@@mb_get_steering, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `engine_force` getter
+    def engine_force
+      get_engine_force
+    end
+    # Property `engine_force` setter
+    def engine_force=(val : Number)
+      set_engine_force(val.to_f64)
+    end
+    # Property `brake` getter
+    def brake
+      get_brake
+    end
+    # Property `brake` setter
+    def brake=(val : Number)
+      set_brake(val.to_f64)
+    end
+    # Property `steering` getter
+    def steering
+      get_steering
+    end
+    # Property `steering` setter
+    def steering=(val : Number)
+      set_steering(val.to_f64)
     end
   end
   class VehicleWheel3D < Godot::Node3D
@@ -1204,6 +1319,124 @@ module Godot
       Bridge.ptrcall(@@mb_get_steering, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `engine_force` getter
+    def engine_force
+      get_engine_force
+    end
+    # Property `engine_force` setter
+    def engine_force=(val : Number)
+      set_engine_force(val.to_f64)
+    end
+    # Property `brake` getter
+    def brake
+      get_brake
+    end
+    # Property `brake` setter
+    def brake=(val : Number)
+      set_brake(val.to_f64)
+    end
+    # Property `steering` getter
+    def steering
+      get_steering
+    end
+    # Property `steering` setter
+    def steering=(val : Number)
+      set_steering(val.to_f64)
+    end
+    # Property `use_as_traction` getter
+    def use_as_traction
+      is_used_as_traction
+    end
+    def use_as_traction?
+      use_as_traction
+    end
+    # Property `use_as_traction` setter
+    def use_as_traction=(val)
+      set_use_as_traction(val)
+    end
+    # Property `use_as_steering` getter
+    def use_as_steering
+      is_used_as_steering
+    end
+    def use_as_steering?
+      use_as_steering
+    end
+    # Property `use_as_steering` setter
+    def use_as_steering=(val)
+      set_use_as_steering(val)
+    end
+    # Property `wheel_roll_influence` getter
+    def wheel_roll_influence
+      get_roll_influence
+    end
+    # Property `wheel_roll_influence` setter
+    def wheel_roll_influence=(val : Number)
+      set_roll_influence(val.to_f64)
+    end
+    # Property `wheel_radius` getter
+    def wheel_radius
+      get_radius
+    end
+    # Property `wheel_radius` setter
+    def wheel_radius=(val : Number)
+      set_radius(val.to_f64)
+    end
+    # Property `wheel_rest_length` getter
+    def wheel_rest_length
+      get_suspension_rest_length
+    end
+    # Property `wheel_rest_length` setter
+    def wheel_rest_length=(val : Number)
+      set_suspension_rest_length(val.to_f64)
+    end
+    # Property `wheel_friction_slip` getter
+    def wheel_friction_slip
+      get_friction_slip
+    end
+    # Property `wheel_friction_slip` setter
+    def wheel_friction_slip=(val : Number)
+      set_friction_slip(val.to_f64)
+    end
+    # Property `suspension_travel` getter
+    def suspension_travel
+      get_suspension_travel
+    end
+    # Property `suspension_travel` setter
+    def suspension_travel=(val : Number)
+      set_suspension_travel(val.to_f64)
+    end
+    # Property `suspension_stiffness` getter
+    def suspension_stiffness
+      get_suspension_stiffness
+    end
+    # Property `suspension_stiffness` setter
+    def suspension_stiffness=(val : Number)
+      set_suspension_stiffness(val.to_f64)
+    end
+    # Property `suspension_max_force` getter
+    def suspension_max_force
+      get_suspension_max_force
+    end
+    # Property `suspension_max_force` setter
+    def suspension_max_force=(val : Number)
+      set_suspension_max_force(val.to_f64)
+    end
+    # Property `damping_compression` getter
+    def damping_compression
+      get_damping_compression
+    end
+    # Property `damping_compression` setter
+    def damping_compression=(val : Number)
+      set_damping_compression(val.to_f64)
+    end
+    # Property `damping_relaxation` getter
+    def damping_relaxation
+      get_damping_relaxation
+    end
+    # Property `damping_relaxation` setter
+    def damping_relaxation=(val : Number)
+      set_damping_relaxation(val.to_f64)
+    end
   end
   class VideoStream < Godot::Resource
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -1227,6 +1460,14 @@ module Godot
         @@mb_get_file = Bridge.get_method_bind("VideoStream", "get_file", 2841200299_i64)
       end
       ""
+    end
+    # Property `file` getter
+    def file
+      get_file
+    end
+    # Property `file` setter
+    def file=(val)
+      set_file(val)
     end
   end
   class VideoStreamPlayback < Godot::Resource
@@ -1530,6 +1771,114 @@ module Godot
       Bridge.ptrcall(@@mb_get_video_texture, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Texture2D.new(ret_ptr)
     end
+    # Property `audio_track` getter
+    def audio_track
+      get_audio_track
+    end
+    # Property `audio_track` setter
+    def audio_track=(val : Int)
+      set_audio_track(val.to_i64)
+    end
+    # Property `stream` getter
+    def stream
+      get_stream
+    end
+    # Property `stream` setter
+    def stream=(val)
+      set_stream(val)
+    end
+    # Property `volume_db` getter
+    def volume_db
+      get_volume_db
+    end
+    # Property `volume_db` setter
+    def volume_db=(val : Number)
+      set_volume_db(val.to_f64)
+    end
+    # Property `volume` getter
+    def volume
+      get_volume
+    end
+    # Property `volume` setter
+    def volume=(val : Number)
+      set_volume(val.to_f64)
+    end
+    # Property `speed_scale` getter
+    def speed_scale
+      get_speed_scale
+    end
+    # Property `speed_scale` setter
+    def speed_scale=(val : Number)
+      set_speed_scale(val.to_f64)
+    end
+    # Property `autoplay` getter
+    def autoplay
+      has_autoplay
+    end
+    def autoplay?
+      autoplay
+    end
+    # Property `autoplay` setter
+    def autoplay=(val)
+      set_autoplay(val)
+    end
+    # Property `paused` getter
+    def paused
+      is_paused
+    end
+    def paused?
+      paused
+    end
+    # Property `paused` setter
+    def paused=(val)
+      set_paused(val)
+    end
+    # Property `expand` getter
+    def expand
+      has_expand
+    end
+    def expand?
+      expand
+    end
+    # Property `expand` setter
+    def expand=(val)
+      set_expand(val)
+    end
+    # Property `loop` getter
+    def loop
+      has_loop
+    end
+    def loop?
+      loop
+    end
+    # Property `loop` setter
+    def loop=(val)
+      set_loop(val)
+    end
+    # Property `buffering_msec` getter
+    def buffering_msec
+      get_buffering_msec
+    end
+    # Property `buffering_msec` setter
+    def buffering_msec=(val : Int)
+      set_buffering_msec(val.to_i64)
+    end
+    # Property `stream_position` getter
+    def stream_position
+      get_stream_position
+    end
+    # Property `stream_position` setter
+    def stream_position=(val : Number)
+      set_stream_position(val.to_f64)
+    end
+    # Property `bus` getter
+    def bus
+      get_bus
+    end
+    # Property `bus` setter
+    def bus=(val)
+      set_bus(val)
+    end
   end
   class VideoStreamTheora < Godot::VideoStream
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -1558,6 +1907,14 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_viewport_path_in_scene, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       NodePath.new(ret_ptr)
+    end
+    # Property `viewport_path` getter
+    def viewport_path
+      get_viewport_path_in_scene
+    end
+    # Property `viewport_path` setter
+    def viewport_path=(val)
+      set_viewport_path_in_scene(val)
     end
   end
   class VirtualJoystick < Godot::Control
@@ -1782,6 +2139,94 @@ module Godot
       Bridge.ptrcall(@@mb_get_visibility_mode, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `joystick_mode` getter
+    def joystick_mode
+      get_joystick_mode
+    end
+    # Property `joystick_mode` setter
+    def joystick_mode=(val : Int)
+      set_joystick_mode(val.to_i64)
+    end
+    # Property `joystick_size` getter
+    def joystick_size
+      get_joystick_size
+    end
+    # Property `joystick_size` setter
+    def joystick_size=(val : Number)
+      set_joystick_size(val.to_f64)
+    end
+    # Property `tip_size` getter
+    def tip_size
+      get_tip_size
+    end
+    # Property `tip_size` setter
+    def tip_size=(val : Number)
+      set_tip_size(val.to_f64)
+    end
+    # Property `deadzone_ratio` getter
+    def deadzone_ratio
+      get_deadzone_ratio
+    end
+    # Property `deadzone_ratio` setter
+    def deadzone_ratio=(val : Number)
+      set_deadzone_ratio(val.to_f64)
+    end
+    # Property `clampzone_ratio` getter
+    def clampzone_ratio
+      get_clampzone_ratio
+    end
+    # Property `clampzone_ratio` setter
+    def clampzone_ratio=(val : Number)
+      set_clampzone_ratio(val.to_f64)
+    end
+    # Property `initial_offset_ratio` getter
+    def initial_offset_ratio
+      get_initial_offset_ratio
+    end
+    # Property `initial_offset_ratio` setter
+    def initial_offset_ratio=(val)
+      set_initial_offset_ratio(val)
+    end
+    # Property `action_left` getter
+    def action_left
+      get_action_left
+    end
+    # Property `action_left` setter
+    def action_left=(val)
+      set_action_left(val)
+    end
+    # Property `action_right` getter
+    def action_right
+      get_action_right
+    end
+    # Property `action_right` setter
+    def action_right=(val)
+      set_action_right(val)
+    end
+    # Property `action_up` getter
+    def action_up
+      get_action_up
+    end
+    # Property `action_up` setter
+    def action_up=(val)
+      set_action_up(val)
+    end
+    # Property `action_down` getter
+    def action_down
+      get_action_down
+    end
+    # Property `action_down` setter
+    def action_down=(val)
+      set_action_down(val)
+    end
+    # Property `visibility_mode` getter
+    def visibility_mode
+      get_visibility_mode
+    end
+    # Property `visibility_mode` setter
+    def visibility_mode=(val : Int)
+      set_visibility_mode(val.to_i64)
+    end
   end
   class VisibleOnScreenNotifier2D < Godot::Node2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -1834,6 +2279,25 @@ module Godot
       Bridge.ptrcall(@@mb_is_on_screen, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `rect` getter
+    def rect
+      get_rect
+    end
+    # Property `rect` setter
+    def rect=(val)
+      set_rect(val)
+    end
+    # Property `show_rect` getter
+    def show_rect
+      is_showing_rect
+    end
+    def show_rect?
+      show_rect
+    end
+    # Property `show_rect` setter
+    def show_rect=(val)
+      set_show_rect(val)
+    end
   end
   class VisibleOnScreenEnabler2D < Godot::VisibleOnScreenNotifier2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -1882,6 +2346,22 @@ module Godot
       Bridge.ptrcall(@@mb_get_enable_node_path, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       NodePath.new(ret_ptr)
     end
+    # Property `enable_mode` getter
+    def enable_mode
+      get_enable_mode
+    end
+    # Property `enable_mode` setter
+    def enable_mode=(val : Int)
+      set_enable_mode(val.to_i64)
+    end
+    # Property `enable_node_path` getter
+    def enable_node_path
+      get_enable_node_path
+    end
+    # Property `enable_node_path` setter
+    def enable_node_path=(val)
+      set_enable_node_path(val)
+    end
   end
   class VisibleOnScreenNotifier3D < Godot::VisualInstance3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -1905,6 +2385,14 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_on_screen, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `aabb` getter
+    def aabb
+      get_aabb
+    end
+    # Property `aabb` setter
+    def aabb=(val)
+      set_aabb(val)
     end
   end
   class VisibleOnScreenEnabler3D < Godot::VisibleOnScreenNotifier3D
@@ -1953,6 +2441,22 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_enable_node_path, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       NodePath.new(ret_ptr)
+    end
+    # Property `enable_mode` getter
+    def enable_mode
+      get_enable_mode
+    end
+    # Property `enable_mode` setter
+    def enable_mode=(val : Int)
+      set_enable_mode(val.to_i64)
+    end
+    # Property `enable_node_path` getter
+    def enable_node_path
+      get_enable_node_path
+    end
+    # Property `enable_node_path` setter
+    def enable_node_path=(val)
+      set_enable_node_path(val)
     end
   end
   class VisualShader < Godot::Shader
@@ -2303,6 +2807,14 @@ module Godot
       ret = Vector2.new
       Bridge.ptrcall(@@mb_get_graph_offset, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `graph_offset` getter
+    def graph_offset
+      get_graph_offset
+    end
+    # Property `graph_offset` setter
+    def graph_offset=(val)
+      set_graph_offset(val)
     end
   end
   class VisualShaderGroup < Godot::Resource
@@ -2747,6 +3259,30 @@ module Godot
       args = [arg_0]
       Bridge.ptrcall(@@mb_detach_node_from_frame, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
     end
+    # Property `group_name` getter
+    def group_name
+      get_group_name
+    end
+    # Property `group_name` setter
+    def group_name=(val)
+      set_group_name(val)
+    end
+    # Property `input_port_count` getter
+    def input_port_count
+      get_input_port_count
+    end
+    # Property `input_port_count` setter
+    def input_port_count=(val : Int)
+      set_input_port_count(val.to_i64)
+    end
+    # Property `output_port_count` getter
+    def output_port_count
+      get_output_port_count
+    end
+    # Property `output_port_count` setter
+    def output_port_count=(val : Int)
+      set_output_port_count(val.to_i64)
+    end
   end
   class VisualShaderNode < Godot::Resource
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -2878,6 +3414,30 @@ module Godot
       Bridge.ptrcall(@@mb_get_frame, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `output_port_for_preview` getter
+    def output_port_for_preview
+      get_output_port_for_preview
+    end
+    # Property `output_port_for_preview` setter
+    def output_port_for_preview=(val : Int)
+      set_output_port_for_preview(val.to_i64)
+    end
+    # Property `default_input_values` getter
+    def default_input_values
+      get_default_input_values
+    end
+    # Property `default_input_values` setter
+    def default_input_values=(val)
+      set_default_input_values(val)
+    end
+    # Property `linked_parent_graph_frame` getter
+    def linked_parent_graph_frame
+      get_frame
+    end
+    # Property `linked_parent_graph_frame` setter
+    def linked_parent_graph_frame=(val : Int)
+      set_frame(val.to_i64)
+    end
   end
   class VisualShaderNodeBillboard < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -2928,6 +3488,25 @@ module Godot
       Bridge.ptrcall(@@mb_is_keep_scale_enabled, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `billboard_type` getter
+    def billboard_type
+      get_billboard_type
+    end
+    # Property `billboard_type` setter
+    def billboard_type=(val : Int)
+      set_billboard_type(val.to_i64)
+    end
+    # Property `keep_scale` getter
+    def keep_scale
+      is_keep_scale_enabled
+    end
+    def keep_scale?
+      keep_scale
+    end
+    # Property `keep_scale` setter
+    def keep_scale=(val)
+      set_keep_scale_enabled(val)
+    end
   end
   class VisualShaderNodeConstant < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -2956,6 +3535,17 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_get_constant, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `constant` getter
+    def constant
+      get_constant
+    end
+    def constant?
+      constant
+    end
+    # Property `constant` setter
+    def constant=(val)
+      set_constant(val)
     end
   end
   class VisualShaderNodeParameter < Godot::VisualShaderNode
@@ -3026,6 +3616,30 @@ module Godot
       Bridge.ptrcall(@@mb_get_instance_index, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `parameter_name` getter
+    def parameter_name
+      get_parameter_name
+    end
+    # Property `parameter_name` setter
+    def parameter_name=(val)
+      set_parameter_name(val)
+    end
+    # Property `qualifier` getter
+    def qualifier
+      get_qualifier
+    end
+    # Property `qualifier` setter
+    def qualifier=(val : Int)
+      set_qualifier(val.to_i64)
+    end
+    # Property `instance_index` getter
+    def instance_index
+      get_instance_index
+    end
+    # Property `instance_index` setter
+    def instance_index=(val : Int)
+      set_instance_index(val.to_i64)
+    end
   end
   class VisualShaderNodeBooleanParameter < Godot::VisualShaderNodeParameter
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -3069,6 +3683,28 @@ module Godot
       Bridge.ptrcall(@@mb_get_default_value, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `default_value_enabled` getter
+    def default_value_enabled
+      is_default_value_enabled
+    end
+    def default_value_enabled?
+      default_value_enabled
+    end
+    # Property `default_value_enabled` setter
+    def default_value_enabled=(val)
+      set_default_value_enabled(val)
+    end
+    # Property `default_value` getter
+    def default_value
+      get_default_value
+    end
+    def default_value?
+      default_value
+    end
+    # Property `default_value` setter
+    def default_value=(val)
+      set_default_value(val)
+    end
   end
   class VisualShaderNodeClamp < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -3102,6 +3738,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_op_type, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `op_type` getter
+    def op_type
+      get_op_type
+    end
+    # Property `op_type` setter
+    def op_type=(val : Int)
+      set_op_type(val.to_i64)
+    end
   end
   class VisualShaderNodeColorConstant < Godot::VisualShaderNodeConstant
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -3125,6 +3769,14 @@ module Godot
       ret = Color.new
       Bridge.ptrcall(@@mb_get_constant, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `constant` getter
+    def constant
+      get_constant
+    end
+    # Property `constant` setter
+    def constant=(val)
+      set_constant(val)
     end
   end
   class VisualShaderNodeColorFunc < Godot::VisualShaderNode
@@ -3158,6 +3810,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_function, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `function` getter
+    def function
+      get_function
+    end
+    # Property `function` setter
+    def function=(val : Int)
+      set_function(val.to_i64)
     end
   end
   class VisualShaderNodeColorOp < Godot::VisualShaderNode
@@ -3194,6 +3854,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_operator, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `operator` getter
+    def operator
+      get_operator
+    end
+    # Property `operator` setter
+    def operator=(val : Int)
+      set_operator(val.to_i64)
     end
   end
   class VisualShaderNodeColorParameter < Godot::VisualShaderNodeParameter
@@ -3238,6 +3906,25 @@ module Godot
       Bridge.ptrcall(@@mb_get_default_value, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `default_value_enabled` getter
+    def default_value_enabled
+      is_default_value_enabled
+    end
+    def default_value_enabled?
+      default_value_enabled
+    end
+    # Property `default_value_enabled` setter
+    def default_value_enabled=(val)
+      set_default_value_enabled(val)
+    end
+    # Property `default_value` getter
+    def default_value
+      get_default_value
+    end
+    # Property `default_value` setter
+    def default_value=(val)
+      set_default_value(val)
+    end
   end
   class VisualShaderNodeResizableBase < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -3261,6 +3948,14 @@ module Godot
       ret = Vector2.new
       Bridge.ptrcall(@@mb_get_size, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `size` getter
+    def size
+      get_size
+    end
+    # Property `size` setter
+    def size=(val)
+      set_size(val)
     end
   end
   class VisualShaderNodeFrame < Godot::VisualShaderNodeResizableBase
@@ -3382,6 +4077,52 @@ module Godot
       Bridge.ptrcall(@@mb_get_attached_nodes, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       ret_ptr
     end
+    # Property `title` getter
+    def title
+      get_title
+    end
+    # Property `title` setter
+    def title=(val)
+      set_title(val)
+    end
+    # Property `tint_color_enabled` getter
+    def tint_color_enabled
+      is_tint_color_enabled
+    end
+    def tint_color_enabled?
+      tint_color_enabled
+    end
+    # Property `tint_color_enabled` setter
+    def tint_color_enabled=(val)
+      set_tint_color_enabled(val)
+    end
+    # Property `tint_color` getter
+    def tint_color
+      get_tint_color
+    end
+    # Property `tint_color` setter
+    def tint_color=(val)
+      set_tint_color(val)
+    end
+    # Property `autoshrink` getter
+    def autoshrink
+      is_autoshrink_enabled
+    end
+    def autoshrink?
+      autoshrink
+    end
+    # Property `autoshrink` setter
+    def autoshrink=(val)
+      set_autoshrink_enabled(val)
+    end
+    # Property `attached_nodes` getter
+    def attached_nodes
+      get_attached_nodes
+    end
+    # Property `attached_nodes` setter
+    def attached_nodes=(val)
+      set_attached_nodes(val)
+    end
   end
   class VisualShaderNodeComment < Godot::VisualShaderNodeFrame
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -3405,6 +4146,14 @@ module Godot
         @@mb_get_description = Bridge.get_method_bind("VisualShaderNodeComment", "get_description", 201670096_i64)
       end
       ""
+    end
+    # Property `description` getter
+    def description
+      get_description
+    end
+    # Property `description` setter
+    def description=(val)
+      set_description(val)
     end
   end
   class VisualShaderNodeCompare < Godot::VisualShaderNode
@@ -3493,6 +4242,30 @@ module Godot
       Bridge.ptrcall(@@mb_get_condition, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `type` getter
+    def get_type
+      get_comparison_type
+    end
+    # Property `type` setter
+    def get_type=(val : Int)
+      set_comparison_type(val.to_i64)
+    end
+    # Property `function` getter
+    def function
+      get_function
+    end
+    # Property `function` setter
+    def function=(val : Int)
+      set_function(val.to_i64)
+    end
+    # Property `condition` getter
+    def condition
+      get_condition
+    end
+    # Property `condition` setter
+    def condition=(val : Int)
+      set_condition(val.to_i64)
+    end
   end
   class VisualShaderNodeCubemap < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -3565,6 +4338,30 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_texture_type, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `source` getter
+    def source
+      get_source
+    end
+    # Property `source` setter
+    def source=(val : Int)
+      set_source(val.to_i64)
+    end
+    # Property `cube_map` getter
+    def cube_map
+      get_cube_map
+    end
+    # Property `cube_map` setter
+    def cube_map=(val)
+      set_cube_map(val)
+    end
+    # Property `texture_type` getter
+    def texture_type
+      get_texture_type
+    end
+    # Property `texture_type` setter
+    def texture_type=(val : Int)
+      set_texture_type(val.to_i64)
     end
   end
   class VisualShaderNodeTextureParameter < Godot::VisualShaderNodeParameter
@@ -3702,6 +4499,46 @@ module Godot
       Bridge.ptrcall(@@mb_get_texture_source, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `texture_type` getter
+    def texture_type
+      get_texture_type
+    end
+    # Property `texture_type` setter
+    def texture_type=(val : Int)
+      set_texture_type(val.to_i64)
+    end
+    # Property `color_default` getter
+    def color_default
+      get_color_default
+    end
+    # Property `color_default` setter
+    def color_default=(val : Int)
+      set_color_default(val.to_i64)
+    end
+    # Property `texture_filter` getter
+    def texture_filter
+      get_texture_filter
+    end
+    # Property `texture_filter` setter
+    def texture_filter=(val : Int)
+      set_texture_filter(val.to_i64)
+    end
+    # Property `texture_repeat` getter
+    def texture_repeat
+      get_texture_repeat
+    end
+    # Property `texture_repeat` setter
+    def texture_repeat=(val : Int)
+      set_texture_repeat(val.to_i64)
+    end
+    # Property `texture_source` getter
+    def texture_source
+      get_texture_source
+    end
+    # Property `texture_source` setter
+    def texture_source=(val : Int)
+      set_texture_source(val.to_i64)
+    end
   end
   class VisualShaderNodeCubemapParameter < Godot::VisualShaderNodeTextureParameter
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -3731,6 +4568,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_texture, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       CurveTexture.new(ret_ptr)
     end
+    # Property `texture` getter
+    def texture
+      get_texture
+    end
+    # Property `texture` setter
+    def texture=(val)
+      set_texture(val)
+    end
   end
   class VisualShaderNodeCurveXYZTexture < Godot::VisualShaderNodeResizableBase
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -3755,6 +4600,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_texture, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       CurveXYZTexture.new(ret_ptr)
     end
+    # Property `texture` getter
+    def texture
+      get_texture
+    end
+    # Property `texture` setter
+    def texture=(val)
+      set_texture(val)
+    end
   end
   class VisualShaderNodeCustom < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -3771,6 +4624,17 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_option_index, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
       ret
+    end
+    # Property `initialized` getter
+    def initialized
+      _is_initialized
+    end
+    def initialized?
+      initialized
+    end
+    # Property `properties` getter
+    def properties
+      get_properties
     end
   end
   class VisualShaderNodeDerivativeFunc < Godot::VisualShaderNode
@@ -3852,6 +4716,30 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_precision, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `op_type` getter
+    def op_type
+      get_op_type
+    end
+    # Property `op_type` setter
+    def op_type=(val : Int)
+      set_op_type(val.to_i64)
+    end
+    # Property `function` getter
+    def function
+      get_function
+    end
+    # Property `function` setter
+    def function=(val : Int)
+      set_function(val.to_i64)
+    end
+    # Property `precision` getter
+    def precision
+      get_precision
+    end
+    # Property `precision` setter
+    def precision=(val : Int)
+      set_precision(val.to_i64)
     end
   end
   class VisualShaderNodeDeterminant < Godot::VisualShaderNode
@@ -4127,6 +5015,14 @@ module Godot
       end
       ""
     end
+    # Property `expression` getter
+    def expression
+      get_expression
+    end
+    # Property `expression` setter
+    def expression=(val)
+      set_expression(val)
+    end
   end
   class VisualShaderNodeVectorBase < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -4157,6 +5053,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_op_type, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `op_type` getter
+    def op_type
+      get_op_type
+    end
+    # Property `op_type` setter
+    def op_type=(val : Int)
+      set_op_type(val.to_i64)
+    end
   end
   class VisualShaderNodeFaceForward < Godot::VisualShaderNodeVectorBase
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -4185,6 +5089,14 @@ module Godot
       ret = 0.0_f64
       Bridge.ptrcall(@@mb_get_constant, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `constant` getter
+    def constant
+      get_constant
+    end
+    # Property `constant` setter
+    def constant=(val : Number)
+      set_constant(val.to_f64)
     end
   end
   class VisualShaderNodeFloatFunc < Godot::VisualShaderNode
@@ -4245,6 +5157,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_function, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `function` getter
+    def function
+      get_function
+    end
+    # Property `function` setter
+    def function=(val : Int)
+      set_function(val.to_i64)
+    end
   end
   class VisualShaderNodeFloatOp < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -4281,6 +5201,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_operator, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `operator` getter
+    def operator
+      get_operator
+    end
+    # Property `operator` setter
+    def operator=(val : Int)
+      set_operator(val.to_i64)
     end
   end
   class VisualShaderNodeFloatParameter < Godot::VisualShaderNodeParameter
@@ -4407,6 +5335,57 @@ module Godot
       Bridge.ptrcall(@@mb_get_default_value, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `hint` getter
+    def hint
+      get_hint
+    end
+    # Property `hint` setter
+    def hint=(val : Int)
+      set_hint(val.to_i64)
+    end
+    # Property `min` getter
+    def min
+      get_min
+    end
+    # Property `min` setter
+    def min=(val : Number)
+      set_min(val.to_f64)
+    end
+    # Property `max` getter
+    def max
+      get_max
+    end
+    # Property `max` setter
+    def max=(val : Number)
+      set_max(val.to_f64)
+    end
+    # Property `step` getter
+    def step
+      get_step
+    end
+    # Property `step` setter
+    def step=(val : Number)
+      set_step(val.to_f64)
+    end
+    # Property `default_value_enabled` getter
+    def default_value_enabled
+      is_default_value_enabled
+    end
+    def default_value_enabled?
+      default_value_enabled
+    end
+    # Property `default_value_enabled` setter
+    def default_value_enabled=(val)
+      set_default_value_enabled(val)
+    end
+    # Property `default_value` getter
+    def default_value
+      get_default_value
+    end
+    # Property `default_value` setter
+    def default_value=(val : Number)
+      set_default_value(val.to_f64)
+    end
   end
   class VisualShaderNodeFresnel < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -4440,6 +5419,14 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_group, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       VisualShaderGroup.new(ret_ptr)
+    end
+    # Property `group` getter
+    def group
+      get_group
+    end
+    # Property `group` setter
+    def group=(val)
+      set_group(val)
     end
   end
   class VisualShaderNodeGroupInput < Godot::VisualShaderNode
@@ -4487,6 +5474,14 @@ module Godot
       end
       ""
     end
+    # Property `input_name` getter
+    def input_name
+      get_input_name
+    end
+    # Property `input_name` setter
+    def input_name=(val)
+      set_input_name(val)
+    end
   end
   class VisualShaderNodeIntConstant < Godot::VisualShaderNodeConstant
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -4510,6 +5505,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_constant, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `constant` getter
+    def constant
+      get_constant
+    end
+    # Property `constant` setter
+    def constant=(val : Int)
+      set_constant(val.to_i64)
     end
   end
   class VisualShaderNodeIntFunc < Godot::VisualShaderNode
@@ -4541,6 +5544,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_function, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `function` getter
+    def function
+      get_function
+    end
+    # Property `function` setter
+    def function=(val : Int)
+      set_function(val.to_i64)
     end
   end
   class VisualShaderNodeIntOp < Godot::VisualShaderNode
@@ -4580,6 +5591,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_operator, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `operator` getter
+    def operator
+      get_operator
+    end
+    # Property `operator` setter
+    def operator=(val : Int)
+      set_operator(val.to_i64)
     end
   end
   class VisualShaderNodeIntParameter < Godot::VisualShaderNodeParameter
@@ -4726,6 +5745,65 @@ module Godot
       Bridge.ptrcall(@@mb_get_default_value, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `hint` getter
+    def hint
+      get_hint
+    end
+    # Property `hint` setter
+    def hint=(val : Int)
+      set_hint(val.to_i64)
+    end
+    # Property `min` getter
+    def min
+      get_min
+    end
+    # Property `min` setter
+    def min=(val : Int)
+      set_min(val.to_i64)
+    end
+    # Property `max` getter
+    def max
+      get_max
+    end
+    # Property `max` setter
+    def max=(val : Int)
+      set_max(val.to_i64)
+    end
+    # Property `step` getter
+    def step
+      get_step
+    end
+    # Property `step` setter
+    def step=(val : Int)
+      set_step(val.to_i64)
+    end
+    # Property `enum_names` getter
+    def enum_names
+      get_enum_names
+    end
+    # Property `enum_names` setter
+    def enum_names=(val)
+      set_enum_names(val)
+    end
+    # Property `default_value_enabled` getter
+    def default_value_enabled
+      is_default_value_enabled
+    end
+    def default_value_enabled?
+      default_value_enabled
+    end
+    # Property `default_value_enabled` setter
+    def default_value_enabled=(val)
+      set_default_value_enabled(val)
+    end
+    # Property `default_value` getter
+    def default_value
+      get_default_value
+    end
+    # Property `default_value` setter
+    def default_value=(val : Int)
+      set_default_value(val.to_i64)
+    end
   end
   class VisualShaderNodeIs < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -4754,6 +5832,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_function, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `function` getter
+    def function
+      get_function
+    end
+    # Property `function` setter
+    def function=(val : Int)
+      set_function(val.to_i64)
     end
   end
   class VisualShaderNodeLinearSceneDepth < Godot::VisualShaderNode
@@ -4794,6 +5880,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_op_type, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `op_type` getter
+    def op_type
+      get_op_type
+    end
+    # Property `op_type` setter
+    def op_type=(val : Int)
+      set_op_type(val.to_i64)
+    end
   end
   class VisualShaderNodeMultiplyAdd < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -4824,6 +5918,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_op_type, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `op_type` getter
+    def op_type
+      get_op_type
+    end
+    # Property `op_type` setter
+    def op_type=(val : Int)
+      set_op_type(val.to_i64)
     end
   end
   class VisualShaderNodeOuterProduct < Godot::VisualShaderNode
@@ -4859,6 +5961,14 @@ module Godot
       end
       ""
     end
+    # Property `parameter_name` getter
+    def parameter_name
+      get_parameter_name
+    end
+    # Property `parameter_name` setter
+    def parameter_name=(val)
+      set_parameter_name(val)
+    end
   end
   class VisualShaderNodeParticleAccelerator < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -4889,6 +5999,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_mode, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `mode` getter
+    def mode
+      get_mode
+    end
+    # Property `mode` setter
+    def mode=(val : Int)
+      set_mode(val.to_i64)
+    end
   end
   class VisualShaderNodeParticleEmitter < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -4912,6 +6030,17 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_mode_2d, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `mode_2d` getter
+    def mode_2d
+      is_mode_2d
+    end
+    def mode_2d?
+      mode_2d
+    end
+    # Property `mode_2d` setter
+    def mode_2d=(val)
+      set_mode_2d(val)
     end
   end
   class VisualShaderNodeParticleBoxEmitter < Godot::VisualShaderNodeParticleEmitter
@@ -4953,6 +6082,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_flags, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `flags` getter
+    def flags
+      get_flags
+    end
+    # Property `flags` setter
+    def flags=(val : Int)
+      set_flags(val.to_i64)
     end
   end
   class VisualShaderNodeParticleMeshEmitter < Godot::VisualShaderNodeParticleEmitter
@@ -5016,6 +6153,33 @@ module Godot
       Bridge.ptrcall(@@mb_get_surface_index, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `mesh` getter
+    def mesh
+      get_mesh
+    end
+    # Property `mesh` setter
+    def mesh=(val)
+      set_mesh(val)
+    end
+    # Property `use_all_surfaces` getter
+    def use_all_surfaces
+      is_use_all_surfaces
+    end
+    def use_all_surfaces?
+      use_all_surfaces
+    end
+    # Property `use_all_surfaces` setter
+    def use_all_surfaces=(val)
+      set_use_all_surfaces(val)
+    end
+    # Property `surface_index` getter
+    def surface_index
+      get_surface_index
+    end
+    # Property `surface_index` setter
+    def surface_index=(val : Int)
+      set_surface_index(val.to_i64)
+    end
   end
   class VisualShaderNodeParticleMultiplyByAxisAngle < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -5039,6 +6203,17 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_degrees_mode, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `degrees_mode` getter
+    def degrees_mode
+      is_degrees_mode
+    end
+    def degrees_mode?
+      degrees_mode
+    end
+    # Property `degrees_mode` setter
+    def degrees_mode=(val)
+      set_degrees_mode(val)
     end
   end
   class VisualShaderNodeParticleOutput < Godot::VisualShaderNodeOutput
@@ -5075,6 +6250,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_op_type, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `op_type` getter
+    def op_type
+      get_op_type
+    end
+    # Property `op_type` setter
+    def op_type=(val : Int)
+      set_op_type(val.to_i64)
     end
   end
   class VisualShaderNodeParticleRingEmitter < Godot::VisualShaderNodeParticleEmitter
@@ -5130,6 +6313,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_op_type, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `op_type` getter
+    def op_type
+      get_op_type
+    end
+    # Property `op_type` setter
+    def op_type=(val : Int)
+      set_op_type(val.to_i64)
+    end
   end
   class VisualShaderNodeReroute < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -5143,6 +6334,10 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_port_type, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `port_type` getter
+    def port_type
+      get_port_type
     end
   end
   class VisualShaderNodeRotationByAxis < Godot::VisualShaderNode
@@ -5188,6 +6383,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_source, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `source` getter
+    def source
+      get_source
+    end
+    # Property `source` setter
+    def source=(val : Int)
+      set_source(val.to_i64)
+    end
   end
   class VisualShaderNodeScreenNormalWorldSpace < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -5232,6 +6435,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_op_type, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `op_type` getter
+    def op_type
+      get_op_type
+    end
+    # Property `op_type` setter
+    def op_type=(val : Int)
+      set_op_type(val.to_i64)
+    end
   end
   class VisualShaderNodeStep < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -5265,6 +6476,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_op_type, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `op_type` getter
+    def op_type
+      get_op_type
+    end
+    # Property `op_type` setter
+    def op_type=(val : Int)
+      set_op_type(val.to_i64)
     end
   end
   class VisualShaderNodeSwitch < Godot::VisualShaderNode
@@ -5300,6 +6519,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_op_type, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `op_type` getter
+    def op_type
+      get_op_type
+    end
+    # Property `op_type` setter
+    def op_type=(val : Int)
+      set_op_type(val.to_i64)
     end
   end
   class VisualShaderNodeTexture < Godot::VisualShaderNode
@@ -5380,6 +6607,30 @@ module Godot
       Bridge.ptrcall(@@mb_get_texture_type, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `source` getter
+    def source
+      get_source
+    end
+    # Property `source` setter
+    def source=(val : Int)
+      set_source(val.to_i64)
+    end
+    # Property `texture` getter
+    def texture
+      get_texture
+    end
+    # Property `texture` setter
+    def texture=(val)
+      set_texture(val)
+    end
+    # Property `texture_type` getter
+    def texture_type
+      get_texture_type
+    end
+    # Property `texture_type` setter
+    def texture_type=(val : Int)
+      set_texture_type(val.to_i64)
+    end
   end
   class VisualShaderNodeTexture2DArray < Godot::VisualShaderNodeSample3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -5403,6 +6654,14 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_texture_array, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       TextureLayered.new(ret_ptr)
+    end
+    # Property `texture_array` getter
+    def texture_array
+      get_texture_array
+    end
+    # Property `texture_array` setter
+    def texture_array=(val)
+      set_texture_array(val)
     end
   end
   class VisualShaderNodeTexture2DArrayParameter < Godot::VisualShaderNodeTextureParameter
@@ -5437,6 +6696,14 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_texture, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Texture3D.new(ret_ptr)
+    end
+    # Property `texture` getter
+    def texture
+      get_texture
+    end
+    # Property `texture` setter
+    def texture=(val)
+      set_texture(val)
     end
   end
   class VisualShaderNodeTexture3DParameter < Godot::VisualShaderNodeTextureParameter
@@ -5487,6 +6754,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_constant, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `constant` getter
+    def constant
+      get_constant
+    end
+    # Property `constant` setter
+    def constant=(val)
+      set_constant(val)
+    end
   end
   class VisualShaderNodeTransformDecompose < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -5520,6 +6795,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_function, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `function` getter
+    def function
+      get_function
+    end
+    # Property `function` setter
+    def function=(val : Int)
+      set_function(val.to_i64)
     end
   end
   class VisualShaderNodeTransformOp < Godot::VisualShaderNode
@@ -5556,6 +6839,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_operator, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `operator` getter
+    def operator
+      get_operator
+    end
+    # Property `operator` setter
+    def operator=(val : Int)
+      set_operator(val.to_i64)
     end
   end
   class VisualShaderNodeTransformParameter < Godot::VisualShaderNodeParameter
@@ -5600,6 +6891,25 @@ module Godot
       Bridge.ptrcall(@@mb_get_default_value, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `default_value_enabled` getter
+    def default_value_enabled
+      is_default_value_enabled
+    end
+    def default_value_enabled?
+      default_value_enabled
+    end
+    # Property `default_value_enabled` setter
+    def default_value_enabled=(val)
+      set_default_value_enabled(val)
+    end
+    # Property `default_value` getter
+    def default_value
+      get_default_value
+    end
+    # Property `default_value` setter
+    def default_value=(val)
+      set_default_value(val)
+    end
   end
   class VisualShaderNodeTransformVecMult < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -5631,6 +6941,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_operator, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `operator` getter
+    def operator
+      get_operator
+    end
+    # Property `operator` setter
+    def operator=(val : Int)
+      set_operator(val.to_i64)
+    end
   end
   class VisualShaderNodeUIntConstant < Godot::VisualShaderNodeConstant
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -5654,6 +6972,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_constant, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `constant` getter
+    def constant
+      get_constant
+    end
+    # Property `constant` setter
+    def constant=(val : Int)
+      set_constant(val.to_i64)
     end
   end
   class VisualShaderNodeUIntFunc < Godot::VisualShaderNode
@@ -5683,6 +7009,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_function, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `function` getter
+    def function
+      get_function
+    end
+    # Property `function` setter
+    def function=(val : Int)
+      set_function(val.to_i64)
     end
   end
   class VisualShaderNodeUIntOp < Godot::VisualShaderNode
@@ -5722,6 +7056,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_operator, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `operator` getter
+    def operator
+      get_operator
+    end
+    # Property `operator` setter
+    def operator=(val : Int)
+      set_operator(val.to_i64)
     end
   end
   class VisualShaderNodeUIntParameter < Godot::VisualShaderNodeParameter
@@ -5766,6 +7108,25 @@ module Godot
       Bridge.ptrcall(@@mb_get_default_value, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `default_value_enabled` getter
+    def default_value_enabled
+      is_default_value_enabled
+    end
+    def default_value_enabled?
+      default_value_enabled
+    end
+    # Property `default_value_enabled` setter
+    def default_value_enabled=(val)
+      set_default_value_enabled(val)
+    end
+    # Property `default_value` getter
+    def default_value
+      get_default_value
+    end
+    # Property `default_value` setter
+    def default_value=(val : Int)
+      set_default_value(val.to_i64)
+    end
   end
   class VisualShaderNodeUVFunc < Godot::VisualShaderNode
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -5794,6 +7155,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_function, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `function` getter
+    def function
+      get_function
+    end
+    # Property `function` setter
+    def function=(val : Int)
+      set_function(val.to_i64)
     end
   end
   class VisualShaderNodeUVPolarCoord < Godot::VisualShaderNode
@@ -5843,6 +7212,22 @@ module Godot
       Bridge.ptrcall(@@mb_get_varying_type, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `varying_name` getter
+    def varying_name
+      get_varying_name
+    end
+    # Property `varying_name` setter
+    def varying_name=(val)
+      set_varying_name(val)
+    end
+    # Property `varying_type` getter
+    def varying_type
+      get_varying_type
+    end
+    # Property `varying_type` setter
+    def varying_type=(val : Int)
+      set_varying_type(val.to_i64)
+    end
   end
   class VisualShaderNodeVaryingGetter < Godot::VisualShaderNodeVarying
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -5876,6 +7261,14 @@ module Godot
       ret = Vector2.new
       Bridge.ptrcall(@@mb_get_constant, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `constant` getter
+    def constant
+      get_constant
+    end
+    # Property `constant` setter
+    def constant=(val)
+      set_constant(val)
     end
   end
   class VisualShaderNodeVec2Parameter < Godot::VisualShaderNodeParameter
@@ -5920,6 +7313,25 @@ module Godot
       Bridge.ptrcall(@@mb_get_default_value, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `default_value_enabled` getter
+    def default_value_enabled
+      is_default_value_enabled
+    end
+    def default_value_enabled?
+      default_value_enabled
+    end
+    # Property `default_value_enabled` setter
+    def default_value_enabled=(val)
+      set_default_value_enabled(val)
+    end
+    # Property `default_value` getter
+    def default_value
+      get_default_value
+    end
+    # Property `default_value` setter
+    def default_value=(val)
+      set_default_value(val)
+    end
   end
   class VisualShaderNodeVec3Constant < Godot::VisualShaderNodeConstant
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -5943,6 +7355,14 @@ module Godot
       ret = Vector3.new
       Bridge.ptrcall(@@mb_get_constant, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `constant` getter
+    def constant
+      get_constant
+    end
+    # Property `constant` setter
+    def constant=(val)
+      set_constant(val)
     end
   end
   class VisualShaderNodeVec3Parameter < Godot::VisualShaderNodeParameter
@@ -5987,6 +7407,25 @@ module Godot
       Bridge.ptrcall(@@mb_get_default_value, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `default_value_enabled` getter
+    def default_value_enabled
+      is_default_value_enabled
+    end
+    def default_value_enabled?
+      default_value_enabled
+    end
+    # Property `default_value_enabled` setter
+    def default_value_enabled=(val)
+      set_default_value_enabled(val)
+    end
+    # Property `default_value` getter
+    def default_value
+      get_default_value
+    end
+    # Property `default_value` setter
+    def default_value=(val)
+      set_default_value(val)
+    end
   end
   class VisualShaderNodeVec4Constant < Godot::VisualShaderNodeConstant
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -6010,6 +7449,14 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_constant, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Quaternion.new(ret_ptr)
+    end
+    # Property `constant` getter
+    def constant
+      get_constant
+    end
+    # Property `constant` setter
+    def constant=(val)
+      set_constant(val)
     end
   end
   class VisualShaderNodeVec4Parameter < Godot::VisualShaderNodeParameter
@@ -6053,6 +7500,25 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_default_value, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Vector4.new(ret_ptr)
+    end
+    # Property `default_value_enabled` getter
+    def default_value_enabled
+      is_default_value_enabled
+    end
+    def default_value_enabled?
+      default_value_enabled
+    end
+    # Property `default_value_enabled` setter
+    def default_value_enabled=(val)
+      set_default_value_enabled(val)
+    end
+    # Property `default_value` getter
+    def default_value
+      get_default_value
+    end
+    # Property `default_value` setter
+    def default_value=(val)
+      set_default_value(val)
     end
   end
   class VisualShaderNodeVectorCompose < Godot::VisualShaderNodeVectorBase
@@ -6129,6 +7595,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_function, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `function` getter
+    def function
+      get_function
+    end
+    # Property `function` setter
+    def function=(val : Int)
+      set_function(val.to_i64)
+    end
   end
   class VisualShaderNodeVectorLen < Godot::VisualShaderNodeVectorBase
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -6172,6 +7646,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_operator, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `operator` getter
+    def operator
+      get_operator
+    end
+    # Property `operator` setter
+    def operator=(val : Int)
+      set_operator(val.to_i64)
     end
   end
   class VisualShaderNodeVectorRefract < Godot::VisualShaderNodeVectorBase
@@ -6289,6 +7771,38 @@ module Godot
         @@mb_debug_bake = Bridge.get_method_bind("VoxelGI", "debug_bake", 3218959716_i64)
       end
       Bridge.ptrcall(@@mb_debug_bake, @pointer, Pointer(Pointer(Void)).null, Pointer(Void).null)
+    end
+    # Property `subdiv` getter
+    def subdiv
+      get_subdiv
+    end
+    # Property `subdiv` setter
+    def subdiv=(val : Int)
+      set_subdiv(val.to_i64)
+    end
+    # Property `size` getter
+    def size
+      get_size
+    end
+    # Property `size` setter
+    def size=(val)
+      set_size(val)
+    end
+    # Property `camera_attributes` getter
+    def camera_attributes
+      get_camera_attributes
+    end
+    # Property `camera_attributes` setter
+    def camera_attributes=(val)
+      set_camera_attributes(val)
+    end
+    # Property `data` getter
+    def data
+      get_probe_data
+    end
+    # Property `data` setter
+    def data=(val)
+      set_probe_data(val)
     end
   end
   class VoxelGIData < Godot::Resource
@@ -6504,6 +8018,68 @@ module Godot
       Bridge.ptrcall(@@mb_is_using_two_bounces, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `dynamic_range` getter
+    def dynamic_range
+      get_dynamic_range
+    end
+    # Property `dynamic_range` setter
+    def dynamic_range=(val : Number)
+      set_dynamic_range(val.to_f64)
+    end
+    # Property `energy` getter
+    def energy
+      get_energy
+    end
+    # Property `energy` setter
+    def energy=(val : Number)
+      set_energy(val.to_f64)
+    end
+    # Property `bias` getter
+    def bias
+      get_bias
+    end
+    # Property `bias` setter
+    def bias=(val : Number)
+      set_bias(val.to_f64)
+    end
+    # Property `normal_bias` getter
+    def normal_bias
+      get_normal_bias
+    end
+    # Property `normal_bias` setter
+    def normal_bias=(val : Number)
+      set_normal_bias(val.to_f64)
+    end
+    # Property `propagation` getter
+    def propagation
+      get_propagation
+    end
+    # Property `propagation` setter
+    def propagation=(val : Number)
+      set_propagation(val.to_f64)
+    end
+    # Property `use_two_bounces` getter
+    def use_two_bounces
+      is_using_two_bounces
+    end
+    def use_two_bounces?
+      use_two_bounces
+    end
+    # Property `use_two_bounces` setter
+    def use_two_bounces=(val)
+      set_use_two_bounces(val)
+    end
+    # Property `interior` getter
+    def interior
+      is_interior
+    end
+    def interior?
+      interior
+    end
+    # Property `interior` setter
+    def interior=(val)
+      set_interior(val)
+    end
   end
   class WeakRef < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -6655,6 +8231,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_buffered_amount, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `write_mode` getter
+    def write_mode
+      get_write_mode
+    end
+    # Property `write_mode` setter
+    def write_mode=(val : Int)
+      set_write_mode(val.to_i64)
     end
   end
   class WebRTCDataChannelExtension < Godot::WebRTCDataChannel
@@ -7128,6 +8712,54 @@ module Godot
       Bridge.ptrcall(@@mb_get_max_queued_packets, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `supported_protocols` getter
+    def supported_protocols
+      get_supported_protocols
+    end
+    # Property `supported_protocols` setter
+    def supported_protocols=(val)
+      set_supported_protocols(val)
+    end
+    # Property `handshake_headers` getter
+    def handshake_headers
+      get_handshake_headers
+    end
+    # Property `handshake_headers` setter
+    def handshake_headers=(val)
+      set_handshake_headers(val)
+    end
+    # Property `inbound_buffer_size` getter
+    def inbound_buffer_size
+      get_inbound_buffer_size
+    end
+    # Property `inbound_buffer_size` setter
+    def inbound_buffer_size=(val : Int)
+      set_inbound_buffer_size(val.to_i64)
+    end
+    # Property `outbound_buffer_size` getter
+    def outbound_buffer_size
+      get_outbound_buffer_size
+    end
+    # Property `outbound_buffer_size` setter
+    def outbound_buffer_size=(val : Int)
+      set_outbound_buffer_size(val.to_i64)
+    end
+    # Property `handshake_timeout` getter
+    def handshake_timeout
+      get_handshake_timeout
+    end
+    # Property `handshake_timeout` setter
+    def handshake_timeout=(val : Number)
+      set_handshake_timeout(val.to_f64)
+    end
+    # Property `max_queued_packets` getter
+    def max_queued_packets
+      get_max_queued_packets
+    end
+    # Property `max_queued_packets` setter
+    def max_queued_packets=(val : Int)
+      set_max_queued_packets(val.to_i64)
+    end
   end
   class WebSocketPeer < Godot::PacketPeer
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -7417,6 +9049,54 @@ module Godot
       Bridge.ptrcall(@@mb_get_heartbeat_interval, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `supported_protocols` getter
+    def supported_protocols
+      get_supported_protocols
+    end
+    # Property `supported_protocols` setter
+    def supported_protocols=(val)
+      set_supported_protocols(val)
+    end
+    # Property `handshake_headers` getter
+    def handshake_headers
+      get_handshake_headers
+    end
+    # Property `handshake_headers` setter
+    def handshake_headers=(val)
+      set_handshake_headers(val)
+    end
+    # Property `inbound_buffer_size` getter
+    def inbound_buffer_size
+      get_inbound_buffer_size
+    end
+    # Property `inbound_buffer_size` setter
+    def inbound_buffer_size=(val : Int)
+      set_inbound_buffer_size(val.to_i64)
+    end
+    # Property `outbound_buffer_size` getter
+    def outbound_buffer_size
+      get_outbound_buffer_size
+    end
+    # Property `outbound_buffer_size` setter
+    def outbound_buffer_size=(val : Int)
+      set_outbound_buffer_size(val.to_i64)
+    end
+    # Property `max_queued_packets` getter
+    def max_queued_packets
+      get_max_queued_packets
+    end
+    # Property `max_queued_packets` setter
+    def max_queued_packets=(val : Int)
+      set_max_queued_packets(val.to_i64)
+    end
+    # Property `heartbeat_interval` getter
+    def heartbeat_interval
+      get_heartbeat_interval
+    end
+    # Property `heartbeat_interval` setter
+    def heartbeat_interval=(val : Int)
+      set_heartbeat_interval(val.to_i64)
+    end
   end
   class WebXRInterface < Godot::XRInterface
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -7601,6 +9281,50 @@ module Godot
       Bridge.ptrcall(@@mb_get_available_display_refresh_rates, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Godot::Array.new(ret_ptr)
     end
+    # Property `session_mode` getter
+    def session_mode
+      get_session_mode
+    end
+    # Property `session_mode` setter
+    def session_mode=(val)
+      set_session_mode(val)
+    end
+    # Property `required_features` getter
+    def required_features
+      get_required_features
+    end
+    # Property `required_features` setter
+    def required_features=(val)
+      set_required_features(val)
+    end
+    # Property `optional_features` getter
+    def optional_features
+      get_optional_features
+    end
+    # Property `optional_features` setter
+    def optional_features=(val)
+      set_optional_features(val)
+    end
+    # Property `requested_reference_space_types` getter
+    def requested_reference_space_types
+      get_requested_reference_space_types
+    end
+    # Property `requested_reference_space_types` setter
+    def requested_reference_space_types=(val)
+      set_requested_reference_space_types(val)
+    end
+    # Property `reference_space_type` getter
+    def reference_space_type
+      get_reference_space_type
+    end
+    # Property `enabled_features` getter
+    def enabled_features
+      get_enabled_features
+    end
+    # Property `visibility_state` getter
+    def visibility_state
+      get_visibility_state
+    end
   end
   class WorkerThreadPool < Godot::Object
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -7763,6 +9487,22 @@ module Godot
       Bridge.ptrcall(@@mb_get_direct_space_state, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       PhysicsDirectSpaceState2D.new(ret_ptr)
     end
+    # Property `canvas` getter
+    def canvas
+      get_canvas
+    end
+    # Property `navigation_map` getter
+    def navigation_map
+      get_navigation_map
+    end
+    # Property `space` getter
+    def space
+      get_space
+    end
+    # Property `direct_space_state` getter
+    def direct_space_state
+      get_direct_space_state
+    end
   end
   class World3D < Godot::Resource
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -7861,6 +9601,46 @@ module Godot
       Bridge.ptrcall(@@mb_get_direct_space_state, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       PhysicsDirectSpaceState3D.new(ret_ptr)
     end
+    # Property `environment` getter
+    def environment
+      get_environment
+    end
+    # Property `environment` setter
+    def environment=(val)
+      set_environment(val)
+    end
+    # Property `fallback_environment` getter
+    def fallback_environment
+      get_fallback_environment
+    end
+    # Property `fallback_environment` setter
+    def fallback_environment=(val)
+      set_fallback_environment(val)
+    end
+    # Property `camera_attributes` getter
+    def camera_attributes
+      get_camera_attributes
+    end
+    # Property `camera_attributes` setter
+    def camera_attributes=(val)
+      set_camera_attributes(val)
+    end
+    # Property `space` getter
+    def space
+      get_space
+    end
+    # Property `navigation_map` getter
+    def navigation_map
+      get_navigation_map
+    end
+    # Property `scenario` getter
+    def scenario
+      get_scenario
+    end
+    # Property `direct_space_state` getter
+    def direct_space_state
+      get_direct_space_state
+    end
   end
   class WorldBoundaryShape2D < Godot::Shape2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -7904,6 +9684,22 @@ module Godot
       Bridge.ptrcall(@@mb_get_distance, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `normal` getter
+    def normal
+      get_normal
+    end
+    # Property `normal` setter
+    def normal=(val)
+      set_normal(val)
+    end
+    # Property `distance` getter
+    def distance
+      get_distance
+    end
+    # Property `distance` setter
+    def distance=(val : Number)
+      set_distance(val.to_f64)
+    end
   end
   class WorldBoundaryShape3D < Godot::Shape3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -7927,6 +9723,14 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_plane, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Plane.new(ret_ptr)
+    end
+    # Property `plane` getter
+    def plane
+      get_plane
+    end
+    # Property `plane` setter
+    def plane=(val)
+      set_plane(val)
     end
   end
   class WorldEnvironment < Godot::Node
@@ -7989,6 +9793,30 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_compositor, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Compositor.new(ret_ptr)
+    end
+    # Property `environment` getter
+    def environment
+      get_environment
+    end
+    # Property `environment` setter
+    def environment=(val)
+      set_environment(val)
+    end
+    # Property `camera_attributes` getter
+    def camera_attributes
+      get_camera_attributes
+    end
+    # Property `camera_attributes` setter
+    def camera_attributes=(val)
+      set_camera_attributes(val)
+    end
+    # Property `compositor` getter
+    def compositor
+      get_compositor
+    end
+    # Property `compositor` setter
+    def compositor=(val)
+      set_compositor(val)
     end
   end
   class X509Certificate < Godot::Resource
@@ -8338,6 +10166,33 @@ module Godot
     ensure
       Bridge.free_string(str_0)
     end
+    # Property `tracker` getter
+    def tracker
+      get_tracker
+    end
+    # Property `tracker` setter
+    def tracker=(val)
+      set_tracker(val)
+    end
+    # Property `pose` getter
+    def pose
+      get_pose_name
+    end
+    # Property `pose` setter
+    def pose=(val)
+      set_pose_name(val)
+    end
+    # Property `show_when_tracked` getter
+    def show_when_tracked
+      get_show_when_tracked
+    end
+    def show_when_tracked?
+      show_when_tracked
+    end
+    # Property `show_when_tracked` setter
+    def show_when_tracked=(val)
+      set_show_when_tracked(val)
+    end
   end
   class XRAnchor3D < Godot::XRNode3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -8432,6 +10287,30 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_bone_update, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `body_tracker` getter
+    def body_tracker
+      get_body_tracker
+    end
+    # Property `body_tracker` setter
+    def body_tracker=(val)
+      set_body_tracker(val)
+    end
+    # Property `body_update` getter
+    def body_update
+      get_body_update
+    end
+    # Property `body_update` setter
+    def body_update=(val : Int)
+      set_body_update(val.to_i64)
+    end
+    # Property `bone_update` getter
+    def bone_update
+      get_bone_update
+    end
+    # Property `bone_update` setter
+    def bone_update=(val : Int)
+      set_bone_update(val.to_i64)
     end
   end
   class XRBodyTracker < Godot::XRPositionalTracker
@@ -8625,6 +10504,25 @@ module Godot
       Bridge.ptrcall(@@mb_get_joint_transform, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
       ret
     end
+    # Property `has_tracking_data` getter
+    def has_tracking_data
+      get_has_tracking_data
+    end
+    def has_tracking_data?
+      has_tracking_data
+    end
+    # Property `has_tracking_data` setter
+    def has_tracking_data=(val)
+      set_has_tracking_data(val)
+    end
+    # Property `body_flags` getter
+    def body_flags
+      get_body_flags
+    end
+    # Property `body_flags` setter
+    def body_flags=(val : Int)
+      set_body_flags(val.to_i64)
+    end
   end
   class XRCamera3D < Godot::Camera3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -8749,6 +10647,22 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_target, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       NodePath.new(ret_ptr)
+    end
+    # Property `face_tracker` getter
+    def face_tracker
+      get_face_tracker
+    end
+    # Property `face_tracker` setter
+    def face_tracker=(val)
+      set_face_tracker(val)
+    end
+    # Property `target` getter
+    def target
+      get_target
+    end
+    # Property `target` setter
+    def target=(val)
+      set_target(val)
     end
   end
   class XRFaceTracker < Godot::XRTracker
@@ -8944,6 +10858,14 @@ module Godot
       args = [arg_0]
       Bridge.ptrcall(@@mb_set_blend_shapes, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
     end
+    # Property `blend_shapes` getter
+    def blend_shapes
+      get_blend_shapes
+    end
+    # Property `blend_shapes` setter
+    def blend_shapes=(val)
+      set_blend_shapes(val)
+    end
   end
   class XRHandModifier3D < Godot::SkeletonModifier3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -8991,6 +10913,22 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_bone_update, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `hand_tracker` getter
+    def hand_tracker
+      get_hand_tracker
+    end
+    # Property `hand_tracker` setter
+    def hand_tracker=(val)
+      set_hand_tracker(val)
+    end
+    # Property `bone_update` getter
+    def bone_update
+      get_bone_update
+    end
+    # Property `bone_update` setter
+    def bone_update=(val : Int)
+      set_bone_update(val.to_i64)
     end
   end
   class XRHandTracker < Godot::XRPositionalTracker
@@ -9199,6 +11137,25 @@ module Godot
       Bridge.ptrcall(@@mb_get_hand_joint_angular_velocity, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
       ret
     end
+    # Property `has_tracking_data` getter
+    def has_tracking_data
+      get_has_tracking_data
+    end
+    def has_tracking_data?
+      has_tracking_data
+    end
+    # Property `has_tracking_data` setter
+    def has_tracking_data=(val)
+      set_has_tracking_data(val)
+    end
+    # Property `hand_tracking_source` getter
+    def hand_tracking_source
+      get_hand_tracking_source
+    end
+    # Property `hand_tracking_source` setter
+    def hand_tracking_source=(val : Int)
+      set_hand_tracking_source(val.to_i64)
+    end
   end
   class XRInterfaceExtension < Godot::XRInterface
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -9315,6 +11272,25 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_current, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `world_scale` getter
+    def world_scale
+      get_world_scale
+    end
+    # Property `world_scale` setter
+    def world_scale=(val : Number)
+      set_world_scale(val.to_f64)
+    end
+    # Property `current` getter
+    def current
+      is_current
+    end
+    def current?
+      current
+    end
+    # Property `current` setter
+    def current=(val)
+      set_current(val)
     end
   end
   class XRPose < Godot::RefCounted
@@ -9448,6 +11424,57 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_tracking_confidence, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `has_tracking_data` getter
+    def has_tracking_data
+      get_has_tracking_data
+    end
+    def has_tracking_data?
+      has_tracking_data
+    end
+    # Property `has_tracking_data` setter
+    def has_tracking_data=(val)
+      set_has_tracking_data(val)
+    end
+    # Property `name` getter
+    def name
+      get_name
+    end
+    # Property `name` setter
+    def name=(val)
+      set_name(val)
+    end
+    # Property `transform` getter
+    def transform
+      get_transform
+    end
+    # Property `transform` setter
+    def transform=(val)
+      set_transform(val)
+    end
+    # Property `linear_velocity` getter
+    def linear_velocity
+      get_linear_velocity
+    end
+    # Property `linear_velocity` setter
+    def linear_velocity=(val)
+      set_linear_velocity(val)
+    end
+    # Property `angular_velocity` getter
+    def angular_velocity
+      get_angular_velocity
+    end
+    # Property `angular_velocity` setter
+    def angular_velocity=(val)
+      set_angular_velocity(val)
+    end
+    # Property `tracking_confidence` getter
+    def tracking_confidence
+      get_tracking_confidence
+    end
+    # Property `tracking_confidence` setter
+    def tracking_confidence=(val : Int)
+      set_tracking_confidence(val.to_i64)
     end
   end
   class XRServer < Godot::Object
@@ -9694,6 +11721,41 @@ module Godot
       args = [arg_0]
       Bridge.ptrcall(@@mb_set_primary_interface, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
     end
+    # Property `world_scale` getter
+    def world_scale
+      get_world_scale
+    end
+    # Property `world_scale` setter
+    def world_scale=(val : Number)
+      set_world_scale(val.to_f64)
+    end
+    # Property `world_origin` getter
+    def world_origin
+      get_world_origin
+    end
+    # Property `world_origin` setter
+    def world_origin=(val)
+      set_world_origin(val)
+    end
+    # Property `camera_locked_to_origin` getter
+    def camera_locked_to_origin
+      is_camera_locked_to_origin
+    end
+    def camera_locked_to_origin?
+      camera_locked_to_origin
+    end
+    # Property `camera_locked_to_origin` setter
+    def camera_locked_to_origin=(val)
+      set_camera_locked_to_origin(val)
+    end
+    # Property `primary_interface` getter
+    def primary_interface
+      get_primary_interface
+    end
+    # Property `primary_interface` setter
+    def primary_interface=(val)
+      set_primary_interface(val)
+    end
   end
   class XRVRS < Godot::Object
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -9769,6 +11831,30 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_make_vrs_texture, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
       ret
+    end
+    # Property `vrs_min_radius` getter
+    def vrs_min_radius
+      get_vrs_min_radius
+    end
+    # Property `vrs_min_radius` setter
+    def vrs_min_radius=(val : Number)
+      set_vrs_min_radius(val.to_f64)
+    end
+    # Property `vrs_strength` getter
+    def vrs_strength
+      get_vrs_strength
+    end
+    # Property `vrs_strength` setter
+    def vrs_strength=(val : Number)
+      set_vrs_strength(val.to_f64)
+    end
+    # Property `vrs_render_region` getter
+    def vrs_render_region
+      get_vrs_render_region
+    end
+    # Property `vrs_render_region` setter
+    def vrs_render_region=(val)
+      set_vrs_render_region(val)
     end
   end
   class ZIPPacker < Godot::RefCounted
@@ -9886,6 +11972,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_close, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `compression_level` getter
+    def compression_level
+      get_compression_level
+    end
+    # Property `compression_level` setter
+    def compression_level=(val : Int)
+      set_compression_level(val.to_i64)
     end
   end
   class ZIPReader < Godot::RefCounted

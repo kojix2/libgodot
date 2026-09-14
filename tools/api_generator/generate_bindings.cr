@@ -230,7 +230,38 @@ puts "Generating #{sorted_classes.size} classes..."
 class_names = Set(String).new
 class_map.keys.each { |k| class_names.add(k) }
 
-def generate_class_code(io : IO, c : JSON::Any, keywords : Hash(String, String), type_map : Hash(String, String), class_names : Set(String))
+all_method_names = Set(String).new
+classes.each do |c|
+  c["methods"]?.try(&.as_a.each { |m| all_method_names.add(m["name"].as_s) })
+end
+
+manual_methods = Hash(String, Set(String)).new
+["src/libgodot/object.cr", "src/libgodot.cr"].each do |manual_file|
+  path = if File.exists?(manual_file)
+    manual_file
+  elsif File.exists?(File.join(__DIR__, "..", "..", manual_file))
+    File.join(__DIR__, "..", "..", manual_file)
+  else
+    nil
+  end
+  next unless path && File.exists?(path)
+
+  curr_class : String? = nil
+  File.each_line(path) do |line|
+    if line =~ /^\s*class\s+([A-Za-z0-9_]+)/
+      curr_class = $1
+      manual_methods[curr_class] ||= Set(String).new
+    elsif curr_class
+      if line =~ /^\s*(?:def|property|getter|setter)\??\s+([A-Za-z0-9_]+[=?]?)/
+        m_ident = $1
+        manual_methods[curr_class].add(m_ident)
+        manual_methods[curr_class].add("#{m_ident}=") unless m_ident.ends_with?("=")
+      end
+    end
+  end
+end
+
+def generate_class_code(io : IO, c : JSON::Any, keywords : Hash(String, String), type_map : Hash(String, String), class_names : Set(String), all_method_names : Set(String), manual_methods : Hash(String, Set(String)))
   name = c["name"].as_s
   parent = c["inherits"]?.try(&.as_s) || "Godot::Object"
   parent_type = parent == "Godot::Object" ? parent : (parent.starts_with?("Godot::") ? parent : "Godot::#{parent}")
@@ -416,6 +447,113 @@ def generate_class_code(io : IO, c : JSON::Any, keywords : Hash(String, String),
     end
   end
 
+  # Properties (Getter/Setter synthesis)
+  if props = c["properties"]?.try(&.as_a)
+    existing_methods = Set(String).new
+    c["methods"]?.try(&.as_a.each { |m| existing_methods.add(sanitize_name(m["name"].as_s, keywords)) })
+
+    props.each do |p|
+      raw_p_name = p["name"].as_s
+      next if raw_p_name.empty? || raw_p_name.includes?("/")
+      clean_p_name = sanitize_name(raw_p_name, keywords)
+
+      # Avoid colliding if a method with the exact same name already exists directly on this class
+      next if existing_methods.includes?(clean_p_name)
+
+      raw_setter = p["setter"]?.try(&.as_s) || ""
+      raw_getter = p["getter"]?.try(&.as_s) || ""
+      index = p["index"]?
+      has_index = index && !index.raw.nil? && !index.to_s.empty?
+      index_val = has_index ? "#{index}_i64" : ""
+
+      # Resolve getter
+      resolved_getter = if all_method_names.includes?(raw_getter)
+        raw_getter
+      elsif raw_getter.starts_with?("_") && all_method_names.includes?(raw_getter.lstrip('_'))
+        raw_getter.lstrip('_')
+      else
+        nil
+      end
+
+      # Resolve setter
+      resolved_setter = if all_method_names.includes?(raw_setter)
+        raw_setter
+      elsif raw_setter.starts_with?("_") && all_method_names.includes?(raw_setter.lstrip('_'))
+        raw_setter.lstrip('_')
+      else
+        nil
+      end
+
+      clean_getter = resolved_getter ? sanitize_name(resolved_getter, keywords) : nil
+      clean_setter = resolved_setter ? sanitize_name(resolved_setter, keywords) : nil
+      p_type = p["type"].as_s
+      class_manuals = manual_methods[name]?
+
+      # Generate Getter
+      if clean_getter
+        has_manual_getter = class_manuals && (class_manuals.includes?(clean_p_name) || class_manuals.includes?("#{clean_p_name}?"))
+        if !has_manual_getter
+          io.puts "    # Property `#{raw_p_name}` getter"
+          if has_index
+            io.puts "    def #{clean_p_name}"
+            io.puts "      #{clean_getter}(#{index_val})"
+            io.puts "    end\n"
+          else
+            io.puts "    def #{clean_p_name}"
+            io.puts "      #{clean_getter}"
+            io.puts "    end\n"
+          end
+
+          # Boolean predicate alias
+          if p_type == "bool" || raw_getter.starts_with?("is_") || raw_getter.starts_with?("has_")
+            io.puts "    def #{clean_p_name}?"
+            io.puts "      #{clean_p_name}"
+            io.puts "    end\n"
+          end
+        end
+      end
+
+      # Generate Setter
+      if clean_setter
+        has_manual_setter = class_manuals && class_manuals.includes?("#{clean_p_name}=")
+        if !has_manual_setter
+          io.puts "    # Property `#{raw_p_name}` setter"
+          if p_type == "float"
+            if has_index
+              io.puts "    def #{clean_p_name}=(val : Number)"
+              io.puts "      #{clean_setter}(#{index_val}, val.to_f64)"
+              io.puts "    end\n"
+            else
+              io.puts "    def #{clean_p_name}=(val : Number)"
+              io.puts "      #{clean_setter}(val.to_f64)"
+              io.puts "    end\n"
+            end
+          elsif p_type == "int"
+            if has_index
+              io.puts "    def #{clean_p_name}=(val : Int)"
+              io.puts "      #{clean_setter}(#{index_val}, val.to_i64)"
+              io.puts "    end\n"
+            else
+              io.puts "    def #{clean_p_name}=(val : Int)"
+              io.puts "      #{clean_setter}(val.to_i64)"
+              io.puts "    end\n"
+            end
+          else
+            if has_index
+              io.puts "    def #{clean_p_name}=(val)"
+              io.puts "      #{clean_setter}(#{index_val}, val)"
+              io.puts "    end\n"
+            else
+              io.puts "    def #{clean_p_name}=(val)"
+              io.puts "      #{clean_setter}(val)"
+              io.puts "    end\n"
+            end
+          end
+        end
+      end
+    end
+  end
+
   io.puts "  end\n"
 end
 
@@ -442,7 +580,7 @@ num_parts.times do |part_idx|
     f.puts "# Generated classes part #{part_num} (in topological order)"
     f.puts "module Godot"
     part_classes.each do |c|
-      generate_class_code(f, c, keywords, type_map, class_names)
+      generate_class_code(f, c, keywords, type_map, class_names, all_method_names, manual_methods)
     end
     f.puts "end"
   end

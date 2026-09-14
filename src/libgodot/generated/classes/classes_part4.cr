@@ -75,6 +75,30 @@ module Godot
       Bridge.ptrcall(@@mb_get_length, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `packet_data` getter
+    def packet_data
+      get_packet_data
+    end
+    # Property `packet_data` setter
+    def packet_data=(val)
+      set_packet_data(val)
+    end
+    # Property `granule_positions` getter
+    def granule_positions
+      get_packet_granule_positions
+    end
+    # Property `granule_positions` setter
+    def granule_positions=(val)
+      set_packet_granule_positions(val)
+    end
+    # Property `sampling_rate` getter
+    def sampling_rate
+      get_sampling_rate
+    end
+    # Property `sampling_rate` setter
+    def sampling_rate=(val : Number)
+      set_sampling_rate(val.to_f64)
+    end
   end
   class OggPacketSequencePlayback < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -107,6 +131,30 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_shadow_mode, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `omni_range` getter
+    def omni_range
+      get_param(4_i64)
+    end
+    # Property `omni_range` setter
+    def omni_range=(val : Number)
+      set_param(4_i64, val.to_f64)
+    end
+    # Property `omni_attenuation` getter
+    def omni_attenuation
+      get_param(6_i64)
+    end
+    # Property `omni_attenuation` setter
+    def omni_attenuation=(val : Number)
+      set_param(6_i64, val.to_f64)
+    end
+    # Property `omni_shadow_mode` getter
+    def omni_shadow_mode
+      get_shadow_mode
+    end
+    # Property `omni_shadow_mode` setter
+    def omni_shadow_mode=(val : Int)
+      set_shadow_mode(val.to_i64)
     end
   end
   class OpenXRAPIExtension < Godot::RefCounted
@@ -727,6 +775,30 @@ module Godot
       Bridge.ptrcall(@@mb_get_toplevel_paths, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       ret_ptr
     end
+    # Property `localized_name` getter
+    def localized_name
+      get_localized_name
+    end
+    # Property `localized_name` setter
+    def localized_name=(val)
+      set_localized_name(val)
+    end
+    # Property `action_type` getter
+    def action_type
+      get_action_type
+    end
+    # Property `action_type` setter
+    def action_type=(val : Int)
+      set_action_type(val.to_i64)
+    end
+    # Property `toplevel_paths` getter
+    def toplevel_paths
+      get_toplevel_paths
+    end
+    # Property `toplevel_paths` setter
+    def toplevel_paths=(val)
+      set_toplevel_paths(val)
+    end
   end
   class OpenXRBindingModifier < Godot::Resource
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -897,6 +969,22 @@ module Godot
       end
       Bridge.ptrcall(@@mb_create_default_action_sets, @pointer, Pointer(Pointer(Void)).null, Pointer(Void).null)
     end
+    # Property `action_sets` getter
+    def action_sets
+      get_action_sets
+    end
+    # Property `action_sets` setter
+    def action_sets=(val)
+      set_action_sets(val)
+    end
+    # Property `interaction_profiles` getter
+    def interaction_profiles
+      get_interaction_profiles
+    end
+    # Property `interaction_profiles` setter
+    def interaction_profiles=(val)
+      set_interaction_profiles(val)
+    end
   end
   class OpenXRActionSet < Godot::Resource
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -988,6 +1076,30 @@ module Godot
       args = [arg_0]
       Bridge.ptrcall(@@mb_remove_action, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
     end
+    # Property `localized_name` getter
+    def localized_name
+      get_localized_name
+    end
+    # Property `localized_name` setter
+    def localized_name=(val)
+      set_localized_name(val)
+    end
+    # Property `priority` getter
+    def priority
+      get_priority
+    end
+    # Property `priority` setter
+    def priority=(val : Int)
+      set_priority(val.to_i64)
+    end
+    # Property `actions` getter
+    def actions
+      get_actions
+    end
+    # Property `actions` setter
+    def actions=(val)
+      set_actions(val)
+    end
   end
   class OpenXRAnalogThresholdModifier < Godot::OpenXRActionBindingModifier
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -1069,6 +1181,38 @@ module Godot
       Bridge.ptrcall(@@mb_get_off_haptic, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       OpenXRHapticBase.new(ret_ptr)
     end
+    # Property `on_threshold` getter
+    def on_threshold
+      get_on_threshold
+    end
+    # Property `on_threshold` setter
+    def on_threshold=(val : Number)
+      set_on_threshold(val.to_f64)
+    end
+    # Property `off_threshold` getter
+    def off_threshold
+      get_off_threshold
+    end
+    # Property `off_threshold` setter
+    def off_threshold=(val : Number)
+      set_off_threshold(val.to_f64)
+    end
+    # Property `on_haptic` getter
+    def on_haptic
+      get_on_haptic
+    end
+    # Property `on_haptic` setter
+    def on_haptic=(val)
+      set_on_haptic(val)
+    end
+    # Property `off_haptic` getter
+    def off_haptic
+      get_off_haptic
+    end
+    # Property `off_haptic` setter
+    def off_haptic=(val)
+      set_off_haptic(val)
+    end
   end
   class XRTracker < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -1130,6 +1274,30 @@ module Godot
       Bridge.ptrcall(@@mb_set_tracker_desc, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
     ensure
       Bridge.free_string(str_0)
+    end
+    # Property `type` getter
+    def get_type
+      get_tracker_type
+    end
+    # Property `type` setter
+    def get_type=(val : Int)
+      set_tracker_type(val.to_i64)
+    end
+    # Property `name` getter
+    def name
+      get_tracker_name
+    end
+    # Property `name` setter
+    def name=(val)
+      set_tracker_name(val)
+    end
+    # Property `description` getter
+    def description
+      get_tracker_desc
+    end
+    # Property `description` setter
+    def description=(val)
+      set_tracker_desc(val)
     end
   end
   class XRPositionalTracker < Godot::XRTracker
@@ -1270,6 +1438,22 @@ module Godot
     ensure
       Bridge.free_string_name(sn_0)
     end
+    # Property `profile` getter
+    def profile
+      get_tracker_profile
+    end
+    # Property `profile` setter
+    def profile=(val)
+      set_tracker_profile(val)
+    end
+    # Property `hand` getter
+    def hand
+      get_tracker_hand
+    end
+    # Property `hand` setter
+    def hand=(val : Int)
+      set_tracker_hand(val.to_i64)
+    end
   end
   class OpenXRSpatialEntityTracker < Godot::XRPositionalTracker
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -1366,6 +1550,22 @@ module Godot
       args = [arg_0]
       Bridge.ptrcall(@@mb_remove_next, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
     end
+    # Property `entity` getter
+    def entity
+      get_entity
+    end
+    # Property `entity` setter
+    def entity=(val)
+      set_entity(val)
+    end
+    # Property `spatial_tracking_state` getter
+    def spatial_tracking_state
+      get_spatial_tracking_state
+    end
+    # Property `spatial_tracking_state` setter
+    def spatial_tracking_state=(val : Int)
+      set_spatial_tracking_state(val.to_i64)
+    end
   end
   class OpenXRAnchorTracker < Godot::OpenXRSpatialEntityTracker
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -1398,6 +1598,14 @@ module Godot
         @@mb_get_uuid = Bridge.get_method_bind("OpenXRAnchorTracker", "get_uuid", 201670096_i64)
       end
       ""
+    end
+    # Property `uuid` getter
+    def uuid
+      get_uuid
+    end
+    # Property `uuid` setter
+    def uuid=(val)
+      set_uuid(val)
     end
   end
   class OpenXRExtensionWrapper < Godot::Object
@@ -1904,6 +2112,170 @@ module Godot
       Bridge.ptrcall(@@mb_intersects_ray, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
       ret
     end
+    # Property `layer_viewport` getter
+    def layer_viewport
+      get_layer_viewport
+    end
+    # Property `layer_viewport` setter
+    def layer_viewport=(val)
+      set_layer_viewport(val)
+    end
+    # Property `use_android_surface` getter
+    def use_android_surface
+      get_use_android_surface
+    end
+    def use_android_surface?
+      use_android_surface
+    end
+    # Property `use_android_surface` setter
+    def use_android_surface=(val)
+      set_use_android_surface(val)
+    end
+    # Property `protected_content` getter
+    def protected_content
+      is_protected_content
+    end
+    def protected_content?
+      protected_content
+    end
+    # Property `protected_content` setter
+    def protected_content=(val)
+      set_protected_content(val)
+    end
+    # Property `android_surface_size` getter
+    def android_surface_size
+      get_android_surface_size
+    end
+    # Property `android_surface_size` setter
+    def android_surface_size=(val)
+      set_android_surface_size(val)
+    end
+    # Property `sort_order` getter
+    def sort_order
+      get_sort_order
+    end
+    # Property `sort_order` setter
+    def sort_order=(val : Int)
+      set_sort_order(val.to_i64)
+    end
+    # Property `alpha_blend` getter
+    def alpha_blend
+      get_alpha_blend
+    end
+    def alpha_blend?
+      alpha_blend
+    end
+    # Property `alpha_blend` setter
+    def alpha_blend=(val)
+      set_alpha_blend(val)
+    end
+    # Property `enable_hole_punch` getter
+    def enable_hole_punch
+      get_enable_hole_punch
+    end
+    def enable_hole_punch?
+      enable_hole_punch
+    end
+    # Property `enable_hole_punch` setter
+    def enable_hole_punch=(val)
+      set_enable_hole_punch(val)
+    end
+    # Property `eye_visibility` getter
+    def eye_visibility
+      get_eye_visibility
+    end
+    # Property `eye_visibility` setter
+    def eye_visibility=(val : Int)
+      set_eye_visibility(val.to_i64)
+    end
+    # Property `swapchain_state_min_filter` getter
+    def swapchain_state_min_filter
+      get_min_filter
+    end
+    # Property `swapchain_state_min_filter` setter
+    def swapchain_state_min_filter=(val : Int)
+      set_min_filter(val.to_i64)
+    end
+    # Property `swapchain_state_mag_filter` getter
+    def swapchain_state_mag_filter
+      get_mag_filter
+    end
+    # Property `swapchain_state_mag_filter` setter
+    def swapchain_state_mag_filter=(val : Int)
+      set_mag_filter(val.to_i64)
+    end
+    # Property `swapchain_state_mipmap_mode` getter
+    def swapchain_state_mipmap_mode
+      get_mipmap_mode
+    end
+    # Property `swapchain_state_mipmap_mode` setter
+    def swapchain_state_mipmap_mode=(val : Int)
+      set_mipmap_mode(val.to_i64)
+    end
+    # Property `swapchain_state_horizontal_wrap` getter
+    def swapchain_state_horizontal_wrap
+      get_horizontal_wrap
+    end
+    # Property `swapchain_state_horizontal_wrap` setter
+    def swapchain_state_horizontal_wrap=(val : Int)
+      set_horizontal_wrap(val.to_i64)
+    end
+    # Property `swapchain_state_vertical_wrap` getter
+    def swapchain_state_vertical_wrap
+      get_vertical_wrap
+    end
+    # Property `swapchain_state_vertical_wrap` setter
+    def swapchain_state_vertical_wrap=(val : Int)
+      set_vertical_wrap(val.to_i64)
+    end
+    # Property `swapchain_state_red_swizzle` getter
+    def swapchain_state_red_swizzle
+      get_red_swizzle
+    end
+    # Property `swapchain_state_red_swizzle` setter
+    def swapchain_state_red_swizzle=(val : Int)
+      set_red_swizzle(val.to_i64)
+    end
+    # Property `swapchain_state_green_swizzle` getter
+    def swapchain_state_green_swizzle
+      get_green_swizzle
+    end
+    # Property `swapchain_state_green_swizzle` setter
+    def swapchain_state_green_swizzle=(val : Int)
+      set_green_swizzle(val.to_i64)
+    end
+    # Property `swapchain_state_blue_swizzle` getter
+    def swapchain_state_blue_swizzle
+      get_blue_swizzle
+    end
+    # Property `swapchain_state_blue_swizzle` setter
+    def swapchain_state_blue_swizzle=(val : Int)
+      set_blue_swizzle(val.to_i64)
+    end
+    # Property `swapchain_state_alpha_swizzle` getter
+    def swapchain_state_alpha_swizzle
+      get_alpha_swizzle
+    end
+    # Property `swapchain_state_alpha_swizzle` setter
+    def swapchain_state_alpha_swizzle=(val : Int)
+      set_alpha_swizzle(val.to_i64)
+    end
+    # Property `swapchain_state_max_anisotropy` getter
+    def swapchain_state_max_anisotropy
+      get_max_anisotropy
+    end
+    # Property `swapchain_state_max_anisotropy` setter
+    def swapchain_state_max_anisotropy=(val : Number)
+      set_max_anisotropy(val.to_f64)
+    end
+    # Property `swapchain_state_border_color` getter
+    def swapchain_state_border_color
+      get_border_color
+    end
+    # Property `swapchain_state_border_color` setter
+    def swapchain_state_border_color=(val)
+      set_border_color(val)
+    end
   end
   class OpenXRCompositionLayerCylinder < Godot::OpenXRCompositionLayer
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -1984,6 +2356,38 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_fallback_segments, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `radius` getter
+    def radius
+      get_radius
+    end
+    # Property `radius` setter
+    def radius=(val : Number)
+      set_radius(val.to_f64)
+    end
+    # Property `aspect_ratio` getter
+    def aspect_ratio
+      get_aspect_ratio
+    end
+    # Property `aspect_ratio` setter
+    def aspect_ratio=(val : Number)
+      set_aspect_ratio(val.to_f64)
+    end
+    # Property `central_angle` getter
+    def central_angle
+      get_central_angle
+    end
+    # Property `central_angle` setter
+    def central_angle=(val : Number)
+      set_central_angle(val.to_f64)
+    end
+    # Property `fallback_segments` getter
+    def fallback_segments
+      get_fallback_segments
+    end
+    # Property `fallback_segments` setter
+    def fallback_segments=(val : Int)
+      set_fallback_segments(val.to_i64)
     end
   end
   class OpenXRCompositionLayerEquirect < Godot::OpenXRCompositionLayer
@@ -2085,6 +2489,46 @@ module Godot
       Bridge.ptrcall(@@mb_get_fallback_segments, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `radius` getter
+    def radius
+      get_radius
+    end
+    # Property `radius` setter
+    def radius=(val : Number)
+      set_radius(val.to_f64)
+    end
+    # Property `central_horizontal_angle` getter
+    def central_horizontal_angle
+      get_central_horizontal_angle
+    end
+    # Property `central_horizontal_angle` setter
+    def central_horizontal_angle=(val : Number)
+      set_central_horizontal_angle(val.to_f64)
+    end
+    # Property `upper_vertical_angle` getter
+    def upper_vertical_angle
+      get_upper_vertical_angle
+    end
+    # Property `upper_vertical_angle` setter
+    def upper_vertical_angle=(val : Number)
+      set_upper_vertical_angle(val.to_f64)
+    end
+    # Property `lower_vertical_angle` getter
+    def lower_vertical_angle
+      get_lower_vertical_angle
+    end
+    # Property `lower_vertical_angle` setter
+    def lower_vertical_angle=(val : Number)
+      set_lower_vertical_angle(val.to_f64)
+    end
+    # Property `fallback_segments` getter
+    def fallback_segments
+      get_fallback_segments
+    end
+    # Property `fallback_segments` setter
+    def fallback_segments=(val : Int)
+      set_fallback_segments(val.to_i64)
+    end
   end
   class OpenXRCompositionLayerQuad < Godot::OpenXRCompositionLayer
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -2108,6 +2552,14 @@ module Godot
       ret = Vector2.new
       Bridge.ptrcall(@@mb_get_quad_size, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `quad_size` getter
+    def quad_size
+      get_quad_size
+    end
+    # Property `quad_size` setter
+    def quad_size=(val)
+      set_quad_size(val)
     end
   end
   class OpenXRIPBindingModifier < Godot::OpenXRBindingModifier
@@ -2290,6 +2742,81 @@ module Godot
       Bridge.ptrcall(@@mb_get_off_haptic, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       OpenXRHapticBase.new(ret_ptr)
     end
+    # Property `action_set` getter
+    def action_set
+      get_action_set
+    end
+    # Property `action_set` setter
+    def action_set=(val)
+      set_action_set(val)
+    end
+    # Property `input_path` getter
+    def input_path
+      get_input_path
+    end
+    # Property `input_path` setter
+    def input_path=(val)
+      set_input_path(val)
+    end
+    # Property `threshold` getter
+    def threshold
+      get_threshold
+    end
+    # Property `threshold` setter
+    def threshold=(val : Number)
+      set_threshold(val.to_f64)
+    end
+    # Property `threshold_released` getter
+    def threshold_released
+      get_threshold_released
+    end
+    # Property `threshold_released` setter
+    def threshold_released=(val : Number)
+      set_threshold_released(val.to_f64)
+    end
+    # Property `center_region` getter
+    def center_region
+      get_center_region
+    end
+    # Property `center_region` setter
+    def center_region=(val : Number)
+      set_center_region(val.to_f64)
+    end
+    # Property `wedge_angle` getter
+    def wedge_angle
+      get_wedge_angle
+    end
+    # Property `wedge_angle` setter
+    def wedge_angle=(val : Number)
+      set_wedge_angle(val.to_f64)
+    end
+    # Property `is_sticky` getter
+    def is_sticky
+      get_is_sticky
+    end
+    def is_sticky?
+      is_sticky
+    end
+    # Property `is_sticky` setter
+    def is_sticky=(val)
+      set_is_sticky(val)
+    end
+    # Property `on_haptic` getter
+    def on_haptic
+      get_on_haptic
+    end
+    # Property `on_haptic` setter
+    def on_haptic=(val)
+      set_on_haptic(val)
+    end
+    # Property `off_haptic` getter
+    def off_haptic
+      get_off_haptic
+    end
+    # Property `off_haptic` setter
+    def off_haptic=(val)
+      set_off_haptic(val)
+    end
   end
   class OpenXRExtensionWrapperExtension < Godot::OpenXRExtensionWrapper
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -2353,6 +2880,28 @@ module Godot
         @@mb_skip_next_frame = Bridge.get_method_bind("OpenXRFrameSynthesisExtension", "skip_next_frame", 3218959716_i64)
       end
       Bridge.ptrcall(@@mb_skip_next_frame, @pointer, Pointer(Pointer(Void)).null, Pointer(Void).null)
+    end
+    # Property `enabled` getter
+    def enabled
+      is_enabled
+    end
+    def enabled?
+      enabled
+    end
+    # Property `enabled` setter
+    def enabled=(val)
+      set_enabled(val)
+    end
+    # Property `relax_frame_interval` getter
+    def relax_frame_interval
+      get_relax_frame_interval
+    end
+    def relax_frame_interval?
+      relax_frame_interval
+    end
+    # Property `relax_frame_interval` setter
+    def relax_frame_interval=(val)
+      set_relax_frame_interval(val)
     end
   end
   class OpenXRFutureExtension < Godot::OpenXRExtensionWrapper
@@ -2568,6 +3117,46 @@ module Godot
       Bridge.ptrcall(@@mb_get_bone_update, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `hand` getter
+    def hand
+      get_hand
+    end
+    # Property `hand` setter
+    def hand=(val : Int)
+      set_hand(val.to_i64)
+    end
+    # Property `motion_range` getter
+    def motion_range
+      get_motion_range
+    end
+    # Property `motion_range` setter
+    def motion_range=(val : Int)
+      set_motion_range(val.to_i64)
+    end
+    # Property `hand_skeleton` getter
+    def hand_skeleton
+      get_hand_skeleton
+    end
+    # Property `hand_skeleton` setter
+    def hand_skeleton=(val)
+      set_hand_skeleton(val)
+    end
+    # Property `skeleton_rig` getter
+    def skeleton_rig
+      get_skeleton_rig
+    end
+    # Property `skeleton_rig` setter
+    def skeleton_rig=(val : Int)
+      set_skeleton_rig(val.to_i64)
+    end
+    # Property `bone_update` getter
+    def bone_update
+      get_bone_update
+    end
+    # Property `bone_update` setter
+    def bone_update=(val : Int)
+      set_bone_update(val.to_i64)
+    end
   end
   class OpenXRHapticBase < Godot::Resource
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -2634,6 +3223,30 @@ module Godot
       ret = 0.0_f64
       Bridge.ptrcall(@@mb_get_amplitude, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `duration` getter
+    def duration
+      get_duration
+    end
+    # Property `duration` setter
+    def duration=(val : Int)
+      set_duration(val.to_i64)
+    end
+    # Property `frequency` getter
+    def frequency
+      get_frequency
+    end
+    # Property `frequency` setter
+    def frequency=(val : Number)
+      set_frequency(val.to_f64)
+    end
+    # Property `amplitude` getter
+    def amplitude
+      get_amplitude
+    end
+    # Property `amplitude` setter
+    def amplitude=(val : Number)
+      set_amplitude(val.to_f64)
     end
   end
   class OpenXRIPBinding < Godot::Resource
@@ -2784,6 +3397,38 @@ module Godot
     ensure
       Bridge.free_string(str_0)
     end
+    # Property `action` getter
+    def action
+      get_action
+    end
+    # Property `action` setter
+    def action=(val)
+      set_action(val)
+    end
+    # Property `binding_path` getter
+    def binding_path
+      get_binding_path
+    end
+    # Property `binding_path` setter
+    def binding_path=(val)
+      set_binding_path(val)
+    end
+    # Property `binding_modifiers` getter
+    def binding_modifiers
+      get_binding_modifiers
+    end
+    # Property `binding_modifiers` setter
+    def binding_modifiers=(val)
+      set_binding_modifiers(val)
+    end
+    # Property `paths` getter
+    def paths
+      get_paths
+    end
+    # Property `paths` setter
+    def paths=(val)
+      set_paths(val)
+    end
   end
   class OpenXRInteractionProfile < Godot::Resource
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -2887,6 +3532,30 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_binding_modifiers, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Godot::Array.new(ret_ptr)
+    end
+    # Property `interaction_profile_path` getter
+    def interaction_profile_path
+      get_interaction_profile_path
+    end
+    # Property `interaction_profile_path` setter
+    def interaction_profile_path=(val)
+      set_interaction_profile_path(val)
+    end
+    # Property `bindings` getter
+    def bindings
+      get_bindings
+    end
+    # Property `bindings` setter
+    def bindings=(val)
+      set_bindings(val)
+    end
+    # Property `binding_modifiers` getter
+    def binding_modifiers
+      get_binding_modifiers
+    end
+    # Property `binding_modifiers` setter
+    def binding_modifiers=(val)
+      set_binding_modifiers(val)
     end
   end
   class OpenXRInteractionProfileEditorBase < Godot::HBoxContainer
@@ -3475,6 +4144,68 @@ module Godot
       args = [arg_0]
       Bridge.ptrcall(@@mb_set_gpu_level, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
     end
+    # Property `display_refresh_rate` getter
+    def display_refresh_rate
+      get_display_refresh_rate
+    end
+    # Property `display_refresh_rate` setter
+    def display_refresh_rate=(val : Number)
+      set_display_refresh_rate(val.to_f64)
+    end
+    # Property `render_target_size_multiplier` getter
+    def render_target_size_multiplier
+      get_render_target_size_multiplier
+    end
+    # Property `render_target_size_multiplier` setter
+    def render_target_size_multiplier=(val : Number)
+      set_render_target_size_multiplier(val.to_f64)
+    end
+    # Property `foveation_level` getter
+    def foveation_level
+      get_foveation_level
+    end
+    # Property `foveation_level` setter
+    def foveation_level=(val : Int)
+      set_foveation_level(val.to_i64)
+    end
+    # Property `foveation_dynamic` getter
+    def foveation_dynamic
+      get_foveation_dynamic
+    end
+    def foveation_dynamic?
+      foveation_dynamic
+    end
+    # Property `foveation_dynamic` setter
+    def foveation_dynamic=(val)
+      set_foveation_dynamic(val)
+    end
+    # Property `foveation_with_subsampled_images` getter
+    def foveation_with_subsampled_images
+      get_foveation_with_subsampled_images
+    end
+    def foveation_with_subsampled_images?
+      foveation_with_subsampled_images
+    end
+    # Property `foveation_with_subsampled_images` setter
+    def foveation_with_subsampled_images=(val)
+      set_foveation_with_subsampled_images(val)
+    end
+    # Property `vrs_min_radius` getter
+    def vrs_min_radius
+      get_vrs_min_radius
+    end
+    # Property `vrs_min_radius` setter
+    def vrs_min_radius=(val : Number)
+      set_vrs_min_radius(val.to_f64)
+    end
+    # Property `vrs_strength` getter
+    def vrs_strength
+      get_vrs_strength
+    end
+    # Property `vrs_strength` setter
+    def vrs_strength=(val : Number)
+      set_vrs_strength(val.to_f64)
+    end
   end
   class OpenXRMarkerTracker < Godot::OpenXRSpatialEntityTracker
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -3557,6 +4288,30 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.type_from_variant(24, pointerof(ret_ptr).as(Void*), ret_var.to_unsafe.as(Void*))
       ret_ptr
+    end
+    # Property `bounds_size` getter
+    def bounds_size
+      get_bounds_size
+    end
+    # Property `bounds_size` setter
+    def bounds_size=(val : Int)
+      set_bounds_size(val.to_i64)
+    end
+    # Property `marker_type` getter
+    def marker_type
+      get_marker_type
+    end
+    # Property `marker_type` setter
+    def marker_type=(val : Int)
+      set_marker_type(val.to_i64)
+    end
+    # Property `marker_id` getter
+    def marker_id
+      get_marker_id
+    end
+    # Property `marker_id` setter
+    def marker_id=(val : Int)
+      set_marker_id(val.to_i64)
     end
   end
   class OpenXRPlaneTracker < Godot::OpenXRSpatialEntityTracker
@@ -3689,6 +4444,30 @@ module Godot
       Bridge.ptrcall(@@mb_get_shape, @pointer, args.to_unsafe.as(Void**), pointerof(ret_ptr).as(Void*))
       Shape3D.new(ret_ptr)
     end
+    # Property `bounds_size` getter
+    def bounds_size
+      get_bounds_size
+    end
+    # Property `bounds_size` setter
+    def bounds_size=(val : Int)
+      set_bounds_size(val.to_i64)
+    end
+    # Property `plane_alignment` getter
+    def plane_alignment
+      get_plane_alignment
+    end
+    # Property `plane_alignment` setter
+    def plane_alignment=(val : Int)
+      set_plane_alignment(val.to_i64)
+    end
+    # Property `plane_label` getter
+    def plane_label
+      get_plane_label
+    end
+    # Property `plane_label` setter
+    def plane_label=(val)
+      set_plane_label(val)
+    end
   end
   class OpenXRRenderModel < Godot::Node3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -3719,6 +4498,14 @@ module Godot
       arg_0 = pointerof(val_0).as(Void*)
       args = [arg_0]
       Bridge.ptrcall(@@mb_set_render_model, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    # Property `render_model` getter
+    def render_model
+      get_render_model
+    end
+    # Property `render_model` setter
+    def render_model=(val)
+      set_render_model(val)
     end
   end
   class OpenXRRenderModelExtension < Godot::OpenXRExtensionWrapper
@@ -3923,6 +4710,22 @@ module Godot
       Bridge.ptrcall(@@mb_set_make_local_to_pose, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
     ensure
       Bridge.free_string(str_0)
+    end
+    # Property `tracker` getter
+    def tracker
+      get_tracker
+    end
+    # Property `tracker` setter
+    def tracker=(val : Int)
+      set_tracker(val.to_i64)
+    end
+    # Property `make_local_to_pose` getter
+    def make_local_to_pose
+      get_make_local_to_pose
+    end
+    # Property `make_local_to_pose` setter
+    def make_local_to_pose=(val)
+      set_make_local_to_pose(val)
     end
   end
   class OpenXRSpatialAnchorCapability < Godot::OpenXRExtensionWrapper
@@ -4181,6 +4984,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_april_dict, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `april_dict` getter
+    def april_dict
+      get_april_dict
+    end
+    # Property `april_dict` setter
+    def april_dict=(val : Int)
+      set_april_dict(val.to_i64)
+    end
   end
   class OpenXRSpatialCapabilityConfigurationAruco < Godot::OpenXRSpatialCapabilityConfigurationBaseHeader
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -4231,6 +5042,14 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_aruco_dict, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `aruco_dict` getter
+    def aruco_dict
+      get_aruco_dict
+    end
+    # Property `aruco_dict` setter
+    def aruco_dict=(val : Int)
+      set_aruco_dict(val.to_i64)
     end
   end
   class OpenXRSpatialCapabilityConfigurationMicroQrCode < Godot::OpenXRSpatialCapabilityConfigurationBaseHeader
@@ -4817,6 +5636,14 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_next, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       OpenXRStructureBase.new(ret_ptr)
+    end
+    # Property `next` getter
+    def next_val
+      get_next
+    end
+    # Property `next` setter
+    def next_val=(val)
+      set_next(val)
     end
   end
   class OpenXRSpatialContextPersistenceConfig < Godot::OpenXRStructureBase
@@ -5614,6 +6441,22 @@ module Godot
       end
       ""
     end
+    # Property `locale` getter
+    def locale
+      get_locale
+    end
+    # Property `locale` setter
+    def locale=(val)
+      set_locale(val)
+    end
+    # Property `plural_rules_override` getter
+    def plural_rules_override
+      get_plural_rules_override
+    end
+    # Property `plural_rules_override` setter
+    def plural_rules_override=(val)
+      set_plural_rules_override(val)
+    end
   end
   class OptimizedTranslation < Godot::Translation
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -6108,6 +6951,78 @@ module Godot
       args = [arg_0]
       Bridge.ptrcall(@@mb_set_disable_shortcuts, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
     end
+    # Property `selected` getter
+    def selected
+      get_selected
+    end
+    # Property `fit_to_longest_item` getter
+    def fit_to_longest_item
+      is_fit_to_longest_item
+    end
+    def fit_to_longest_item?
+      fit_to_longest_item
+    end
+    # Property `fit_to_longest_item` setter
+    def fit_to_longest_item=(val)
+      set_fit_to_longest_item(val)
+    end
+    # Property `allow_reselect` getter
+    def allow_reselect
+      get_allow_reselect
+    end
+    def allow_reselect?
+      allow_reselect
+    end
+    # Property `allow_reselect` setter
+    def allow_reselect=(val)
+      set_allow_reselect(val)
+    end
+    # Property `search_bar_enabled` getter
+    def search_bar_enabled
+      is_search_bar_enabled
+    end
+    def search_bar_enabled?
+      search_bar_enabled
+    end
+    # Property `search_bar_enabled` setter
+    def search_bar_enabled=(val)
+      set_search_bar_enabled(val)
+    end
+    # Property `search_bar_min_item_count` getter
+    def search_bar_min_item_count
+      get_search_bar_min_item_count
+    end
+    # Property `search_bar_min_item_count` setter
+    def search_bar_min_item_count=(val : Int)
+      set_search_bar_min_item_count(val.to_i64)
+    end
+    # Property `search_bar_fuzzy_search_enabled` getter
+    def search_bar_fuzzy_search_enabled
+      is_search_bar_fuzzy_search_enabled
+    end
+    def search_bar_fuzzy_search_enabled?
+      search_bar_fuzzy_search_enabled
+    end
+    # Property `search_bar_fuzzy_search_enabled` setter
+    def search_bar_fuzzy_search_enabled=(val)
+      set_search_bar_fuzzy_search_enabled(val)
+    end
+    # Property `search_bar_fuzzy_search_max_misses` getter
+    def search_bar_fuzzy_search_max_misses
+      get_search_bar_fuzzy_search_max_misses
+    end
+    # Property `search_bar_fuzzy_search_max_misses` setter
+    def search_bar_fuzzy_search_max_misses=(val : Int)
+      set_search_bar_fuzzy_search_max_misses(val.to_i64)
+    end
+    # Property `item_count` getter
+    def item_count
+      get_item_count
+    end
+    # Property `item_count` setter
+    def item_count=(val : Int)
+      set_item_count(val.to_i64)
+    end
   end
   class PCKPacker < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -6410,6 +7325,30 @@ module Godot
       Bridge.ptrcall(@@mb_get_output_buffer_max_size, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `input_buffer_max_size` getter
+    def input_buffer_max_size
+      get_input_buffer_max_size
+    end
+    # Property `input_buffer_max_size` setter
+    def input_buffer_max_size=(val : Int)
+      set_input_buffer_max_size(val.to_i64)
+    end
+    # Property `output_buffer_max_size` getter
+    def output_buffer_max_size
+      get_output_buffer_max_size
+    end
+    # Property `output_buffer_max_size` setter
+    def output_buffer_max_size=(val : Int)
+      set_output_buffer_max_size(val.to_i64)
+    end
+    # Property `stream_peer` getter
+    def stream_peer
+      get_stream_peer
+    end
+    # Property `stream_peer` setter
+    def stream_peer=(val)
+      set_stream_peer(val)
+    end
   end
   class PacketPeerUDP < Godot::PacketPeer
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -6635,6 +7574,33 @@ module Godot
       Bridge.ptrcall(@@mb_get_energy_multiplier, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `panorama` getter
+    def panorama
+      get_panorama
+    end
+    # Property `panorama` setter
+    def panorama=(val)
+      set_panorama(val)
+    end
+    # Property `filter` getter
+    def filter
+      is_filtering_enabled
+    end
+    def filter?
+      filter
+    end
+    # Property `filter` setter
+    def filter=(val)
+      set_filtering_enabled(val)
+    end
+    # Property `energy_multiplier` getter
+    def energy_multiplier
+      get_energy_multiplier
+    end
+    # Property `energy_multiplier` setter
+    def energy_multiplier=(val : Number)
+      set_energy_multiplier(val.to_f64)
+    end
   end
   class Parallax2D < Godot::Node2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -6830,6 +7796,92 @@ module Godot
       Bridge.ptrcall(@@mb_is_ignore_camera_scroll, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `scroll_scale` getter
+    def scroll_scale
+      get_scroll_scale
+    end
+    # Property `scroll_scale` setter
+    def scroll_scale=(val)
+      set_scroll_scale(val)
+    end
+    # Property `scroll_offset` getter
+    def scroll_offset
+      get_scroll_offset
+    end
+    # Property `scroll_offset` setter
+    def scroll_offset=(val)
+      set_scroll_offset(val)
+    end
+    # Property `repeat_size` getter
+    def repeat_size
+      get_repeat_size
+    end
+    # Property `repeat_size` setter
+    def repeat_size=(val)
+      set_repeat_size(val)
+    end
+    # Property `autoscroll` getter
+    def autoscroll
+      get_autoscroll
+    end
+    # Property `autoscroll` setter
+    def autoscroll=(val)
+      set_autoscroll(val)
+    end
+    # Property `repeat_times` getter
+    def repeat_times
+      get_repeat_times
+    end
+    # Property `repeat_times` setter
+    def repeat_times=(val : Int)
+      set_repeat_times(val.to_i64)
+    end
+    # Property `limit_begin` getter
+    def limit_begin
+      get_limit_begin
+    end
+    # Property `limit_begin` setter
+    def limit_begin=(val)
+      set_limit_begin(val)
+    end
+    # Property `limit_end` getter
+    def limit_end
+      get_limit_end
+    end
+    # Property `limit_end` setter
+    def limit_end=(val)
+      set_limit_end(val)
+    end
+    # Property `follow_viewport` getter
+    def follow_viewport
+      get_follow_viewport
+    end
+    def follow_viewport?
+      follow_viewport
+    end
+    # Property `follow_viewport` setter
+    def follow_viewport=(val)
+      set_follow_viewport(val)
+    end
+    # Property `ignore_camera_scroll` getter
+    def ignore_camera_scroll
+      is_ignore_camera_scroll
+    end
+    def ignore_camera_scroll?
+      ignore_camera_scroll
+    end
+    # Property `ignore_camera_scroll` setter
+    def ignore_camera_scroll=(val)
+      set_ignore_camera_scroll(val)
+    end
+    # Property `screen_offset` getter
+    def screen_offset
+      get_screen_offset
+    end
+    # Property `screen_offset` setter
+    def screen_offset=(val)
+      set_screen_offset(val)
+    end
   end
   class ParallaxBackground < Godot::CanvasLayer
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -6949,6 +8001,57 @@ module Godot
       Bridge.ptrcall(@@mb_is_ignore_camera_zoom, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `scroll_offset` getter
+    def scroll_offset
+      get_scroll_offset
+    end
+    # Property `scroll_offset` setter
+    def scroll_offset=(val)
+      set_scroll_offset(val)
+    end
+    # Property `scroll_base_offset` getter
+    def scroll_base_offset
+      get_scroll_base_offset
+    end
+    # Property `scroll_base_offset` setter
+    def scroll_base_offset=(val)
+      set_scroll_base_offset(val)
+    end
+    # Property `scroll_base_scale` getter
+    def scroll_base_scale
+      get_scroll_base_scale
+    end
+    # Property `scroll_base_scale` setter
+    def scroll_base_scale=(val)
+      set_scroll_base_scale(val)
+    end
+    # Property `scroll_limit_begin` getter
+    def scroll_limit_begin
+      get_limit_begin
+    end
+    # Property `scroll_limit_begin` setter
+    def scroll_limit_begin=(val)
+      set_limit_begin(val)
+    end
+    # Property `scroll_limit_end` getter
+    def scroll_limit_end
+      get_limit_end
+    end
+    # Property `scroll_limit_end` setter
+    def scroll_limit_end=(val)
+      set_limit_end(val)
+    end
+    # Property `scroll_ignore_camera_zoom` getter
+    def scroll_ignore_camera_zoom
+      is_ignore_camera_zoom
+    end
+    def scroll_ignore_camera_zoom?
+      scroll_ignore_camera_zoom
+    end
+    # Property `scroll_ignore_camera_zoom` setter
+    def scroll_ignore_camera_zoom=(val)
+      set_ignore_camera_zoom(val)
+    end
   end
   class ParallaxLayer < Godot::Node2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -7010,6 +8113,30 @@ module Godot
       ret = Vector2.new
       Bridge.ptrcall(@@mb_get_mirroring, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `motion_scale` getter
+    def motion_scale
+      get_motion_scale
+    end
+    # Property `motion_scale` setter
+    def motion_scale=(val)
+      set_motion_scale(val)
+    end
+    # Property `motion_offset` getter
+    def motion_offset
+      get_motion_offset
+    end
+    # Property `motion_offset` setter
+    def motion_offset=(val)
+      set_motion_offset(val)
+    end
+    # Property `motion_mirroring` getter
+    def motion_mirroring
+      get_mirroring
+    end
+    # Property `motion_mirroring` setter
+    def motion_mirroring=(val)
+      set_mirroring(val)
     end
   end
   class ParticleProcessMaterial < Godot::Material
@@ -8197,6 +9324,1045 @@ module Godot
       Bridge.ptrcall(@@mb_get_rotation_velocity_3d_curve, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Texture2D.new(ret_ptr)
     end
+    # Property `lifetime_randomness` getter
+    def lifetime_randomness
+      get_lifetime_randomness
+    end
+    # Property `lifetime_randomness` setter
+    def lifetime_randomness=(val : Number)
+      set_lifetime_randomness(val.to_f64)
+    end
+    # Property `particle_flag_align_y` getter
+    def particle_flag_align_y
+      get_particle_flag(0_i64)
+    end
+    def particle_flag_align_y?
+      particle_flag_align_y
+    end
+    # Property `particle_flag_align_y` setter
+    def particle_flag_align_y=(val)
+      set_particle_flag(0_i64, val)
+    end
+    # Property `particle_flag_rotate_y` getter
+    def particle_flag_rotate_y
+      get_particle_flag(1_i64)
+    end
+    def particle_flag_rotate_y?
+      particle_flag_rotate_y
+    end
+    # Property `particle_flag_rotate_y` setter
+    def particle_flag_rotate_y=(val)
+      set_particle_flag(1_i64, val)
+    end
+    # Property `particle_flag_disable_z` getter
+    def particle_flag_disable_z
+      get_particle_flag(2_i64)
+    end
+    def particle_flag_disable_z?
+      particle_flag_disable_z
+    end
+    # Property `particle_flag_disable_z` setter
+    def particle_flag_disable_z=(val)
+      set_particle_flag(2_i64, val)
+    end
+    # Property `particle_flag_damping_as_friction` getter
+    def particle_flag_damping_as_friction
+      get_particle_flag(3_i64)
+    end
+    def particle_flag_damping_as_friction?
+      particle_flag_damping_as_friction
+    end
+    # Property `particle_flag_damping_as_friction` setter
+    def particle_flag_damping_as_friction=(val)
+      set_particle_flag(3_i64, val)
+    end
+    # Property `particle_flag_inherit_emitter_scale` getter
+    def particle_flag_inherit_emitter_scale
+      get_particle_flag(4_i64)
+    end
+    def particle_flag_inherit_emitter_scale?
+      particle_flag_inherit_emitter_scale
+    end
+    # Property `particle_flag_inherit_emitter_scale` setter
+    def particle_flag_inherit_emitter_scale=(val)
+      set_particle_flag(4_i64, val)
+    end
+    # Property `particle_flag_preserve_color` getter
+    def particle_flag_preserve_color
+      get_particle_flag(5_i64)
+    end
+    def particle_flag_preserve_color?
+      particle_flag_preserve_color
+    end
+    # Property `particle_flag_preserve_color` setter
+    def particle_flag_preserve_color=(val)
+      set_particle_flag(5_i64, val)
+    end
+    # Property `emission_shape_offset` getter
+    def emission_shape_offset
+      get_emission_shape_offset
+    end
+    # Property `emission_shape_offset` setter
+    def emission_shape_offset=(val)
+      set_emission_shape_offset(val)
+    end
+    # Property `emission_shape_scale` getter
+    def emission_shape_scale
+      get_emission_shape_scale
+    end
+    # Property `emission_shape_scale` setter
+    def emission_shape_scale=(val)
+      set_emission_shape_scale(val)
+    end
+    # Property `emission_shape` getter
+    def emission_shape
+      get_emission_shape
+    end
+    # Property `emission_shape` setter
+    def emission_shape=(val : Int)
+      set_emission_shape(val.to_i64)
+    end
+    # Property `emission_sphere_radius` getter
+    def emission_sphere_radius
+      get_emission_sphere_radius
+    end
+    # Property `emission_sphere_radius` setter
+    def emission_sphere_radius=(val : Number)
+      set_emission_sphere_radius(val.to_f64)
+    end
+    # Property `emission_box_extents` getter
+    def emission_box_extents
+      get_emission_box_extents
+    end
+    # Property `emission_box_extents` setter
+    def emission_box_extents=(val)
+      set_emission_box_extents(val)
+    end
+    # Property `emission_point_texture` getter
+    def emission_point_texture
+      get_emission_point_texture
+    end
+    # Property `emission_point_texture` setter
+    def emission_point_texture=(val)
+      set_emission_point_texture(val)
+    end
+    # Property `emission_normal_texture` getter
+    def emission_normal_texture
+      get_emission_normal_texture
+    end
+    # Property `emission_normal_texture` setter
+    def emission_normal_texture=(val)
+      set_emission_normal_texture(val)
+    end
+    # Property `emission_color_texture` getter
+    def emission_color_texture
+      get_emission_color_texture
+    end
+    # Property `emission_color_texture` setter
+    def emission_color_texture=(val)
+      set_emission_color_texture(val)
+    end
+    # Property `emission_point_count` getter
+    def emission_point_count
+      get_emission_point_count
+    end
+    # Property `emission_point_count` setter
+    def emission_point_count=(val : Int)
+      set_emission_point_count(val.to_i64)
+    end
+    # Property `emission_ring_axis` getter
+    def emission_ring_axis
+      get_emission_ring_axis
+    end
+    # Property `emission_ring_axis` setter
+    def emission_ring_axis=(val)
+      set_emission_ring_axis(val)
+    end
+    # Property `emission_ring_height` getter
+    def emission_ring_height
+      get_emission_ring_height
+    end
+    # Property `emission_ring_height` setter
+    def emission_ring_height=(val : Number)
+      set_emission_ring_height(val.to_f64)
+    end
+    # Property `emission_ring_radius` getter
+    def emission_ring_radius
+      get_emission_ring_radius
+    end
+    # Property `emission_ring_radius` setter
+    def emission_ring_radius=(val : Number)
+      set_emission_ring_radius(val.to_f64)
+    end
+    # Property `emission_ring_inner_radius` getter
+    def emission_ring_inner_radius
+      get_emission_ring_inner_radius
+    end
+    # Property `emission_ring_inner_radius` setter
+    def emission_ring_inner_radius=(val : Number)
+      set_emission_ring_inner_radius(val.to_f64)
+    end
+    # Property `emission_ring_cone_angle` getter
+    def emission_ring_cone_angle
+      get_emission_ring_cone_angle
+    end
+    # Property `emission_ring_cone_angle` setter
+    def emission_ring_cone_angle=(val : Number)
+      set_emission_ring_cone_angle(val.to_f64)
+    end
+    # Property `angle` getter
+    def angle
+      get_param(7_i64)
+    end
+    # Property `angle` setter
+    def angle=(val)
+      set_param(7_i64, val)
+    end
+    # Property `angle_min` getter
+    def angle_min
+      get_param_min(7_i64)
+    end
+    # Property `angle_min` setter
+    def angle_min=(val : Number)
+      set_param_min(7_i64, val.to_f64)
+    end
+    # Property `angle_max` getter
+    def angle_max
+      get_param_max(7_i64)
+    end
+    # Property `angle_max` setter
+    def angle_max=(val : Number)
+      set_param_max(7_i64, val.to_f64)
+    end
+    # Property `angle_curve` getter
+    def angle_curve
+      get_param_texture(7_i64)
+    end
+    # Property `angle_curve` setter
+    def angle_curve=(val)
+      set_param_texture(7_i64, val)
+    end
+    # Property `use_rotation_3d` getter
+    def use_rotation_3d
+      is_using_rotation_3d
+    end
+    def use_rotation_3d?
+      use_rotation_3d
+    end
+    # Property `use_rotation_3d` setter
+    def use_rotation_3d=(val)
+      set_use_rotation_3d(val)
+    end
+    # Property `rotation_3d_min` getter
+    def rotation_3d_min
+      get_rotation_3d_min
+    end
+    # Property `rotation_3d_min` setter
+    def rotation_3d_min=(val)
+      set_rotation_3d_min(val)
+    end
+    # Property `rotation_3d_max` getter
+    def rotation_3d_max
+      get_rotation_3d_max
+    end
+    # Property `rotation_3d_max` setter
+    def rotation_3d_max=(val)
+      set_rotation_3d_max(val)
+    end
+    # Property `inherit_velocity_ratio` getter
+    def inherit_velocity_ratio
+      get_inherit_velocity_ratio
+    end
+    # Property `inherit_velocity_ratio` setter
+    def inherit_velocity_ratio=(val : Number)
+      set_inherit_velocity_ratio(val.to_f64)
+    end
+    # Property `velocity_pivot` getter
+    def velocity_pivot
+      get_velocity_pivot
+    end
+    # Property `velocity_pivot` setter
+    def velocity_pivot=(val)
+      set_velocity_pivot(val)
+    end
+    # Property `direction` getter
+    def direction
+      get_direction
+    end
+    # Property `direction` setter
+    def direction=(val)
+      set_direction(val)
+    end
+    # Property `spread` getter
+    def spread
+      get_spread
+    end
+    # Property `spread` setter
+    def spread=(val : Number)
+      set_spread(val.to_f64)
+    end
+    # Property `flatness` getter
+    def flatness
+      get_flatness
+    end
+    # Property `flatness` setter
+    def flatness=(val : Number)
+      set_flatness(val.to_f64)
+    end
+    # Property `initial_velocity` getter
+    def initial_velocity
+      get_param(0_i64)
+    end
+    # Property `initial_velocity` setter
+    def initial_velocity=(val)
+      set_param(0_i64, val)
+    end
+    # Property `initial_velocity_min` getter
+    def initial_velocity_min
+      get_param_min(0_i64)
+    end
+    # Property `initial_velocity_min` setter
+    def initial_velocity_min=(val : Number)
+      set_param_min(0_i64, val.to_f64)
+    end
+    # Property `initial_velocity_max` getter
+    def initial_velocity_max
+      get_param_max(0_i64)
+    end
+    # Property `initial_velocity_max` setter
+    def initial_velocity_max=(val : Number)
+      set_param_max(0_i64, val.to_f64)
+    end
+    # Property `angular_velocity` getter
+    def angular_velocity
+      get_param(1_i64)
+    end
+    # Property `angular_velocity` setter
+    def angular_velocity=(val)
+      set_param(1_i64, val)
+    end
+    # Property `angular_velocity_min` getter
+    def angular_velocity_min
+      get_param_min(1_i64)
+    end
+    # Property `angular_velocity_min` setter
+    def angular_velocity_min=(val : Number)
+      set_param_min(1_i64, val.to_f64)
+    end
+    # Property `angular_velocity_max` getter
+    def angular_velocity_max
+      get_param_max(1_i64)
+    end
+    # Property `angular_velocity_max` setter
+    def angular_velocity_max=(val : Number)
+      set_param_max(1_i64, val.to_f64)
+    end
+    # Property `angular_velocity_curve` getter
+    def angular_velocity_curve
+      get_param_texture(1_i64)
+    end
+    # Property `angular_velocity_curve` setter
+    def angular_velocity_curve=(val)
+      set_param_texture(1_i64, val)
+    end
+    # Property `directional_velocity` getter
+    def directional_velocity
+      get_param(16_i64)
+    end
+    # Property `directional_velocity` setter
+    def directional_velocity=(val)
+      set_param(16_i64, val)
+    end
+    # Property `directional_velocity_min` getter
+    def directional_velocity_min
+      get_param_min(16_i64)
+    end
+    # Property `directional_velocity_min` setter
+    def directional_velocity_min=(val : Number)
+      set_param_min(16_i64, val.to_f64)
+    end
+    # Property `directional_velocity_max` getter
+    def directional_velocity_max
+      get_param_max(16_i64)
+    end
+    # Property `directional_velocity_max` setter
+    def directional_velocity_max=(val : Number)
+      set_param_max(16_i64, val.to_f64)
+    end
+    # Property `directional_velocity_curve` getter
+    def directional_velocity_curve
+      get_param_texture(16_i64)
+    end
+    # Property `directional_velocity_curve` setter
+    def directional_velocity_curve=(val)
+      set_param_texture(16_i64, val)
+    end
+    # Property `orbit_velocity` getter
+    def orbit_velocity
+      get_param(2_i64)
+    end
+    # Property `orbit_velocity` setter
+    def orbit_velocity=(val)
+      set_param(2_i64, val)
+    end
+    # Property `orbit_velocity_min` getter
+    def orbit_velocity_min
+      get_param_min(2_i64)
+    end
+    # Property `orbit_velocity_min` setter
+    def orbit_velocity_min=(val : Number)
+      set_param_min(2_i64, val.to_f64)
+    end
+    # Property `orbit_velocity_max` getter
+    def orbit_velocity_max
+      get_param_max(2_i64)
+    end
+    # Property `orbit_velocity_max` setter
+    def orbit_velocity_max=(val : Number)
+      set_param_max(2_i64, val.to_f64)
+    end
+    # Property `orbit_velocity_curve` getter
+    def orbit_velocity_curve
+      get_param_texture(2_i64)
+    end
+    # Property `orbit_velocity_curve` setter
+    def orbit_velocity_curve=(val)
+      set_param_texture(2_i64, val)
+    end
+    # Property `radial_velocity` getter
+    def radial_velocity
+      get_param(15_i64)
+    end
+    # Property `radial_velocity` setter
+    def radial_velocity=(val)
+      set_param(15_i64, val)
+    end
+    # Property `radial_velocity_min` getter
+    def radial_velocity_min
+      get_param_min(15_i64)
+    end
+    # Property `radial_velocity_min` setter
+    def radial_velocity_min=(val : Number)
+      set_param_min(15_i64, val.to_f64)
+    end
+    # Property `radial_velocity_max` getter
+    def radial_velocity_max
+      get_param_max(15_i64)
+    end
+    # Property `radial_velocity_max` setter
+    def radial_velocity_max=(val : Number)
+      set_param_max(15_i64, val.to_f64)
+    end
+    # Property `radial_velocity_curve` getter
+    def radial_velocity_curve
+      get_param_texture(15_i64)
+    end
+    # Property `radial_velocity_curve` setter
+    def radial_velocity_curve=(val)
+      set_param_texture(15_i64, val)
+    end
+    # Property `velocity_limit_curve` getter
+    def velocity_limit_curve
+      get_velocity_limit_curve
+    end
+    # Property `velocity_limit_curve` setter
+    def velocity_limit_curve=(val)
+      set_velocity_limit_curve(val)
+    end
+    # Property `use_rotation_velocity_3d` getter
+    def use_rotation_velocity_3d
+      is_using_rotation_velocity_3d
+    end
+    def use_rotation_velocity_3d?
+      use_rotation_velocity_3d
+    end
+    # Property `use_rotation_velocity_3d` setter
+    def use_rotation_velocity_3d=(val)
+      set_using_rotation_velocity_3d(val)
+    end
+    # Property `rotation_velocity_3d_min` getter
+    def rotation_velocity_3d_min
+      get_rotation_velocity_3d_min
+    end
+    # Property `rotation_velocity_3d_min` setter
+    def rotation_velocity_3d_min=(val)
+      set_rotation_velocity_3d_min(val)
+    end
+    # Property `rotation_velocity_3d_max` getter
+    def rotation_velocity_3d_max
+      get_rotation_velocity_3d_max
+    end
+    # Property `rotation_velocity_3d_max` setter
+    def rotation_velocity_3d_max=(val)
+      set_rotation_velocity_3d_max(val)
+    end
+    # Property `rotation_velocity_3d_curve` getter
+    def rotation_velocity_3d_curve
+      get_rotation_velocity_3d_curve
+    end
+    # Property `rotation_velocity_3d_curve` setter
+    def rotation_velocity_3d_curve=(val)
+      set_rotation_velocity_3d_curve(val)
+    end
+    # Property `gravity` getter
+    def gravity
+      get_gravity
+    end
+    # Property `gravity` setter
+    def gravity=(val)
+      set_gravity(val)
+    end
+    # Property `linear_accel` getter
+    def linear_accel
+      get_param(3_i64)
+    end
+    # Property `linear_accel` setter
+    def linear_accel=(val)
+      set_param(3_i64, val)
+    end
+    # Property `linear_accel_min` getter
+    def linear_accel_min
+      get_param_min(3_i64)
+    end
+    # Property `linear_accel_min` setter
+    def linear_accel_min=(val : Number)
+      set_param_min(3_i64, val.to_f64)
+    end
+    # Property `linear_accel_max` getter
+    def linear_accel_max
+      get_param_max(3_i64)
+    end
+    # Property `linear_accel_max` setter
+    def linear_accel_max=(val : Number)
+      set_param_max(3_i64, val.to_f64)
+    end
+    # Property `linear_accel_curve` getter
+    def linear_accel_curve
+      get_param_texture(3_i64)
+    end
+    # Property `linear_accel_curve` setter
+    def linear_accel_curve=(val)
+      set_param_texture(3_i64, val)
+    end
+    # Property `radial_accel` getter
+    def radial_accel
+      get_param(4_i64)
+    end
+    # Property `radial_accel` setter
+    def radial_accel=(val)
+      set_param(4_i64, val)
+    end
+    # Property `radial_accel_min` getter
+    def radial_accel_min
+      get_param_min(4_i64)
+    end
+    # Property `radial_accel_min` setter
+    def radial_accel_min=(val : Number)
+      set_param_min(4_i64, val.to_f64)
+    end
+    # Property `radial_accel_max` getter
+    def radial_accel_max
+      get_param_max(4_i64)
+    end
+    # Property `radial_accel_max` setter
+    def radial_accel_max=(val : Number)
+      set_param_max(4_i64, val.to_f64)
+    end
+    # Property `radial_accel_curve` getter
+    def radial_accel_curve
+      get_param_texture(4_i64)
+    end
+    # Property `radial_accel_curve` setter
+    def radial_accel_curve=(val)
+      set_param_texture(4_i64, val)
+    end
+    # Property `tangential_accel` getter
+    def tangential_accel
+      get_param(5_i64)
+    end
+    # Property `tangential_accel` setter
+    def tangential_accel=(val)
+      set_param(5_i64, val)
+    end
+    # Property `tangential_accel_min` getter
+    def tangential_accel_min
+      get_param_min(5_i64)
+    end
+    # Property `tangential_accel_min` setter
+    def tangential_accel_min=(val : Number)
+      set_param_min(5_i64, val.to_f64)
+    end
+    # Property `tangential_accel_max` getter
+    def tangential_accel_max
+      get_param_max(5_i64)
+    end
+    # Property `tangential_accel_max` setter
+    def tangential_accel_max=(val : Number)
+      set_param_max(5_i64, val.to_f64)
+    end
+    # Property `tangential_accel_curve` getter
+    def tangential_accel_curve
+      get_param_texture(5_i64)
+    end
+    # Property `tangential_accel_curve` setter
+    def tangential_accel_curve=(val)
+      set_param_texture(5_i64, val)
+    end
+    # Property `damping` getter
+    def damping
+      get_param(6_i64)
+    end
+    # Property `damping` setter
+    def damping=(val)
+      set_param(6_i64, val)
+    end
+    # Property `damping_min` getter
+    def damping_min
+      get_param_min(6_i64)
+    end
+    # Property `damping_min` setter
+    def damping_min=(val : Number)
+      set_param_min(6_i64, val.to_f64)
+    end
+    # Property `damping_max` getter
+    def damping_max
+      get_param_max(6_i64)
+    end
+    # Property `damping_max` setter
+    def damping_max=(val : Number)
+      set_param_max(6_i64, val.to_f64)
+    end
+    # Property `damping_curve` getter
+    def damping_curve
+      get_param_texture(6_i64)
+    end
+    # Property `damping_curve` setter
+    def damping_curve=(val)
+      set_param_texture(6_i64, val)
+    end
+    # Property `attractor_interaction_enabled` getter
+    def attractor_interaction_enabled
+      is_attractor_interaction_enabled
+    end
+    def attractor_interaction_enabled?
+      attractor_interaction_enabled
+    end
+    # Property `attractor_interaction_enabled` setter
+    def attractor_interaction_enabled=(val)
+      set_attractor_interaction_enabled(val)
+    end
+    # Property `use_scale_3d` getter
+    def use_scale_3d
+      is_using_scale_3d
+    end
+    def use_scale_3d?
+      use_scale_3d
+    end
+    # Property `use_scale_3d` setter
+    def use_scale_3d=(val)
+      set_use_scale_3d(val)
+    end
+    # Property `scale_3d_min` getter
+    def scale_3d_min
+      get_scale_3d_min
+    end
+    # Property `scale_3d_min` setter
+    def scale_3d_min=(val)
+      set_scale_3d_min(val)
+    end
+    # Property `scale_3d_max` getter
+    def scale_3d_max
+      get_scale_3d_max
+    end
+    # Property `scale_3d_max` setter
+    def scale_3d_max=(val)
+      set_scale_3d_max(val)
+    end
+    # Property `scale` getter
+    def scale
+      get_param(8_i64)
+    end
+    # Property `scale` setter
+    def scale=(val)
+      set_param(8_i64, val)
+    end
+    # Property `scale_min` getter
+    def scale_min
+      get_param_min(8_i64)
+    end
+    # Property `scale_min` setter
+    def scale_min=(val : Number)
+      set_param_min(8_i64, val.to_f64)
+    end
+    # Property `scale_max` getter
+    def scale_max
+      get_param_max(8_i64)
+    end
+    # Property `scale_max` setter
+    def scale_max=(val : Number)
+      set_param_max(8_i64, val.to_f64)
+    end
+    # Property `scale_curve` getter
+    def scale_curve
+      get_param_texture(8_i64)
+    end
+    # Property `scale_curve` setter
+    def scale_curve=(val)
+      set_param_texture(8_i64, val)
+    end
+    # Property `scale_over_velocity` getter
+    def scale_over_velocity
+      get_param(17_i64)
+    end
+    # Property `scale_over_velocity` setter
+    def scale_over_velocity=(val)
+      set_param(17_i64, val)
+    end
+    # Property `scale_over_velocity_min` getter
+    def scale_over_velocity_min
+      get_param_min(17_i64)
+    end
+    # Property `scale_over_velocity_min` setter
+    def scale_over_velocity_min=(val : Number)
+      set_param_min(17_i64, val.to_f64)
+    end
+    # Property `scale_over_velocity_max` getter
+    def scale_over_velocity_max
+      get_param_max(17_i64)
+    end
+    # Property `scale_over_velocity_max` setter
+    def scale_over_velocity_max=(val : Number)
+      set_param_max(17_i64, val.to_f64)
+    end
+    # Property `scale_over_velocity_curve` getter
+    def scale_over_velocity_curve
+      get_param_texture(17_i64)
+    end
+    # Property `scale_over_velocity_curve` setter
+    def scale_over_velocity_curve=(val)
+      set_param_texture(17_i64, val)
+    end
+    # Property `color` getter
+    def color
+      get_color
+    end
+    # Property `color` setter
+    def color=(val)
+      set_color(val)
+    end
+    # Property `color_ramp` getter
+    def color_ramp
+      get_color_ramp
+    end
+    # Property `color_ramp` setter
+    def color_ramp=(val)
+      set_color_ramp(val)
+    end
+    # Property `color_initial_ramp` getter
+    def color_initial_ramp
+      get_color_initial_ramp
+    end
+    # Property `color_initial_ramp` setter
+    def color_initial_ramp=(val)
+      set_color_initial_ramp(val)
+    end
+    # Property `alpha_curve` getter
+    def alpha_curve
+      get_alpha_curve
+    end
+    # Property `alpha_curve` setter
+    def alpha_curve=(val)
+      set_alpha_curve(val)
+    end
+    # Property `emission_curve` getter
+    def emission_curve
+      get_emission_curve
+    end
+    # Property `emission_curve` setter
+    def emission_curve=(val)
+      set_emission_curve(val)
+    end
+    # Property `hue_variation` getter
+    def hue_variation
+      get_param(9_i64)
+    end
+    # Property `hue_variation` setter
+    def hue_variation=(val)
+      set_param(9_i64, val)
+    end
+    # Property `hue_variation_min` getter
+    def hue_variation_min
+      get_param_min(9_i64)
+    end
+    # Property `hue_variation_min` setter
+    def hue_variation_min=(val : Number)
+      set_param_min(9_i64, val.to_f64)
+    end
+    # Property `hue_variation_max` getter
+    def hue_variation_max
+      get_param_max(9_i64)
+    end
+    # Property `hue_variation_max` setter
+    def hue_variation_max=(val : Number)
+      set_param_max(9_i64, val.to_f64)
+    end
+    # Property `hue_variation_curve` getter
+    def hue_variation_curve
+      get_param_texture(9_i64)
+    end
+    # Property `hue_variation_curve` setter
+    def hue_variation_curve=(val)
+      set_param_texture(9_i64, val)
+    end
+    # Property `anim_speed` getter
+    def anim_speed
+      get_param(10_i64)
+    end
+    # Property `anim_speed` setter
+    def anim_speed=(val)
+      set_param(10_i64, val)
+    end
+    # Property `anim_speed_min` getter
+    def anim_speed_min
+      get_param_min(10_i64)
+    end
+    # Property `anim_speed_min` setter
+    def anim_speed_min=(val : Number)
+      set_param_min(10_i64, val.to_f64)
+    end
+    # Property `anim_speed_max` getter
+    def anim_speed_max
+      get_param_max(10_i64)
+    end
+    # Property `anim_speed_max` setter
+    def anim_speed_max=(val : Number)
+      set_param_max(10_i64, val.to_f64)
+    end
+    # Property `anim_speed_curve` getter
+    def anim_speed_curve
+      get_param_texture(10_i64)
+    end
+    # Property `anim_speed_curve` setter
+    def anim_speed_curve=(val)
+      set_param_texture(10_i64, val)
+    end
+    # Property `anim_offset` getter
+    def anim_offset
+      get_param(11_i64)
+    end
+    # Property `anim_offset` setter
+    def anim_offset=(val)
+      set_param(11_i64, val)
+    end
+    # Property `anim_offset_min` getter
+    def anim_offset_min
+      get_param_min(11_i64)
+    end
+    # Property `anim_offset_min` setter
+    def anim_offset_min=(val : Number)
+      set_param_min(11_i64, val.to_f64)
+    end
+    # Property `anim_offset_max` getter
+    def anim_offset_max
+      get_param_max(11_i64)
+    end
+    # Property `anim_offset_max` setter
+    def anim_offset_max=(val : Number)
+      set_param_max(11_i64, val.to_f64)
+    end
+    # Property `anim_offset_curve` getter
+    def anim_offset_curve
+      get_param_texture(11_i64)
+    end
+    # Property `anim_offset_curve` setter
+    def anim_offset_curve=(val)
+      set_param_texture(11_i64, val)
+    end
+    # Property `turbulence_enabled` getter
+    def turbulence_enabled
+      get_turbulence_enabled
+    end
+    def turbulence_enabled?
+      turbulence_enabled
+    end
+    # Property `turbulence_enabled` setter
+    def turbulence_enabled=(val)
+      set_turbulence_enabled(val)
+    end
+    # Property `turbulence_noise_strength` getter
+    def turbulence_noise_strength
+      get_turbulence_noise_strength
+    end
+    # Property `turbulence_noise_strength` setter
+    def turbulence_noise_strength=(val : Number)
+      set_turbulence_noise_strength(val.to_f64)
+    end
+    # Property `turbulence_noise_scale` getter
+    def turbulence_noise_scale
+      get_turbulence_noise_scale
+    end
+    # Property `turbulence_noise_scale` setter
+    def turbulence_noise_scale=(val : Number)
+      set_turbulence_noise_scale(val.to_f64)
+    end
+    # Property `turbulence_noise_speed` getter
+    def turbulence_noise_speed
+      get_turbulence_noise_speed
+    end
+    # Property `turbulence_noise_speed` setter
+    def turbulence_noise_speed=(val)
+      set_turbulence_noise_speed(val)
+    end
+    # Property `turbulence_noise_speed_random` getter
+    def turbulence_noise_speed_random
+      get_turbulence_noise_speed_random
+    end
+    # Property `turbulence_noise_speed_random` setter
+    def turbulence_noise_speed_random=(val : Number)
+      set_turbulence_noise_speed_random(val.to_f64)
+    end
+    # Property `turbulence_influence` getter
+    def turbulence_influence
+      get_param(13_i64)
+    end
+    # Property `turbulence_influence` setter
+    def turbulence_influence=(val)
+      set_param(13_i64, val)
+    end
+    # Property `turbulence_influence_min` getter
+    def turbulence_influence_min
+      get_param_min(13_i64)
+    end
+    # Property `turbulence_influence_min` setter
+    def turbulence_influence_min=(val : Number)
+      set_param_min(13_i64, val.to_f64)
+    end
+    # Property `turbulence_influence_max` getter
+    def turbulence_influence_max
+      get_param_max(13_i64)
+    end
+    # Property `turbulence_influence_max` setter
+    def turbulence_influence_max=(val : Number)
+      set_param_max(13_i64, val.to_f64)
+    end
+    # Property `turbulence_initial_displacement` getter
+    def turbulence_initial_displacement
+      get_param(14_i64)
+    end
+    # Property `turbulence_initial_displacement` setter
+    def turbulence_initial_displacement=(val)
+      set_param(14_i64, val)
+    end
+    # Property `turbulence_initial_displacement_min` getter
+    def turbulence_initial_displacement_min
+      get_param_min(14_i64)
+    end
+    # Property `turbulence_initial_displacement_min` setter
+    def turbulence_initial_displacement_min=(val : Number)
+      set_param_min(14_i64, val.to_f64)
+    end
+    # Property `turbulence_initial_displacement_max` getter
+    def turbulence_initial_displacement_max
+      get_param_max(14_i64)
+    end
+    # Property `turbulence_initial_displacement_max` setter
+    def turbulence_initial_displacement_max=(val : Number)
+      set_param_max(14_i64, val.to_f64)
+    end
+    # Property `turbulence_influence_over_life` getter
+    def turbulence_influence_over_life
+      get_param_texture(12_i64)
+    end
+    # Property `turbulence_influence_over_life` setter
+    def turbulence_influence_over_life=(val)
+      set_param_texture(12_i64, val)
+    end
+    # Property `collision_mode` getter
+    def collision_mode
+      get_collision_mode
+    end
+    # Property `collision_mode` setter
+    def collision_mode=(val : Int)
+      set_collision_mode(val.to_i64)
+    end
+    # Property `collision_friction` getter
+    def collision_friction
+      get_collision_friction
+    end
+    # Property `collision_friction` setter
+    def collision_friction=(val : Number)
+      set_collision_friction(val.to_f64)
+    end
+    # Property `collision_bounce` getter
+    def collision_bounce
+      get_collision_bounce
+    end
+    # Property `collision_bounce` setter
+    def collision_bounce=(val : Number)
+      set_collision_bounce(val.to_f64)
+    end
+    # Property `collision_use_scale` getter
+    def collision_use_scale
+      is_collision_using_scale
+    end
+    def collision_use_scale?
+      collision_use_scale
+    end
+    # Property `collision_use_scale` setter
+    def collision_use_scale=(val)
+      set_collision_use_scale(val)
+    end
+    # Property `sub_emitter_mode` getter
+    def sub_emitter_mode
+      get_sub_emitter_mode
+    end
+    # Property `sub_emitter_mode` setter
+    def sub_emitter_mode=(val : Int)
+      set_sub_emitter_mode(val.to_i64)
+    end
+    # Property `sub_emitter_frequency` getter
+    def sub_emitter_frequency
+      get_sub_emitter_frequency
+    end
+    # Property `sub_emitter_frequency` setter
+    def sub_emitter_frequency=(val : Number)
+      set_sub_emitter_frequency(val.to_f64)
+    end
+    # Property `sub_emitter_amount_at_end` getter
+    def sub_emitter_amount_at_end
+      get_sub_emitter_amount_at_end
+    end
+    # Property `sub_emitter_amount_at_end` setter
+    def sub_emitter_amount_at_end=(val : Int)
+      set_sub_emitter_amount_at_end(val.to_i64)
+    end
+    # Property `sub_emitter_amount_at_collision` getter
+    def sub_emitter_amount_at_collision
+      get_sub_emitter_amount_at_collision
+    end
+    # Property `sub_emitter_amount_at_collision` setter
+    def sub_emitter_amount_at_collision=(val : Int)
+      set_sub_emitter_amount_at_collision(val.to_i64)
+    end
+    # Property `sub_emitter_amount_at_start` getter
+    def sub_emitter_amount_at_start
+      get_sub_emitter_amount_at_start
+    end
+    # Property `sub_emitter_amount_at_start` setter
+    def sub_emitter_amount_at_start=(val : Int)
+      set_sub_emitter_amount_at_start(val.to_i64)
+    end
+    # Property `sub_emitter_keep_velocity` getter
+    def sub_emitter_keep_velocity
+      get_sub_emitter_keep_velocity
+    end
+    def sub_emitter_keep_velocity?
+      sub_emitter_keep_velocity
+    end
+    # Property `sub_emitter_keep_velocity` setter
+    def sub_emitter_keep_velocity=(val)
+      set_sub_emitter_keep_velocity(val)
+    end
   end
   class Path2D < Godot::Node2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -8220,6 +10386,14 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_curve, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Curve2D.new(ret_ptr)
+    end
+    # Property `curve` getter
+    def curve
+      get_curve
+    end
+    # Property `curve` setter
+    def curve=(val)
+      set_curve(val)
     end
   end
   class Path3D < Godot::Node3D
@@ -8263,6 +10437,22 @@ module Godot
       ret = Color.new
       Bridge.ptrcall(@@mb_get_debug_custom_color, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `curve` getter
+    def curve
+      get_curve
+    end
+    # Property `curve` setter
+    def curve=(val)
+      set_curve(val)
+    end
+    # Property `debug_custom_color` getter
+    def debug_custom_color
+      get_debug_custom_color
+    end
+    # Property `debug_custom_color` setter
+    def debug_custom_color=(val)
+      set_debug_custom_color(val)
     end
   end
   class PathFollow2D < Godot::Node2D
@@ -8401,6 +10591,71 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_has_loop, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `progress` getter
+    def progress
+      get_progress
+    end
+    # Property `progress` setter
+    def progress=(val : Number)
+      set_progress(val.to_f64)
+    end
+    # Property `progress_ratio` getter
+    def progress_ratio
+      get_progress_ratio
+    end
+    # Property `progress_ratio` setter
+    def progress_ratio=(val : Number)
+      set_progress_ratio(val.to_f64)
+    end
+    # Property `h_offset` getter
+    def h_offset
+      get_h_offset
+    end
+    # Property `h_offset` setter
+    def h_offset=(val : Number)
+      set_h_offset(val.to_f64)
+    end
+    # Property `v_offset` getter
+    def v_offset
+      get_v_offset
+    end
+    # Property `v_offset` setter
+    def v_offset=(val : Number)
+      set_v_offset(val.to_f64)
+    end
+    # Property `rotates` getter
+    def rotates
+      is_rotating
+    end
+    def rotates?
+      rotates
+    end
+    # Property `rotates` setter
+    def rotates=(val)
+      set_rotates(val)
+    end
+    # Property `cubic_interp` getter
+    def cubic_interp
+      get_cubic_interpolation
+    end
+    def cubic_interp?
+      cubic_interp
+    end
+    # Property `cubic_interp` setter
+    def cubic_interp=(val)
+      set_cubic_interpolation(val)
+    end
+    # Property `loop` getter
+    def loop
+      has_loop
+    end
+    def loop?
+      loop
+    end
+    # Property `loop` setter
+    def loop=(val)
+      set_loop(val)
     end
   end
   class PathFollow3D < Godot::Node3D
@@ -8598,6 +10853,90 @@ module Godot
       ret = Transform3D.new
       Bridge.ptrcall(@@mb_correct_posture, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
       ret
+    end
+    # Property `progress` getter
+    def progress
+      get_progress
+    end
+    # Property `progress` setter
+    def progress=(val : Number)
+      set_progress(val.to_f64)
+    end
+    # Property `progress_ratio` getter
+    def progress_ratio
+      get_progress_ratio
+    end
+    # Property `progress_ratio` setter
+    def progress_ratio=(val : Number)
+      set_progress_ratio(val.to_f64)
+    end
+    # Property `h_offset` getter
+    def h_offset
+      get_h_offset
+    end
+    # Property `h_offset` setter
+    def h_offset=(val : Number)
+      set_h_offset(val.to_f64)
+    end
+    # Property `v_offset` getter
+    def v_offset
+      get_v_offset
+    end
+    # Property `v_offset` setter
+    def v_offset=(val : Number)
+      set_v_offset(val.to_f64)
+    end
+    # Property `rotation_mode` getter
+    def rotation_mode
+      get_rotation_mode
+    end
+    # Property `rotation_mode` setter
+    def rotation_mode=(val : Int)
+      set_rotation_mode(val.to_i64)
+    end
+    # Property `use_model_front` getter
+    def use_model_front
+      is_using_model_front
+    end
+    def use_model_front?
+      use_model_front
+    end
+    # Property `use_model_front` setter
+    def use_model_front=(val)
+      set_use_model_front(val)
+    end
+    # Property `cubic_interp` getter
+    def cubic_interp
+      get_cubic_interpolation
+    end
+    def cubic_interp?
+      cubic_interp
+    end
+    # Property `cubic_interp` setter
+    def cubic_interp=(val)
+      set_cubic_interpolation(val)
+    end
+    # Property `loop` getter
+    def loop
+      has_loop
+    end
+    def loop?
+      loop
+    end
+    # Property `loop` setter
+    def loop=(val)
+      set_loop(val)
+    end
+    # Property `tilt_enabled` getter
+    def tilt_enabled
+      is_tilt_enabled
+    end
+    def tilt_enabled?
+      tilt_enabled
+    end
+    # Property `tilt_enabled` setter
+    def tilt_enabled=(val)
+      set_tilt_enabled(val)
     end
   end
   class Performance < Godot::Object
@@ -9379,6 +11718,208 @@ module Godot
       Bridge.ptrcall(@@mb_get_colliding_bodies, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Godot::Array.new(ret_ptr)
     end
+    # Property `mass` getter
+    def mass
+      get_mass
+    end
+    # Property `mass` setter
+    def mass=(val : Number)
+      set_mass(val.to_f64)
+    end
+    # Property `physics_material_override` getter
+    def physics_material_override
+      get_physics_material_override
+    end
+    # Property `physics_material_override` setter
+    def physics_material_override=(val)
+      set_physics_material_override(val)
+    end
+    # Property `gravity_scale` getter
+    def gravity_scale
+      get_gravity_scale
+    end
+    # Property `gravity_scale` setter
+    def gravity_scale=(val : Number)
+      set_gravity_scale(val.to_f64)
+    end
+    # Property `center_of_mass_mode` getter
+    def center_of_mass_mode
+      get_center_of_mass_mode
+    end
+    # Property `center_of_mass_mode` setter
+    def center_of_mass_mode=(val : Int)
+      set_center_of_mass_mode(val.to_i64)
+    end
+    # Property `center_of_mass` getter
+    def center_of_mass
+      get_center_of_mass
+    end
+    # Property `center_of_mass` setter
+    def center_of_mass=(val)
+      set_center_of_mass(val)
+    end
+    # Property `inertia` getter
+    def inertia
+      get_inertia
+    end
+    # Property `inertia` setter
+    def inertia=(val : Number)
+      set_inertia(val.to_f64)
+    end
+    # Property `sleeping` getter
+    def sleeping
+      is_sleeping
+    end
+    def sleeping?
+      sleeping
+    end
+    # Property `sleeping` setter
+    def sleeping=(val)
+      set_sleeping(val)
+    end
+    # Property `can_sleep` getter
+    def can_sleep
+      is_able_to_sleep
+    end
+    def can_sleep?
+      can_sleep
+    end
+    # Property `can_sleep` setter
+    def can_sleep=(val)
+      set_can_sleep(val)
+    end
+    # Property `lock_rotation` getter
+    def lock_rotation
+      is_lock_rotation_enabled
+    end
+    def lock_rotation?
+      lock_rotation
+    end
+    # Property `lock_rotation` setter
+    def lock_rotation=(val)
+      set_lock_rotation_enabled(val)
+    end
+    # Property `freeze` getter
+    def freeze
+      is_freeze_enabled
+    end
+    def freeze?
+      freeze
+    end
+    # Property `freeze` setter
+    def freeze=(val)
+      set_freeze_enabled(val)
+    end
+    # Property `freeze_mode` getter
+    def freeze_mode
+      get_freeze_mode
+    end
+    # Property `freeze_mode` setter
+    def freeze_mode=(val : Int)
+      set_freeze_mode(val.to_i64)
+    end
+    # Property `custom_integrator` getter
+    def custom_integrator
+      is_using_custom_integrator
+    end
+    def custom_integrator?
+      custom_integrator
+    end
+    # Property `custom_integrator` setter
+    def custom_integrator=(val)
+      set_use_custom_integrator(val)
+    end
+    # Property `continuous_cd` getter
+    def continuous_cd
+      get_continuous_collision_detection_mode
+    end
+    # Property `continuous_cd` setter
+    def continuous_cd=(val : Int)
+      set_continuous_collision_detection_mode(val.to_i64)
+    end
+    # Property `contact_monitor` getter
+    def contact_monitor
+      is_contact_monitor_enabled
+    end
+    def contact_monitor?
+      contact_monitor
+    end
+    # Property `contact_monitor` setter
+    def contact_monitor=(val)
+      set_contact_monitor(val)
+    end
+    # Property `max_contacts_reported` getter
+    def max_contacts_reported
+      get_max_contacts_reported
+    end
+    # Property `max_contacts_reported` setter
+    def max_contacts_reported=(val : Int)
+      set_max_contacts_reported(val.to_i64)
+    end
+    # Property `linear_velocity` getter
+    def linear_velocity
+      get_linear_velocity
+    end
+    # Property `linear_velocity` setter
+    def linear_velocity=(val)
+      set_linear_velocity(val)
+    end
+    # Property `linear_damp_mode` getter
+    def linear_damp_mode
+      get_linear_damp_mode
+    end
+    # Property `linear_damp_mode` setter
+    def linear_damp_mode=(val : Int)
+      set_linear_damp_mode(val.to_i64)
+    end
+    # Property `linear_damp` getter
+    def linear_damp
+      get_linear_damp
+    end
+    # Property `linear_damp` setter
+    def linear_damp=(val : Number)
+      set_linear_damp(val.to_f64)
+    end
+    # Property `angular_velocity` getter
+    def angular_velocity
+      get_angular_velocity
+    end
+    # Property `angular_velocity` setter
+    def angular_velocity=(val : Number)
+      set_angular_velocity(val.to_f64)
+    end
+    # Property `angular_damp_mode` getter
+    def angular_damp_mode
+      get_angular_damp_mode
+    end
+    # Property `angular_damp_mode` setter
+    def angular_damp_mode=(val : Int)
+      set_angular_damp_mode(val.to_i64)
+    end
+    # Property `angular_damp` getter
+    def angular_damp
+      get_angular_damp
+    end
+    # Property `angular_damp` setter
+    def angular_damp=(val : Number)
+      set_angular_damp(val.to_f64)
+    end
+    # Property `constant_force` getter
+    def constant_force
+      get_constant_force
+    end
+    # Property `constant_force` setter
+    def constant_force=(val)
+      set_constant_force(val)
+    end
+    # Property `constant_torque` getter
+    def constant_torque
+      get_constant_torque
+    end
+    # Property `constant_torque` setter
+    def constant_torque=(val : Number)
+      set_constant_torque(val.to_f64)
+    end
   end
   class PhysicalBone2D < Godot::RigidBody2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -9496,6 +12037,55 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_get_follow_bone_when_simulating, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `bone2d_nodepath` getter
+    def bone2d_nodepath
+      get_bone2d_nodepath
+    end
+    # Property `bone2d_nodepath` setter
+    def bone2d_nodepath=(val)
+      set_bone2d_nodepath(val)
+    end
+    # Property `bone2d_index` getter
+    def bone2d_index
+      get_bone2d_index
+    end
+    # Property `bone2d_index` setter
+    def bone2d_index=(val : Int)
+      set_bone2d_index(val.to_i64)
+    end
+    # Property `auto_configure_joint` getter
+    def auto_configure_joint
+      get_auto_configure_joint
+    end
+    def auto_configure_joint?
+      auto_configure_joint
+    end
+    # Property `auto_configure_joint` setter
+    def auto_configure_joint=(val)
+      set_auto_configure_joint(val)
+    end
+    # Property `simulate_physics` getter
+    def simulate_physics
+      get_simulate_physics
+    end
+    def simulate_physics?
+      simulate_physics
+    end
+    # Property `simulate_physics` setter
+    def simulate_physics=(val)
+      set_simulate_physics(val)
+    end
+    # Property `follow_bone_when_simulating` getter
+    def follow_bone_when_simulating
+      get_follow_bone_when_simulating
+    end
+    def follow_bone_when_simulating?
+      follow_bone_when_simulating
+    end
+    # Property `follow_bone_when_simulating` setter
+    def follow_bone_when_simulating=(val)
+      set_follow_bone_when_simulating(val)
     end
   end
   class PhysicalBone3D < Godot::PhysicsBody3D
@@ -9876,6 +12466,140 @@ module Godot
       Bridge.ptrcall(@@mb_is_able_to_sleep, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `joint_type` getter
+    def joint_type
+      get_joint_type
+    end
+    # Property `joint_type` setter
+    def joint_type=(val : Int)
+      set_joint_type(val.to_i64)
+    end
+    # Property `joint_offset` getter
+    def joint_offset
+      get_joint_offset
+    end
+    # Property `joint_offset` setter
+    def joint_offset=(val)
+      set_joint_offset(val)
+    end
+    # Property `joint_rotation` getter
+    def joint_rotation
+      get_joint_rotation
+    end
+    # Property `joint_rotation` setter
+    def joint_rotation=(val)
+      set_joint_rotation(val)
+    end
+    # Property `body_offset` getter
+    def body_offset
+      get_body_offset
+    end
+    # Property `body_offset` setter
+    def body_offset=(val)
+      set_body_offset(val)
+    end
+    # Property `mass` getter
+    def mass
+      get_mass
+    end
+    # Property `mass` setter
+    def mass=(val : Number)
+      set_mass(val.to_f64)
+    end
+    # Property `friction` getter
+    def friction
+      get_friction
+    end
+    # Property `friction` setter
+    def friction=(val : Number)
+      set_friction(val.to_f64)
+    end
+    # Property `bounce` getter
+    def bounce
+      get_bounce
+    end
+    # Property `bounce` setter
+    def bounce=(val : Number)
+      set_bounce(val.to_f64)
+    end
+    # Property `gravity_scale` getter
+    def gravity_scale
+      get_gravity_scale
+    end
+    # Property `gravity_scale` setter
+    def gravity_scale=(val : Number)
+      set_gravity_scale(val.to_f64)
+    end
+    # Property `custom_integrator` getter
+    def custom_integrator
+      is_using_custom_integrator
+    end
+    def custom_integrator?
+      custom_integrator
+    end
+    # Property `custom_integrator` setter
+    def custom_integrator=(val)
+      set_use_custom_integrator(val)
+    end
+    # Property `linear_damp_mode` getter
+    def linear_damp_mode
+      get_linear_damp_mode
+    end
+    # Property `linear_damp_mode` setter
+    def linear_damp_mode=(val : Int)
+      set_linear_damp_mode(val.to_i64)
+    end
+    # Property `linear_damp` getter
+    def linear_damp
+      get_linear_damp
+    end
+    # Property `linear_damp` setter
+    def linear_damp=(val : Number)
+      set_linear_damp(val.to_f64)
+    end
+    # Property `angular_damp_mode` getter
+    def angular_damp_mode
+      get_angular_damp_mode
+    end
+    # Property `angular_damp_mode` setter
+    def angular_damp_mode=(val : Int)
+      set_angular_damp_mode(val.to_i64)
+    end
+    # Property `angular_damp` getter
+    def angular_damp
+      get_angular_damp
+    end
+    # Property `angular_damp` setter
+    def angular_damp=(val : Number)
+      set_angular_damp(val.to_f64)
+    end
+    # Property `linear_velocity` getter
+    def linear_velocity
+      get_linear_velocity
+    end
+    # Property `linear_velocity` setter
+    def linear_velocity=(val)
+      set_linear_velocity(val)
+    end
+    # Property `angular_velocity` getter
+    def angular_velocity
+      get_angular_velocity
+    end
+    # Property `angular_velocity` setter
+    def angular_velocity=(val)
+      set_angular_velocity(val)
+    end
+    # Property `can_sleep` getter
+    def can_sleep
+      is_able_to_sleep
+    end
+    def can_sleep?
+      can_sleep
+    end
+    # Property `can_sleep` setter
+    def can_sleep=(val)
+      set_can_sleep(val)
+    end
   end
   class PhysicalBoneSimulator3D < Godot::SkeletonModifier3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -10140,6 +12864,97 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_night_sky, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Texture2D.new(ret_ptr)
+    end
+    # Property `rayleigh_coefficient` getter
+    def rayleigh_coefficient
+      get_rayleigh_coefficient
+    end
+    # Property `rayleigh_coefficient` setter
+    def rayleigh_coefficient=(val : Number)
+      set_rayleigh_coefficient(val.to_f64)
+    end
+    # Property `rayleigh_color` getter
+    def rayleigh_color
+      get_rayleigh_color
+    end
+    # Property `rayleigh_color` setter
+    def rayleigh_color=(val)
+      set_rayleigh_color(val)
+    end
+    # Property `mie_coefficient` getter
+    def mie_coefficient
+      get_mie_coefficient
+    end
+    # Property `mie_coefficient` setter
+    def mie_coefficient=(val : Number)
+      set_mie_coefficient(val.to_f64)
+    end
+    # Property `mie_eccentricity` getter
+    def mie_eccentricity
+      get_mie_eccentricity
+    end
+    # Property `mie_eccentricity` setter
+    def mie_eccentricity=(val : Number)
+      set_mie_eccentricity(val.to_f64)
+    end
+    # Property `mie_color` getter
+    def mie_color
+      get_mie_color
+    end
+    # Property `mie_color` setter
+    def mie_color=(val)
+      set_mie_color(val)
+    end
+    # Property `turbidity` getter
+    def turbidity
+      get_turbidity
+    end
+    # Property `turbidity` setter
+    def turbidity=(val : Number)
+      set_turbidity(val.to_f64)
+    end
+    # Property `sun_disk_scale` getter
+    def sun_disk_scale
+      get_sun_disk_scale
+    end
+    # Property `sun_disk_scale` setter
+    def sun_disk_scale=(val : Number)
+      set_sun_disk_scale(val.to_f64)
+    end
+    # Property `ground_color` getter
+    def ground_color
+      get_ground_color
+    end
+    # Property `ground_color` setter
+    def ground_color=(val)
+      set_ground_color(val)
+    end
+    # Property `energy_multiplier` getter
+    def energy_multiplier
+      get_energy_multiplier
+    end
+    # Property `energy_multiplier` setter
+    def energy_multiplier=(val : Number)
+      set_energy_multiplier(val.to_f64)
+    end
+    # Property `use_debanding` getter
+    def use_debanding
+      get_use_debanding
+    end
+    def use_debanding?
+      use_debanding
+    end
+    # Property `use_debanding` setter
+    def use_debanding=(val)
+      set_use_debanding(val)
+    end
+    # Property `night_sky` getter
+    def night_sky
+      get_night_sky
+    end
+    # Property `night_sky` setter
+    def night_sky=(val)
+      set_night_sky(val)
     end
   end
   class PhysicsDirectBodyState2D < Godot::Object
@@ -10634,6 +13449,89 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_space_state, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       PhysicsDirectSpaceState2D.new(ret_ptr)
+    end
+    # Property `step` getter
+    def step
+      get_step
+    end
+    # Property `inverse_mass` getter
+    def inverse_mass
+      get_inverse_mass
+    end
+    # Property `inverse_inertia` getter
+    def inverse_inertia
+      get_inverse_inertia
+    end
+    # Property `total_angular_damp` getter
+    def total_angular_damp
+      get_total_angular_damp
+    end
+    # Property `total_linear_damp` getter
+    def total_linear_damp
+      get_total_linear_damp
+    end
+    # Property `total_gravity` getter
+    def total_gravity
+      get_total_gravity
+    end
+    # Property `center_of_mass` getter
+    def center_of_mass
+      get_center_of_mass
+    end
+    # Property `center_of_mass_local` getter
+    def center_of_mass_local
+      get_center_of_mass_local
+    end
+    # Property `angular_velocity` getter
+    def angular_velocity
+      get_angular_velocity
+    end
+    # Property `angular_velocity` setter
+    def angular_velocity=(val : Number)
+      set_angular_velocity(val.to_f64)
+    end
+    # Property `linear_velocity` getter
+    def linear_velocity
+      get_linear_velocity
+    end
+    # Property `linear_velocity` setter
+    def linear_velocity=(val)
+      set_linear_velocity(val)
+    end
+    # Property `sleeping` getter
+    def sleeping
+      is_sleeping
+    end
+    def sleeping?
+      sleeping
+    end
+    # Property `sleeping` setter
+    def sleeping=(val)
+      set_sleep_state(val)
+    end
+    # Property `collision_layer` getter
+    def collision_layer
+      get_collision_layer
+    end
+    # Property `collision_layer` setter
+    def collision_layer=(val : Int)
+      set_collision_layer(val.to_i64)
+    end
+    # Property `collision_mask` getter
+    def collision_mask
+      get_collision_mask
+    end
+    # Property `collision_mask` setter
+    def collision_mask=(val : Int)
+      set_collision_mask(val.to_i64)
+    end
+    # Property `transform` getter
+    def transform
+      get_transform
+    end
+    # Property `transform` setter
+    def transform=(val)
+      set_transform(val)
     end
   end
   class PhysicsDirectBodyState2DExtension < Godot::PhysicsDirectBodyState2D
@@ -11152,6 +14050,97 @@ module Godot
       Bridge.ptrcall(@@mb_get_space_state, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       PhysicsDirectSpaceState3D.new(ret_ptr)
     end
+    # Property `step` getter
+    def step
+      get_step
+    end
+    # Property `inverse_mass` getter
+    def inverse_mass
+      get_inverse_mass
+    end
+    # Property `total_angular_damp` getter
+    def total_angular_damp
+      get_total_angular_damp
+    end
+    # Property `total_linear_damp` getter
+    def total_linear_damp
+      get_total_linear_damp
+    end
+    # Property `inverse_inertia` getter
+    def inverse_inertia
+      get_inverse_inertia
+    end
+    # Property `inverse_inertia_tensor` getter
+    def inverse_inertia_tensor
+      get_inverse_inertia_tensor
+    end
+    # Property `total_gravity` getter
+    def total_gravity
+      get_total_gravity
+    end
+    # Property `center_of_mass` getter
+    def center_of_mass
+      get_center_of_mass
+    end
+    # Property `center_of_mass_local` getter
+    def center_of_mass_local
+      get_center_of_mass_local
+    end
+    # Property `principal_inertia_axes` getter
+    def principal_inertia_axes
+      get_principal_inertia_axes
+    end
+    # Property `angular_velocity` getter
+    def angular_velocity
+      get_angular_velocity
+    end
+    # Property `angular_velocity` setter
+    def angular_velocity=(val)
+      set_angular_velocity(val)
+    end
+    # Property `linear_velocity` getter
+    def linear_velocity
+      get_linear_velocity
+    end
+    # Property `linear_velocity` setter
+    def linear_velocity=(val)
+      set_linear_velocity(val)
+    end
+    # Property `sleeping` getter
+    def sleeping
+      is_sleeping
+    end
+    def sleeping?
+      sleeping
+    end
+    # Property `sleeping` setter
+    def sleeping=(val)
+      set_sleep_state(val)
+    end
+    # Property `collision_layer` getter
+    def collision_layer
+      get_collision_layer
+    end
+    # Property `collision_layer` setter
+    def collision_layer=(val : Int)
+      set_collision_layer(val.to_i64)
+    end
+    # Property `collision_mask` getter
+    def collision_mask
+      get_collision_mask
+    end
+    # Property `collision_mask` setter
+    def collision_mask=(val : Int)
+      set_collision_mask(val.to_i64)
+    end
+    # Property `transform` getter
+    def transform
+      get_transform
+    end
+    # Property `transform` setter
+    def transform=(val)
+      set_transform(val)
+    end
   end
   class PhysicsDirectBodyState3DExtension < Godot::PhysicsDirectBodyState3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -11438,6 +14427,44 @@ module Godot
       Bridge.ptrcall(@@mb_is_absorbent, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `friction` getter
+    def friction
+      get_friction
+    end
+    # Property `friction` setter
+    def friction=(val : Number)
+      set_friction(val.to_f64)
+    end
+    # Property `rough` getter
+    def rough
+      is_rough
+    end
+    def rough?
+      rough
+    end
+    # Property `rough` setter
+    def rough=(val)
+      set_rough(val)
+    end
+    # Property `bounce` getter
+    def bounce
+      get_bounce
+    end
+    # Property `bounce` setter
+    def bounce=(val : Number)
+      set_bounce(val.to_f64)
+    end
+    # Property `absorbent` getter
+    def absorbent
+      is_absorbent
+    end
+    def absorbent?
+      absorbent
+    end
+    # Property `absorbent` setter
+    def absorbent=(val)
+      set_absorbent(val)
+    end
   end
   class PhysicsPointQueryParameters2D < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -11557,6 +14584,60 @@ module Godot
       Bridge.ptrcall(@@mb_is_collide_with_areas_enabled, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `position` getter
+    def position
+      get_position
+    end
+    # Property `position` setter
+    def position=(val)
+      set_position(val)
+    end
+    # Property `canvas_instance_id` getter
+    def canvas_instance_id
+      get_canvas_instance_id
+    end
+    # Property `canvas_instance_id` setter
+    def canvas_instance_id=(val : Int)
+      set_canvas_instance_id(val.to_i64)
+    end
+    # Property `collision_mask` getter
+    def collision_mask
+      get_collision_mask
+    end
+    # Property `collision_mask` setter
+    def collision_mask=(val : Int)
+      set_collision_mask(val.to_i64)
+    end
+    # Property `exclude` getter
+    def exclude
+      get_exclude
+    end
+    # Property `exclude` setter
+    def exclude=(val)
+      set_exclude(val)
+    end
+    # Property `collide_with_bodies` getter
+    def collide_with_bodies
+      is_collide_with_bodies_enabled
+    end
+    def collide_with_bodies?
+      collide_with_bodies
+    end
+    # Property `collide_with_bodies` setter
+    def collide_with_bodies=(val)
+      set_collide_with_bodies(val)
+    end
+    # Property `collide_with_areas` getter
+    def collide_with_areas
+      is_collide_with_areas_enabled
+    end
+    def collide_with_areas?
+      collide_with_areas
+    end
+    # Property `collide_with_areas` setter
+    def collide_with_areas=(val)
+      set_collide_with_areas(val)
+    end
   end
   class PhysicsPointQueryParameters3D < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -11656,6 +14737,52 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_collide_with_areas_enabled, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `position` getter
+    def position
+      get_position
+    end
+    # Property `position` setter
+    def position=(val)
+      set_position(val)
+    end
+    # Property `collision_mask` getter
+    def collision_mask
+      get_collision_mask
+    end
+    # Property `collision_mask` setter
+    def collision_mask=(val : Int)
+      set_collision_mask(val.to_i64)
+    end
+    # Property `exclude` getter
+    def exclude
+      get_exclude
+    end
+    # Property `exclude` setter
+    def exclude=(val)
+      set_exclude(val)
+    end
+    # Property `collide_with_bodies` getter
+    def collide_with_bodies
+      is_collide_with_bodies_enabled
+    end
+    def collide_with_bodies?
+      collide_with_bodies
+    end
+    # Property `collide_with_bodies` setter
+    def collide_with_bodies=(val)
+      set_collide_with_bodies(val)
+    end
+    # Property `collide_with_areas` getter
+    def collide_with_areas
+      is_collide_with_areas_enabled
+    end
+    def collide_with_areas?
+      collide_with_areas
+    end
+    # Property `collide_with_areas` setter
+    def collide_with_areas=(val)
+      set_collide_with_areas(val)
     end
   end
   class PhysicsRayQueryParameters2D < Godot::RefCounted
@@ -11812,6 +14939,71 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_hit_from_inside_enabled, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `from` getter
+    def from
+      get_from
+    end
+    # Property `from` setter
+    def from=(val)
+      set_from(val)
+    end
+    # Property `to` getter
+    def to
+      get_to
+    end
+    # Property `to` setter
+    def to=(val)
+      set_to(val)
+    end
+    # Property `collision_mask` getter
+    def collision_mask
+      get_collision_mask
+    end
+    # Property `collision_mask` setter
+    def collision_mask=(val : Int)
+      set_collision_mask(val.to_i64)
+    end
+    # Property `exclude` getter
+    def exclude
+      get_exclude
+    end
+    # Property `exclude` setter
+    def exclude=(val)
+      set_exclude(val)
+    end
+    # Property `collide_with_bodies` getter
+    def collide_with_bodies
+      is_collide_with_bodies_enabled
+    end
+    def collide_with_bodies?
+      collide_with_bodies
+    end
+    # Property `collide_with_bodies` setter
+    def collide_with_bodies=(val)
+      set_collide_with_bodies(val)
+    end
+    # Property `collide_with_areas` getter
+    def collide_with_areas
+      is_collide_with_areas_enabled
+    end
+    def collide_with_areas?
+      collide_with_areas
+    end
+    # Property `collide_with_areas` setter
+    def collide_with_areas=(val)
+      set_collide_with_areas(val)
+    end
+    # Property `hit_from_inside` getter
+    def hit_from_inside
+      is_hit_from_inside_enabled
+    end
+    def hit_from_inside?
+      hit_from_inside
+    end
+    # Property `hit_from_inside` setter
+    def hit_from_inside=(val)
+      set_hit_from_inside(val)
     end
   end
   class PhysicsRayQueryParameters3D < Godot::RefCounted
@@ -11987,6 +15179,82 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_hit_back_faces_enabled, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `from` getter
+    def from
+      get_from
+    end
+    # Property `from` setter
+    def from=(val)
+      set_from(val)
+    end
+    # Property `to` getter
+    def to
+      get_to
+    end
+    # Property `to` setter
+    def to=(val)
+      set_to(val)
+    end
+    # Property `collision_mask` getter
+    def collision_mask
+      get_collision_mask
+    end
+    # Property `collision_mask` setter
+    def collision_mask=(val : Int)
+      set_collision_mask(val.to_i64)
+    end
+    # Property `exclude` getter
+    def exclude
+      get_exclude
+    end
+    # Property `exclude` setter
+    def exclude=(val)
+      set_exclude(val)
+    end
+    # Property `collide_with_bodies` getter
+    def collide_with_bodies
+      is_collide_with_bodies_enabled
+    end
+    def collide_with_bodies?
+      collide_with_bodies
+    end
+    # Property `collide_with_bodies` setter
+    def collide_with_bodies=(val)
+      set_collide_with_bodies(val)
+    end
+    # Property `collide_with_areas` getter
+    def collide_with_areas
+      is_collide_with_areas_enabled
+    end
+    def collide_with_areas?
+      collide_with_areas
+    end
+    # Property `collide_with_areas` setter
+    def collide_with_areas=(val)
+      set_collide_with_areas(val)
+    end
+    # Property `hit_from_inside` getter
+    def hit_from_inside
+      is_hit_from_inside_enabled
+    end
+    def hit_from_inside?
+      hit_from_inside
+    end
+    # Property `hit_from_inside` setter
+    def hit_from_inside=(val)
+      set_hit_from_inside(val)
+    end
+    # Property `hit_back_faces` getter
+    def hit_back_faces
+      is_hit_back_faces_enabled
+    end
+    def hit_back_faces?
+      hit_back_faces
+    end
+    # Property `hit_back_faces` setter
+    def hit_back_faces=(val)
+      set_hit_back_faces(val)
     end
   end
   class PhysicsServer2D < Godot::Object
@@ -16338,6 +19606,84 @@ module Godot
       Bridge.ptrcall(@@mb_is_collide_with_areas_enabled, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `collision_mask` getter
+    def collision_mask
+      get_collision_mask
+    end
+    # Property `collision_mask` setter
+    def collision_mask=(val : Int)
+      set_collision_mask(val.to_i64)
+    end
+    # Property `exclude` getter
+    def exclude
+      get_exclude
+    end
+    # Property `exclude` setter
+    def exclude=(val)
+      set_exclude(val)
+    end
+    # Property `margin` getter
+    def margin
+      get_margin
+    end
+    # Property `margin` setter
+    def margin=(val : Number)
+      set_margin(val.to_f64)
+    end
+    # Property `motion` getter
+    def motion
+      get_motion
+    end
+    # Property `motion` setter
+    def motion=(val)
+      set_motion(val)
+    end
+    # Property `shape` getter
+    def shape
+      get_shape
+    end
+    # Property `shape` setter
+    def shape=(val)
+      set_shape(val)
+    end
+    # Property `shape_rid` getter
+    def shape_rid
+      get_shape_rid
+    end
+    # Property `shape_rid` setter
+    def shape_rid=(val)
+      set_shape_rid(val)
+    end
+    # Property `transform` getter
+    def transform
+      get_transform
+    end
+    # Property `transform` setter
+    def transform=(val)
+      set_transform(val)
+    end
+    # Property `collide_with_bodies` getter
+    def collide_with_bodies
+      is_collide_with_bodies_enabled
+    end
+    def collide_with_bodies?
+      collide_with_bodies
+    end
+    # Property `collide_with_bodies` setter
+    def collide_with_bodies=(val)
+      set_collide_with_bodies(val)
+    end
+    # Property `collide_with_areas` getter
+    def collide_with_areas
+      is_collide_with_areas_enabled
+    end
+    def collide_with_areas?
+      collide_with_areas
+    end
+    # Property `collide_with_areas` setter
+    def collide_with_areas=(val)
+      set_collide_with_areas(val)
+    end
   end
   class PhysicsShapeQueryParameters3D < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -16514,6 +19860,84 @@ module Godot
       Bridge.ptrcall(@@mb_is_collide_with_areas_enabled, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `collision_mask` getter
+    def collision_mask
+      get_collision_mask
+    end
+    # Property `collision_mask` setter
+    def collision_mask=(val : Int)
+      set_collision_mask(val.to_i64)
+    end
+    # Property `exclude` getter
+    def exclude
+      get_exclude
+    end
+    # Property `exclude` setter
+    def exclude=(val)
+      set_exclude(val)
+    end
+    # Property `margin` getter
+    def margin
+      get_margin
+    end
+    # Property `margin` setter
+    def margin=(val : Number)
+      set_margin(val.to_f64)
+    end
+    # Property `motion` getter
+    def motion
+      get_motion
+    end
+    # Property `motion` setter
+    def motion=(val)
+      set_motion(val)
+    end
+    # Property `shape` getter
+    def shape
+      get_shape
+    end
+    # Property `shape` setter
+    def shape=(val)
+      set_shape(val)
+    end
+    # Property `shape_rid` getter
+    def shape_rid
+      get_shape_rid
+    end
+    # Property `shape_rid` setter
+    def shape_rid=(val)
+      set_shape_rid(val)
+    end
+    # Property `transform` getter
+    def transform
+      get_transform
+    end
+    # Property `transform` setter
+    def transform=(val)
+      set_transform(val)
+    end
+    # Property `collide_with_bodies` getter
+    def collide_with_bodies
+      is_collide_with_bodies_enabled
+    end
+    def collide_with_bodies?
+      collide_with_bodies
+    end
+    # Property `collide_with_bodies` setter
+    def collide_with_bodies=(val)
+      set_collide_with_bodies(val)
+    end
+    # Property `collide_with_areas` getter
+    def collide_with_areas
+      is_collide_with_areas_enabled
+    end
+    def collide_with_areas?
+      collide_with_areas
+    end
+    # Property `collide_with_areas` setter
+    def collide_with_areas=(val)
+      set_collide_with_areas(val)
+    end
   end
   class PhysicsTestMotionParameters2D < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -16651,6 +20075,68 @@ module Godot
       arg_0 = pointerof(val_0).as(Void*)
       args = [arg_0]
       Bridge.ptrcall(@@mb_set_recovery_as_collision_enabled, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    # Property `from` getter
+    def from
+      get_from
+    end
+    # Property `from` setter
+    def from=(val)
+      set_from(val)
+    end
+    # Property `motion` getter
+    def motion
+      get_motion
+    end
+    # Property `motion` setter
+    def motion=(val)
+      set_motion(val)
+    end
+    # Property `margin` getter
+    def margin
+      get_margin
+    end
+    # Property `margin` setter
+    def margin=(val : Number)
+      set_margin(val.to_f64)
+    end
+    # Property `collide_separation_ray` getter
+    def collide_separation_ray
+      is_collide_separation_ray_enabled
+    end
+    def collide_separation_ray?
+      collide_separation_ray
+    end
+    # Property `collide_separation_ray` setter
+    def collide_separation_ray=(val)
+      set_collide_separation_ray_enabled(val)
+    end
+    # Property `exclude_bodies` getter
+    def exclude_bodies
+      get_exclude_bodies
+    end
+    # Property `exclude_bodies` setter
+    def exclude_bodies=(val)
+      set_exclude_bodies(val)
+    end
+    # Property `exclude_objects` getter
+    def exclude_objects
+      get_exclude_objects
+    end
+    # Property `exclude_objects` setter
+    def exclude_objects=(val)
+      set_exclude_objects(val)
+    end
+    # Property `recovery_as_collision` getter
+    def recovery_as_collision
+      is_recovery_as_collision_enabled
+    end
+    def recovery_as_collision?
+      recovery_as_collision
+    end
+    # Property `recovery_as_collision` setter
+    def recovery_as_collision=(val)
+      set_recovery_as_collision_enabled(val)
     end
   end
   class PhysicsTestMotionParameters3D < Godot::RefCounted
@@ -16808,6 +20294,76 @@ module Godot
       arg_0 = pointerof(val_0).as(Void*)
       args = [arg_0]
       Bridge.ptrcall(@@mb_set_recovery_as_collision_enabled, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    # Property `from` getter
+    def from
+      get_from
+    end
+    # Property `from` setter
+    def from=(val)
+      set_from(val)
+    end
+    # Property `motion` getter
+    def motion
+      get_motion
+    end
+    # Property `motion` setter
+    def motion=(val)
+      set_motion(val)
+    end
+    # Property `margin` getter
+    def margin
+      get_margin
+    end
+    # Property `margin` setter
+    def margin=(val : Number)
+      set_margin(val.to_f64)
+    end
+    # Property `max_collisions` getter
+    def max_collisions
+      get_max_collisions
+    end
+    # Property `max_collisions` setter
+    def max_collisions=(val : Int)
+      set_max_collisions(val.to_i64)
+    end
+    # Property `collide_separation_ray` getter
+    def collide_separation_ray
+      is_collide_separation_ray_enabled
+    end
+    def collide_separation_ray?
+      collide_separation_ray
+    end
+    # Property `collide_separation_ray` setter
+    def collide_separation_ray=(val)
+      set_collide_separation_ray_enabled(val)
+    end
+    # Property `exclude_bodies` getter
+    def exclude_bodies
+      get_exclude_bodies
+    end
+    # Property `exclude_bodies` setter
+    def exclude_bodies=(val)
+      set_exclude_bodies(val)
+    end
+    # Property `exclude_objects` getter
+    def exclude_objects
+      get_exclude_objects
+    end
+    # Property `exclude_objects` setter
+    def exclude_objects=(val)
+      set_exclude_objects(val)
+    end
+    # Property `recovery_as_collision` getter
+    def recovery_as_collision
+      is_recovery_as_collision_enabled
+    end
+    def recovery_as_collision?
+      recovery_as_collision
+    end
+    # Property `recovery_as_collision` setter
+    def recovery_as_collision=(val)
+      set_recovery_as_collision_enabled(val)
     end
   end
   class PhysicsTestMotionResult2D < Godot::RefCounted
@@ -17208,6 +20764,60 @@ module Godot
       Bridge.ptrcall(@@mb_is_angular_limit_enabled, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `softness` getter
+    def softness
+      get_softness
+    end
+    # Property `softness` setter
+    def softness=(val : Number)
+      set_softness(val.to_f64)
+    end
+    # Property `angular_limit_enabled` getter
+    def angular_limit_enabled
+      is_angular_limit_enabled
+    end
+    def angular_limit_enabled?
+      angular_limit_enabled
+    end
+    # Property `angular_limit_enabled` setter
+    def angular_limit_enabled=(val)
+      set_angular_limit_enabled(val)
+    end
+    # Property `angular_limit_lower` getter
+    def angular_limit_lower
+      get_angular_limit_lower
+    end
+    # Property `angular_limit_lower` setter
+    def angular_limit_lower=(val : Number)
+      set_angular_limit_lower(val.to_f64)
+    end
+    # Property `angular_limit_upper` getter
+    def angular_limit_upper
+      get_angular_limit_upper
+    end
+    # Property `angular_limit_upper` setter
+    def angular_limit_upper=(val : Number)
+      set_angular_limit_upper(val.to_f64)
+    end
+    # Property `motor_enabled` getter
+    def motor_enabled
+      is_motor_enabled
+    end
+    def motor_enabled?
+      motor_enabled
+    end
+    # Property `motor_enabled` setter
+    def motor_enabled=(val)
+      set_motor_enabled(val)
+    end
+    # Property `motor_target_velocity` getter
+    def motor_target_velocity
+      get_motor_target_velocity
+    end
+    # Property `motor_target_velocity` setter
+    def motor_target_velocity=(val : Number)
+      set_motor_target_velocity(val.to_f64)
+    end
   end
   class PinJoint3D < Godot::Joint3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -17276,6 +20886,22 @@ module Godot
       args = [arg_0]
       Bridge.ptrcall(@@mb_set_layers, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
     end
+    # Property `size` getter
+    def size
+      get_size
+    end
+    # Property `size` setter
+    def size=(val)
+      set_size(val)
+    end
+    # Property `layers` getter
+    def layers
+      get_layers
+    end
+    # Property `layers` setter
+    def layers=(val : Int)
+      set_layers(val.to_i64)
+    end
   end
   class PlaceholderCubemap < Godot::PlaceholderTextureLayered
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -17306,6 +20932,14 @@ module Godot
       args = [arg_0]
       Bridge.ptrcall(@@mb_set_aabb, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
     end
+    # Property `aabb` getter
+    def aabb
+      get_aabb
+    end
+    # Property `aabb` setter
+    def aabb=(val)
+      set_aabb(val)
+    end
   end
   class PlaceholderTexture2D < Godot::Texture2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -17320,6 +20954,14 @@ module Godot
       arg_0 = pointerof(val_0).as(Void*)
       args = [arg_0]
       Bridge.ptrcall(@@mb_set_size, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    # Property `size` getter
+    def size
+      get_size
+    end
+    # Property `size` setter
+    def size=(val)
+      set_size(val)
     end
   end
   class PlaceholderTexture2DArray < Godot::PlaceholderTextureLayered
@@ -17349,6 +20991,14 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_size, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Vector3i.new(ret_ptr)
+    end
+    # Property `size` getter
+    def size
+      get_size
+    end
+    # Property `size` setter
+    def size=(val)
+      set_size(val)
     end
   end
   class PlaneMesh < Godot::PrimitiveMesh
@@ -17455,6 +21105,46 @@ module Godot
       Bridge.ptrcall(@@mb_get_orientation, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `size` getter
+    def size
+      get_size
+    end
+    # Property `size` setter
+    def size=(val)
+      set_size(val)
+    end
+    # Property `subdivide_width` getter
+    def subdivide_width
+      get_subdivide_width
+    end
+    # Property `subdivide_width` setter
+    def subdivide_width=(val : Int)
+      set_subdivide_width(val.to_i64)
+    end
+    # Property `subdivide_depth` getter
+    def subdivide_depth
+      get_subdivide_depth
+    end
+    # Property `subdivide_depth` setter
+    def subdivide_depth=(val : Int)
+      set_subdivide_depth(val.to_i64)
+    end
+    # Property `center_offset` getter
+    def center_offset
+      get_center_offset
+    end
+    # Property `center_offset` setter
+    def center_offset=(val)
+      set_center_offset(val)
+    end
+    # Property `orientation` getter
+    def orientation
+      get_orientation
+    end
+    # Property `orientation` setter
+    def orientation=(val : Int)
+      set_orientation(val.to_i64)
+    end
   end
   class PointLight2D < Godot::Light2D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -17516,6 +21206,38 @@ module Godot
       ret = 0.0_f64
       Bridge.ptrcall(@@mb_get_texture_scale, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `texture` getter
+    def texture
+      get_texture
+    end
+    # Property `texture` setter
+    def texture=(val)
+      set_texture(val)
+    end
+    # Property `offset` getter
+    def offset
+      get_texture_offset
+    end
+    # Property `offset` setter
+    def offset=(val)
+      set_texture_offset(val)
+    end
+    # Property `texture_scale` getter
+    def texture_scale
+      get_texture_scale
+    end
+    # Property `texture_scale` setter
+    def texture_scale=(val : Number)
+      set_texture_scale(val.to_f64)
+    end
+    # Property `height` getter
+    def height
+      get_height
+    end
+    # Property `height` setter
+    def height=(val : Number)
+      set_height(val.to_f64)
     end
   end
   class PointMesh < Godot::PrimitiveMesh
@@ -17898,6 +21620,136 @@ module Godot
       Bridge.ptrcall(@@mb_get_internal_vertex_count, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `color` getter
+    def color
+      get_color
+    end
+    # Property `color` setter
+    def color=(val)
+      set_color(val)
+    end
+    # Property `offset` getter
+    def offset
+      get_offset
+    end
+    # Property `offset` setter
+    def offset=(val)
+      set_offset(val)
+    end
+    # Property `antialiased` getter
+    def antialiased
+      get_antialiased
+    end
+    def antialiased?
+      antialiased
+    end
+    # Property `antialiased` setter
+    def antialiased=(val)
+      set_antialiased(val)
+    end
+    # Property `texture` getter
+    def texture
+      get_texture
+    end
+    # Property `texture` setter
+    def texture=(val)
+      set_texture(val)
+    end
+    # Property `texture_offset` getter
+    def texture_offset
+      get_texture_offset
+    end
+    # Property `texture_offset` setter
+    def texture_offset=(val)
+      set_texture_offset(val)
+    end
+    # Property `texture_scale` getter
+    def texture_scale
+      get_texture_scale
+    end
+    # Property `texture_scale` setter
+    def texture_scale=(val)
+      set_texture_scale(val)
+    end
+    # Property `texture_rotation` getter
+    def texture_rotation
+      get_texture_rotation
+    end
+    # Property `texture_rotation` setter
+    def texture_rotation=(val : Number)
+      set_texture_rotation(val.to_f64)
+    end
+    # Property `skeleton` getter
+    def skeleton
+      get_skeleton
+    end
+    # Property `skeleton` setter
+    def skeleton=(val)
+      set_skeleton(val)
+    end
+    # Property `invert_enabled` getter
+    def invert_enabled
+      get_invert_enabled
+    end
+    def invert_enabled?
+      invert_enabled
+    end
+    # Property `invert_enabled` setter
+    def invert_enabled=(val)
+      set_invert_enabled(val)
+    end
+    # Property `invert_border` getter
+    def invert_border
+      get_invert_border
+    end
+    # Property `invert_border` setter
+    def invert_border=(val : Number)
+      set_invert_border(val.to_f64)
+    end
+    # Property `polygon` getter
+    def polygon
+      get_polygon
+    end
+    # Property `polygon` setter
+    def polygon=(val)
+      set_polygon(val)
+    end
+    # Property `uv` getter
+    def uv
+      get_uv
+    end
+    # Property `uv` setter
+    def uv=(val)
+      set_uv(val)
+    end
+    # Property `vertex_colors` getter
+    def vertex_colors
+      get_vertex_colors
+    end
+    # Property `vertex_colors` setter
+    def vertex_colors=(val)
+      set_vertex_colors(val)
+    end
+    # Property `polygons` getter
+    def polygons
+      get_polygons
+    end
+    # Property `polygons` setter
+    def polygons=(val)
+      set_polygons(val)
+    end
+    # Property `bones` setter
+    def bones=(val)
+      set_bones(val)
+    end
+    # Property `internal_vertex_count` getter
+    def internal_vertex_count
+      get_internal_vertex_count
+    end
+    # Property `internal_vertex_count` setter
+    def internal_vertex_count=(val : Int)
+      set_internal_vertex_count(val.to_i64)
+    end
   end
   class PolygonOccluder3D < Godot::Occluder3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -17921,6 +21773,14 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_polygon, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       ret_ptr
+    end
+    # Property `polygon` getter
+    def polygon
+      get_polygon
+    end
+    # Property `polygon` setter
+    def polygon=(val)
+      set_polygon(val)
     end
   end
   class PolygonPathFinder < Godot::Resource
@@ -18023,6 +21883,14 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_bounds, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Rect2.new(ret_ptr)
+    end
+    # Property `data` getter
+    def data
+      _get_data
+    end
+    # Property `data` setter
+    def data=(val)
+      set_data(val)
     end
   end
   class Popup < Godot::Window
@@ -19268,6 +23136,145 @@ module Godot
       Bridge.ptrcall(@@mb_get_shrink_width, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `hide_on_item_selection` getter
+    def hide_on_item_selection
+      is_hide_on_item_selection
+    end
+    def hide_on_item_selection?
+      hide_on_item_selection
+    end
+    # Property `hide_on_item_selection` setter
+    def hide_on_item_selection=(val)
+      set_hide_on_item_selection(val)
+    end
+    # Property `hide_on_checkable_item_selection` getter
+    def hide_on_checkable_item_selection
+      is_hide_on_checkable_item_selection
+    end
+    def hide_on_checkable_item_selection?
+      hide_on_checkable_item_selection
+    end
+    # Property `hide_on_checkable_item_selection` setter
+    def hide_on_checkable_item_selection=(val)
+      set_hide_on_checkable_item_selection(val)
+    end
+    # Property `hide_on_state_item_selection` getter
+    def hide_on_state_item_selection
+      is_hide_on_state_item_selection
+    end
+    def hide_on_state_item_selection?
+      hide_on_state_item_selection
+    end
+    # Property `hide_on_state_item_selection` setter
+    def hide_on_state_item_selection=(val)
+      set_hide_on_state_item_selection(val)
+    end
+    # Property `submenu_popup_delay` getter
+    def submenu_popup_delay
+      get_submenu_popup_delay
+    end
+    # Property `submenu_popup_delay` setter
+    def submenu_popup_delay=(val : Number)
+      set_submenu_popup_delay(val.to_f64)
+    end
+    # Property `allow_search` getter
+    def allow_search
+      get_allow_search
+    end
+    def allow_search?
+      allow_search
+    end
+    # Property `allow_search` setter
+    def allow_search=(val)
+      set_allow_search(val)
+    end
+    # Property `system_menu_id` getter
+    def system_menu_id
+      get_system_menu
+    end
+    # Property `system_menu_id` setter
+    def system_menu_id=(val : Int)
+      set_system_menu(val.to_i64)
+    end
+    # Property `prefer_native_menu` getter
+    def prefer_native_menu
+      is_prefer_native_menu
+    end
+    def prefer_native_menu?
+      prefer_native_menu
+    end
+    # Property `prefer_native_menu` setter
+    def prefer_native_menu=(val)
+      set_prefer_native_menu(val)
+    end
+    # Property `shrink_height` getter
+    def shrink_height
+      get_shrink_height
+    end
+    def shrink_height?
+      shrink_height
+    end
+    # Property `shrink_height` setter
+    def shrink_height=(val)
+      set_shrink_height(val)
+    end
+    # Property `shrink_width` getter
+    def shrink_width
+      get_shrink_width
+    end
+    def shrink_width?
+      shrink_width
+    end
+    # Property `shrink_width` setter
+    def shrink_width=(val)
+      set_shrink_width(val)
+    end
+    # Property `search_bar_enabled` getter
+    def search_bar_enabled
+      is_search_bar_enabled
+    end
+    def search_bar_enabled?
+      search_bar_enabled
+    end
+    # Property `search_bar_enabled` setter
+    def search_bar_enabled=(val)
+      set_search_bar_enabled(val)
+    end
+    # Property `search_bar_min_item_count` getter
+    def search_bar_min_item_count
+      get_search_bar_min_item_count
+    end
+    # Property `search_bar_min_item_count` setter
+    def search_bar_min_item_count=(val : Int)
+      set_search_bar_min_item_count(val.to_i64)
+    end
+    # Property `search_bar_fuzzy_search_enabled` getter
+    def search_bar_fuzzy_search_enabled
+      is_search_bar_fuzzy_search_enabled
+    end
+    def search_bar_fuzzy_search_enabled?
+      search_bar_fuzzy_search_enabled
+    end
+    # Property `search_bar_fuzzy_search_enabled` setter
+    def search_bar_fuzzy_search_enabled=(val)
+      set_search_bar_fuzzy_search_enabled(val)
+    end
+    # Property `search_bar_fuzzy_search_max_misses` getter
+    def search_bar_fuzzy_search_max_misses
+      get_search_bar_fuzzy_search_max_misses
+    end
+    # Property `search_bar_fuzzy_search_max_misses` setter
+    def search_bar_fuzzy_search_max_misses=(val : Int)
+      set_search_bar_fuzzy_search_max_misses(val.to_i64)
+    end
+    # Property `item_count` getter
+    def item_count
+      get_item_count
+    end
+    # Property `item_count` setter
+    def item_count=(val : Int)
+      set_item_count(val.to_i64)
+    end
   end
   class PopupPanel < Godot::Popup
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -19381,6 +23388,25 @@ module Godot
       Bridge.ptrcall(@@mb_is_keeping_all_compressed_buffers, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `size_override` getter
+    def size_override
+      get_size_override
+    end
+    # Property `size_override` setter
+    def size_override=(val)
+      set_size_override(val)
+    end
+    # Property `keep_compressed_buffer` getter
+    def keep_compressed_buffer
+      is_keeping_compressed_buffer
+    end
+    def keep_compressed_buffer?
+      keep_compressed_buffer
+    end
+    # Property `keep_compressed_buffer` setter
+    def keep_compressed_buffer=(val)
+      set_keep_compressed_buffer(val)
+    end
   end
   class PrismMesh < Godot::PrimitiveMesh
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -19480,6 +23506,46 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_subdivide_depth, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `left_to_right` getter
+    def left_to_right
+      get_left_to_right
+    end
+    # Property `left_to_right` setter
+    def left_to_right=(val : Number)
+      set_left_to_right(val.to_f64)
+    end
+    # Property `size` getter
+    def size
+      get_size
+    end
+    # Property `size` setter
+    def size=(val)
+      set_size(val)
+    end
+    # Property `subdivide_width` getter
+    def subdivide_width
+      get_subdivide_width
+    end
+    # Property `subdivide_width` setter
+    def subdivide_width=(val : Int)
+      set_subdivide_width(val.to_i64)
+    end
+    # Property `subdivide_height` getter
+    def subdivide_height
+      get_subdivide_height
+    end
+    # Property `subdivide_height` setter
+    def subdivide_height=(val : Int)
+      set_subdivide_height(val.to_i64)
+    end
+    # Property `subdivide_depth` getter
+    def subdivide_depth
+      get_subdivide_depth
+    end
+    # Property `subdivide_depth` setter
+    def subdivide_depth=(val : Int)
+      set_subdivide_depth(val.to_i64)
     end
   end
   class ProceduralSkyMaterial < Godot::Material
@@ -19752,6 +23818,121 @@ module Godot
       Bridge.ptrcall(@@mb_get_energy_multiplier, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `sky_top_color` getter
+    def sky_top_color
+      get_sky_top_color
+    end
+    # Property `sky_top_color` setter
+    def sky_top_color=(val)
+      set_sky_top_color(val)
+    end
+    # Property `sky_horizon_color` getter
+    def sky_horizon_color
+      get_sky_horizon_color
+    end
+    # Property `sky_horizon_color` setter
+    def sky_horizon_color=(val)
+      set_sky_horizon_color(val)
+    end
+    # Property `sky_curve` getter
+    def sky_curve
+      get_sky_curve
+    end
+    # Property `sky_curve` setter
+    def sky_curve=(val : Number)
+      set_sky_curve(val.to_f64)
+    end
+    # Property `sky_energy_multiplier` getter
+    def sky_energy_multiplier
+      get_sky_energy_multiplier
+    end
+    # Property `sky_energy_multiplier` setter
+    def sky_energy_multiplier=(val : Number)
+      set_sky_energy_multiplier(val.to_f64)
+    end
+    # Property `sky_cover` getter
+    def sky_cover
+      get_sky_cover
+    end
+    # Property `sky_cover` setter
+    def sky_cover=(val)
+      set_sky_cover(val)
+    end
+    # Property `sky_cover_modulate` getter
+    def sky_cover_modulate
+      get_sky_cover_modulate
+    end
+    # Property `sky_cover_modulate` setter
+    def sky_cover_modulate=(val)
+      set_sky_cover_modulate(val)
+    end
+    # Property `ground_bottom_color` getter
+    def ground_bottom_color
+      get_ground_bottom_color
+    end
+    # Property `ground_bottom_color` setter
+    def ground_bottom_color=(val)
+      set_ground_bottom_color(val)
+    end
+    # Property `ground_horizon_color` getter
+    def ground_horizon_color
+      get_ground_horizon_color
+    end
+    # Property `ground_horizon_color` setter
+    def ground_horizon_color=(val)
+      set_ground_horizon_color(val)
+    end
+    # Property `ground_curve` getter
+    def ground_curve
+      get_ground_curve
+    end
+    # Property `ground_curve` setter
+    def ground_curve=(val : Number)
+      set_ground_curve(val.to_f64)
+    end
+    # Property `ground_energy_multiplier` getter
+    def ground_energy_multiplier
+      get_ground_energy_multiplier
+    end
+    # Property `ground_energy_multiplier` setter
+    def ground_energy_multiplier=(val : Number)
+      set_ground_energy_multiplier(val.to_f64)
+    end
+    # Property `sun_angle_max` getter
+    def sun_angle_max
+      get_sun_angle_max
+    end
+    # Property `sun_angle_max` setter
+    def sun_angle_max=(val : Number)
+      set_sun_angle_max(val.to_f64)
+    end
+    # Property `sun_curve` getter
+    def sun_curve
+      get_sun_curve
+    end
+    # Property `sun_curve` setter
+    def sun_curve=(val : Number)
+      set_sun_curve(val.to_f64)
+    end
+    # Property `use_debanding` getter
+    def use_debanding
+      get_use_debanding
+    end
+    def use_debanding?
+      use_debanding
+    end
+    # Property `use_debanding` setter
+    def use_debanding=(val)
+      set_use_debanding(val)
+    end
+    # Property `energy_multiplier` getter
+    def energy_multiplier
+      get_energy_multiplier
+    end
+    # Property `energy_multiplier` setter
+    def energy_multiplier=(val : Number)
+      set_energy_multiplier(val.to_f64)
+    end
   end
   class ProgressBar < Godot::Range
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -19838,6 +24019,47 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_editor_preview_indeterminate_enabled, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `fill_mode` getter
+    def fill_mode
+      get_fill_mode
+    end
+    # Property `fill_mode` setter
+    def fill_mode=(val : Int)
+      set_fill_mode(val.to_i64)
+    end
+    # Property `show_percentage` getter
+    def show_percentage
+      is_percentage_shown
+    end
+    def show_percentage?
+      show_percentage
+    end
+    # Property `show_percentage` setter
+    def show_percentage=(val)
+      set_show_percentage(val)
+    end
+    # Property `indeterminate` getter
+    def indeterminate
+      is_indeterminate
+    end
+    def indeterminate?
+      indeterminate
+    end
+    # Property `indeterminate` setter
+    def indeterminate=(val)
+      set_indeterminate(val)
+    end
+    # Property `editor_preview_indeterminate` getter
+    def editor_preview_indeterminate
+      is_editor_preview_indeterminate_enabled
+    end
+    def editor_preview_indeterminate?
+      editor_preview_indeterminate
+    end
+    # Property `editor_preview_indeterminate` setter
+    def editor_preview_indeterminate=(val)
+      set_editor_preview_indeterminate(val)
     end
   end
   class ProjectSettings < Godot::Object
@@ -20239,6 +24461,14 @@ module Godot
       Bridge.ptrcall(@@mb_get_size, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `size` getter
+    def size
+      get_size
+    end
+    # Property `size` setter
+    def size=(val)
+      set_size(val)
+    end
   end
   class RDAccelerationStructureGeometry < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -20415,6 +24645,78 @@ module Godot
       Bridge.ptrcall(@@mb_get_index_count, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `flags` getter
+    def flags
+      get_flags
+    end
+    # Property `flags` setter
+    def flags=(val : Int)
+      set_flags(val.to_i64)
+    end
+    # Property `vertex_buffer` getter
+    def vertex_buffer
+      get_vertex_buffer
+    end
+    # Property `vertex_buffer` setter
+    def vertex_buffer=(val)
+      set_vertex_buffer(val)
+    end
+    # Property `vertex_offset` getter
+    def vertex_offset
+      get_vertex_offset
+    end
+    # Property `vertex_offset` setter
+    def vertex_offset=(val : Int)
+      set_vertex_offset(val.to_i64)
+    end
+    # Property `vertex_stride` getter
+    def vertex_stride
+      get_vertex_stride
+    end
+    # Property `vertex_stride` setter
+    def vertex_stride=(val : Int)
+      set_vertex_stride(val.to_i64)
+    end
+    # Property `vertex_count` getter
+    def vertex_count
+      get_vertex_count
+    end
+    # Property `vertex_count` setter
+    def vertex_count=(val : Int)
+      set_vertex_count(val.to_i64)
+    end
+    # Property `vertex_format` getter
+    def vertex_format
+      get_vertex_format
+    end
+    # Property `vertex_format` setter
+    def vertex_format=(val : Int)
+      set_vertex_format(val.to_i64)
+    end
+    # Property `index_buffer` getter
+    def index_buffer
+      get_index_buffer
+    end
+    # Property `index_buffer` setter
+    def index_buffer=(val)
+      set_index_buffer(val)
+    end
+    # Property `index_offset` getter
+    def index_offset
+      get_index_offset
+    end
+    # Property `index_offset` setter
+    def index_offset=(val : Int)
+      set_index_offset(val.to_i64)
+    end
+    # Property `index_count` getter
+    def index_count
+      get_index_count
+    end
+    # Property `index_count` setter
+    def index_count=(val : Int)
+      set_index_count(val.to_i64)
+    end
   end
   class RDAccelerationStructureInstance < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -20534,6 +24836,54 @@ module Godot
       Bridge.ptrcall(@@mb_get_blas, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `transform` getter
+    def transform
+      get_transform
+    end
+    # Property `transform` setter
+    def transform=(val)
+      set_transform(val)
+    end
+    # Property `id` getter
+    def id
+      get_id
+    end
+    # Property `id` setter
+    def id=(val : Int)
+      set_id(val.to_i64)
+    end
+    # Property `mask` getter
+    def mask
+      get_mask
+    end
+    # Property `mask` setter
+    def mask=(val : Int)
+      set_mask(val.to_i64)
+    end
+    # Property `hit_sbt_range` getter
+    def hit_sbt_range
+      get_hit_sbt_range
+    end
+    # Property `hit_sbt_range` setter
+    def hit_sbt_range=(val : Int)
+      set_hit_sbt_range(val.to_i64)
+    end
+    # Property `flags` getter
+    def flags
+      get_flags
+    end
+    # Property `flags` setter
+    def flags=(val : Int)
+      set_flags(val.to_i64)
+    end
+    # Property `blas` getter
+    def blas
+      get_blas
+    end
+    # Property `blas` setter
+    def blas=(val)
+      set_blas(val)
+    end
   end
   class RDAttachmentFormat < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -20595,6 +24945,30 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_usage_flags, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `format` getter
+    def format
+      get_format
+    end
+    # Property `format` setter
+    def format=(val : Int)
+      set_format(val.to_i64)
+    end
+    # Property `samples` getter
+    def samples
+      get_samples
+    end
+    # Property `samples` setter
+    def samples=(val : Int)
+      set_samples(val.to_i64)
+    end
+    # Property `usage_flags` getter
+    def usage_flags
+      get_usage_flags
+    end
+    # Property `usage_flags` setter
+    def usage_flags=(val : Int)
+      set_usage_flags(val.to_i64)
     end
   end
   class RDFramebufferPass < Godot::RefCounted
@@ -20696,6 +25070,46 @@ module Godot
       Bridge.ptrcall(@@mb_get_depth_attachment, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `color_attachments` getter
+    def color_attachments
+      get_color_attachments
+    end
+    # Property `color_attachments` setter
+    def color_attachments=(val)
+      set_color_attachments(val)
+    end
+    # Property `input_attachments` getter
+    def input_attachments
+      get_input_attachments
+    end
+    # Property `input_attachments` setter
+    def input_attachments=(val)
+      set_input_attachments(val)
+    end
+    # Property `resolve_attachments` getter
+    def resolve_attachments
+      get_resolve_attachments
+    end
+    # Property `resolve_attachments` setter
+    def resolve_attachments=(val)
+      set_resolve_attachments(val)
+    end
+    # Property `preserve_attachments` getter
+    def preserve_attachments
+      get_preserve_attachments
+    end
+    # Property `preserve_attachments` setter
+    def preserve_attachments=(val)
+      set_preserve_attachments(val)
+    end
+    # Property `depth_attachment` getter
+    def depth_attachment
+      get_depth_attachment
+    end
+    # Property `depth_attachment` setter
+    def depth_attachment=(val : Int)
+      set_depth_attachment(val.to_i64)
+    end
   end
   class RDHitGroup < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -20757,6 +25171,30 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_intersection_shader, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       RDPipelineShader.new(ret_ptr)
+    end
+    # Property `closest_hit_shader` getter
+    def closest_hit_shader
+      get_closest_hit_shader
+    end
+    # Property `closest_hit_shader` setter
+    def closest_hit_shader=(val)
+      set_closest_hit_shader(val)
+    end
+    # Property `any_hit_shader` getter
+    def any_hit_shader
+      get_any_hit_shader
+    end
+    # Property `any_hit_shader` setter
+    def any_hit_shader=(val)
+      set_any_hit_shader(val)
+    end
+    # Property `intersection_shader` getter
+    def intersection_shader
+      get_intersection_shader
+    end
+    # Property `intersection_shader` setter
+    def intersection_shader=(val)
+      set_intersection_shader(val)
     end
   end
   class RDPipelineColorBlendState < Godot::RefCounted
@@ -20838,6 +25276,41 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_attachments, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Godot::Array.new(ret_ptr)
+    end
+    # Property `enable_logic_op` getter
+    def enable_logic_op
+      get_enable_logic_op
+    end
+    def enable_logic_op?
+      enable_logic_op
+    end
+    # Property `enable_logic_op` setter
+    def enable_logic_op=(val)
+      set_enable_logic_op(val)
+    end
+    # Property `logic_op` getter
+    def logic_op
+      get_logic_op
+    end
+    # Property `logic_op` setter
+    def logic_op=(val : Int)
+      set_logic_op(val.to_i64)
+    end
+    # Property `blend_constant` getter
+    def blend_constant
+      get_blend_constant
+    end
+    # Property `blend_constant` setter
+    def blend_constant=(val)
+      set_blend_constant(val)
+    end
+    # Property `attachments` getter
+    def attachments
+      get_attachments
+    end
+    # Property `attachments` setter
+    def attachments=(val)
+      set_attachments(val)
     end
   end
   class RDPipelineColorBlendStateAttachment < Godot::RefCounted
@@ -21059,6 +25532,109 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_get_write_a, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `enable_blend` getter
+    def enable_blend
+      get_enable_blend
+    end
+    def enable_blend?
+      enable_blend
+    end
+    # Property `enable_blend` setter
+    def enable_blend=(val)
+      set_enable_blend(val)
+    end
+    # Property `src_color_blend_factor` getter
+    def src_color_blend_factor
+      get_src_color_blend_factor
+    end
+    # Property `src_color_blend_factor` setter
+    def src_color_blend_factor=(val : Int)
+      set_src_color_blend_factor(val.to_i64)
+    end
+    # Property `dst_color_blend_factor` getter
+    def dst_color_blend_factor
+      get_dst_color_blend_factor
+    end
+    # Property `dst_color_blend_factor` setter
+    def dst_color_blend_factor=(val : Int)
+      set_dst_color_blend_factor(val.to_i64)
+    end
+    # Property `color_blend_op` getter
+    def color_blend_op
+      get_color_blend_op
+    end
+    # Property `color_blend_op` setter
+    def color_blend_op=(val : Int)
+      set_color_blend_op(val.to_i64)
+    end
+    # Property `src_alpha_blend_factor` getter
+    def src_alpha_blend_factor
+      get_src_alpha_blend_factor
+    end
+    # Property `src_alpha_blend_factor` setter
+    def src_alpha_blend_factor=(val : Int)
+      set_src_alpha_blend_factor(val.to_i64)
+    end
+    # Property `dst_alpha_blend_factor` getter
+    def dst_alpha_blend_factor
+      get_dst_alpha_blend_factor
+    end
+    # Property `dst_alpha_blend_factor` setter
+    def dst_alpha_blend_factor=(val : Int)
+      set_dst_alpha_blend_factor(val.to_i64)
+    end
+    # Property `alpha_blend_op` getter
+    def alpha_blend_op
+      get_alpha_blend_op
+    end
+    # Property `alpha_blend_op` setter
+    def alpha_blend_op=(val : Int)
+      set_alpha_blend_op(val.to_i64)
+    end
+    # Property `write_r` getter
+    def write_r
+      get_write_r
+    end
+    def write_r?
+      write_r
+    end
+    # Property `write_r` setter
+    def write_r=(val)
+      set_write_r(val)
+    end
+    # Property `write_g` getter
+    def write_g
+      get_write_g
+    end
+    def write_g?
+      write_g
+    end
+    # Property `write_g` setter
+    def write_g=(val)
+      set_write_g(val)
+    end
+    # Property `write_b` getter
+    def write_b
+      get_write_b
+    end
+    def write_b?
+      write_b
+    end
+    # Property `write_b` setter
+    def write_b=(val)
+      set_write_b(val)
+    end
+    # Property `write_a` getter
+    def write_a
+      get_write_a
+    end
+    def write_a?
+      write_a
+    end
+    # Property `write_a` setter
+    def write_a=(val)
+      set_write_a(val)
     end
   end
   class RDPipelineDepthStencilState < Godot::RefCounted
@@ -21464,6 +26040,186 @@ module Godot
       Bridge.ptrcall(@@mb_get_back_op_reference, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `enable_depth_test` getter
+    def enable_depth_test
+      get_enable_depth_test
+    end
+    def enable_depth_test?
+      enable_depth_test
+    end
+    # Property `enable_depth_test` setter
+    def enable_depth_test=(val)
+      set_enable_depth_test(val)
+    end
+    # Property `enable_depth_write` getter
+    def enable_depth_write
+      get_enable_depth_write
+    end
+    def enable_depth_write?
+      enable_depth_write
+    end
+    # Property `enable_depth_write` setter
+    def enable_depth_write=(val)
+      set_enable_depth_write(val)
+    end
+    # Property `depth_compare_operator` getter
+    def depth_compare_operator
+      get_depth_compare_operator
+    end
+    # Property `depth_compare_operator` setter
+    def depth_compare_operator=(val : Int)
+      set_depth_compare_operator(val.to_i64)
+    end
+    # Property `enable_depth_range` getter
+    def enable_depth_range
+      get_enable_depth_range
+    end
+    def enable_depth_range?
+      enable_depth_range
+    end
+    # Property `enable_depth_range` setter
+    def enable_depth_range=(val)
+      set_enable_depth_range(val)
+    end
+    # Property `depth_range_min` getter
+    def depth_range_min
+      get_depth_range_min
+    end
+    # Property `depth_range_min` setter
+    def depth_range_min=(val : Number)
+      set_depth_range_min(val.to_f64)
+    end
+    # Property `depth_range_max` getter
+    def depth_range_max
+      get_depth_range_max
+    end
+    # Property `depth_range_max` setter
+    def depth_range_max=(val : Number)
+      set_depth_range_max(val.to_f64)
+    end
+    # Property `enable_stencil` getter
+    def enable_stencil
+      get_enable_stencil
+    end
+    def enable_stencil?
+      enable_stencil
+    end
+    # Property `enable_stencil` setter
+    def enable_stencil=(val)
+      set_enable_stencil(val)
+    end
+    # Property `front_op_fail` getter
+    def front_op_fail
+      get_front_op_fail
+    end
+    # Property `front_op_fail` setter
+    def front_op_fail=(val : Int)
+      set_front_op_fail(val.to_i64)
+    end
+    # Property `front_op_pass` getter
+    def front_op_pass
+      get_front_op_pass
+    end
+    # Property `front_op_pass` setter
+    def front_op_pass=(val : Int)
+      set_front_op_pass(val.to_i64)
+    end
+    # Property `front_op_depth_fail` getter
+    def front_op_depth_fail
+      get_front_op_depth_fail
+    end
+    # Property `front_op_depth_fail` setter
+    def front_op_depth_fail=(val : Int)
+      set_front_op_depth_fail(val.to_i64)
+    end
+    # Property `front_op_compare` getter
+    def front_op_compare
+      get_front_op_compare
+    end
+    # Property `front_op_compare` setter
+    def front_op_compare=(val : Int)
+      set_front_op_compare(val.to_i64)
+    end
+    # Property `front_op_compare_mask` getter
+    def front_op_compare_mask
+      get_front_op_compare_mask
+    end
+    # Property `front_op_compare_mask` setter
+    def front_op_compare_mask=(val : Int)
+      set_front_op_compare_mask(val.to_i64)
+    end
+    # Property `front_op_write_mask` getter
+    def front_op_write_mask
+      get_front_op_write_mask
+    end
+    # Property `front_op_write_mask` setter
+    def front_op_write_mask=(val : Int)
+      set_front_op_write_mask(val.to_i64)
+    end
+    # Property `front_op_reference` getter
+    def front_op_reference
+      get_front_op_reference
+    end
+    # Property `front_op_reference` setter
+    def front_op_reference=(val : Int)
+      set_front_op_reference(val.to_i64)
+    end
+    # Property `back_op_fail` getter
+    def back_op_fail
+      get_back_op_fail
+    end
+    # Property `back_op_fail` setter
+    def back_op_fail=(val : Int)
+      set_back_op_fail(val.to_i64)
+    end
+    # Property `back_op_pass` getter
+    def back_op_pass
+      get_back_op_pass
+    end
+    # Property `back_op_pass` setter
+    def back_op_pass=(val : Int)
+      set_back_op_pass(val.to_i64)
+    end
+    # Property `back_op_depth_fail` getter
+    def back_op_depth_fail
+      get_back_op_depth_fail
+    end
+    # Property `back_op_depth_fail` setter
+    def back_op_depth_fail=(val : Int)
+      set_back_op_depth_fail(val.to_i64)
+    end
+    # Property `back_op_compare` getter
+    def back_op_compare
+      get_back_op_compare
+    end
+    # Property `back_op_compare` setter
+    def back_op_compare=(val : Int)
+      set_back_op_compare(val.to_i64)
+    end
+    # Property `back_op_compare_mask` getter
+    def back_op_compare_mask
+      get_back_op_compare_mask
+    end
+    # Property `back_op_compare_mask` setter
+    def back_op_compare_mask=(val : Int)
+      set_back_op_compare_mask(val.to_i64)
+    end
+    # Property `back_op_write_mask` getter
+    def back_op_write_mask
+      get_back_op_write_mask
+    end
+    # Property `back_op_write_mask` setter
+    def back_op_write_mask=(val : Int)
+      set_back_op_write_mask(val.to_i64)
+    end
+    # Property `back_op_reference` getter
+    def back_op_reference
+      get_back_op_reference
+    end
+    # Property `back_op_reference` setter
+    def back_op_reference=(val : Int)
+      set_back_op_reference(val.to_i64)
+    end
   end
   class RDPipelineMultisampleState < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -21582,6 +26338,63 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_sample_masks, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Godot::Array.new(ret_ptr)
+    end
+    # Property `sample_count` getter
+    def sample_count
+      get_sample_count
+    end
+    # Property `sample_count` setter
+    def sample_count=(val : Int)
+      set_sample_count(val.to_i64)
+    end
+    # Property `enable_sample_shading` getter
+    def enable_sample_shading
+      get_enable_sample_shading
+    end
+    def enable_sample_shading?
+      enable_sample_shading
+    end
+    # Property `enable_sample_shading` setter
+    def enable_sample_shading=(val)
+      set_enable_sample_shading(val)
+    end
+    # Property `min_sample_shading` getter
+    def min_sample_shading
+      get_min_sample_shading
+    end
+    # Property `min_sample_shading` setter
+    def min_sample_shading=(val : Number)
+      set_min_sample_shading(val.to_f64)
+    end
+    # Property `enable_alpha_to_coverage` getter
+    def enable_alpha_to_coverage
+      get_enable_alpha_to_coverage
+    end
+    def enable_alpha_to_coverage?
+      enable_alpha_to_coverage
+    end
+    # Property `enable_alpha_to_coverage` setter
+    def enable_alpha_to_coverage=(val)
+      set_enable_alpha_to_coverage(val)
+    end
+    # Property `enable_alpha_to_one` getter
+    def enable_alpha_to_one
+      get_enable_alpha_to_one
+    end
+    def enable_alpha_to_one?
+      enable_alpha_to_one
+    end
+    # Property `enable_alpha_to_one` setter
+    def enable_alpha_to_one=(val)
+      set_enable_alpha_to_one(val)
+    end
+    # Property `sample_masks` getter
+    def sample_masks
+      get_sample_masks
+    end
+    # Property `sample_masks` setter
+    def sample_masks=(val)
+      set_sample_masks(val)
     end
   end
   class RDPipelineRasterizationState < Godot::RefCounted
@@ -21797,6 +26610,106 @@ module Godot
       Bridge.ptrcall(@@mb_get_patch_control_points, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `enable_depth_clamp` getter
+    def enable_depth_clamp
+      get_enable_depth_clamp
+    end
+    def enable_depth_clamp?
+      enable_depth_clamp
+    end
+    # Property `enable_depth_clamp` setter
+    def enable_depth_clamp=(val)
+      set_enable_depth_clamp(val)
+    end
+    # Property `discard_primitives` getter
+    def discard_primitives
+      get_discard_primitives
+    end
+    def discard_primitives?
+      discard_primitives
+    end
+    # Property `discard_primitives` setter
+    def discard_primitives=(val)
+      set_discard_primitives(val)
+    end
+    # Property `wireframe` getter
+    def wireframe
+      get_wireframe
+    end
+    def wireframe?
+      wireframe
+    end
+    # Property `wireframe` setter
+    def wireframe=(val)
+      set_wireframe(val)
+    end
+    # Property `cull_mode` getter
+    def cull_mode
+      get_cull_mode
+    end
+    # Property `cull_mode` setter
+    def cull_mode=(val : Int)
+      set_cull_mode(val.to_i64)
+    end
+    # Property `front_face` getter
+    def front_face
+      get_front_face
+    end
+    # Property `front_face` setter
+    def front_face=(val : Int)
+      set_front_face(val.to_i64)
+    end
+    # Property `depth_bias_enabled` getter
+    def depth_bias_enabled
+      get_depth_bias_enabled
+    end
+    def depth_bias_enabled?
+      depth_bias_enabled
+    end
+    # Property `depth_bias_enabled` setter
+    def depth_bias_enabled=(val)
+      set_depth_bias_enabled(val)
+    end
+    # Property `depth_bias_constant_factor` getter
+    def depth_bias_constant_factor
+      get_depth_bias_constant_factor
+    end
+    # Property `depth_bias_constant_factor` setter
+    def depth_bias_constant_factor=(val : Number)
+      set_depth_bias_constant_factor(val.to_f64)
+    end
+    # Property `depth_bias_clamp` getter
+    def depth_bias_clamp
+      get_depth_bias_clamp
+    end
+    # Property `depth_bias_clamp` setter
+    def depth_bias_clamp=(val : Number)
+      set_depth_bias_clamp(val.to_f64)
+    end
+    # Property `depth_bias_slope_factor` getter
+    def depth_bias_slope_factor
+      get_depth_bias_slope_factor
+    end
+    # Property `depth_bias_slope_factor` setter
+    def depth_bias_slope_factor=(val : Number)
+      set_depth_bias_slope_factor(val.to_f64)
+    end
+    # Property `line_width` getter
+    def line_width
+      get_line_width
+    end
+    # Property `line_width` setter
+    def line_width=(val : Number)
+      set_line_width(val.to_f64)
+    end
+    # Property `patch_control_points` getter
+    def patch_control_points
+      get_patch_control_points
+    end
+    # Property `patch_control_points` setter
+    def patch_control_points=(val : Int)
+      set_patch_control_points(val.to_i64)
+    end
   end
   class RDPipelineShader < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -21839,6 +26752,22 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_specialization_constants, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Godot::Array.new(ret_ptr)
+    end
+    # Property `shader` getter
+    def shader
+      get_shader
+    end
+    # Property `shader` setter
+    def shader=(val)
+      set_shader(val)
+    end
+    # Property `specialization_constants` getter
+    def specialization_constants
+      get_specialization_constants
+    end
+    # Property `specialization_constants` setter
+    def specialization_constants=(val)
+      set_specialization_constants(val)
     end
   end
   class RDPipelineSpecializationConstant < Godot::RefCounted
@@ -21884,6 +26813,22 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_constant_id, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `value` getter
+    def value
+      get_value
+    end
+    # Property `value` setter
+    def value=(val)
+      set_value(val)
+    end
+    # Property `constant_id` getter
+    def constant_id
+      get_constant_id
+    end
+    # Property `constant_id` setter
+    def constant_id=(val : Int)
+      set_constant_id(val.to_i64)
     end
   end
   class RDSamplerState < Godot::RefCounted
@@ -22175,6 +27120,135 @@ module Godot
       Bridge.ptrcall(@@mb_get_unnormalized_uvw, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
     end
+    # Property `mag_filter` getter
+    def mag_filter
+      get_mag_filter
+    end
+    # Property `mag_filter` setter
+    def mag_filter=(val : Int)
+      set_mag_filter(val.to_i64)
+    end
+    # Property `min_filter` getter
+    def min_filter
+      get_min_filter
+    end
+    # Property `min_filter` setter
+    def min_filter=(val : Int)
+      set_min_filter(val.to_i64)
+    end
+    # Property `mip_filter` getter
+    def mip_filter
+      get_mip_filter
+    end
+    # Property `mip_filter` setter
+    def mip_filter=(val : Int)
+      set_mip_filter(val.to_i64)
+    end
+    # Property `repeat_u` getter
+    def repeat_u
+      get_repeat_u
+    end
+    # Property `repeat_u` setter
+    def repeat_u=(val : Int)
+      set_repeat_u(val.to_i64)
+    end
+    # Property `repeat_v` getter
+    def repeat_v
+      get_repeat_v
+    end
+    # Property `repeat_v` setter
+    def repeat_v=(val : Int)
+      set_repeat_v(val.to_i64)
+    end
+    # Property `repeat_w` getter
+    def repeat_w
+      get_repeat_w
+    end
+    # Property `repeat_w` setter
+    def repeat_w=(val : Int)
+      set_repeat_w(val.to_i64)
+    end
+    # Property `lod_bias` getter
+    def lod_bias
+      get_lod_bias
+    end
+    # Property `lod_bias` setter
+    def lod_bias=(val : Number)
+      set_lod_bias(val.to_f64)
+    end
+    # Property `use_anisotropy` getter
+    def use_anisotropy
+      get_use_anisotropy
+    end
+    def use_anisotropy?
+      use_anisotropy
+    end
+    # Property `use_anisotropy` setter
+    def use_anisotropy=(val)
+      set_use_anisotropy(val)
+    end
+    # Property `anisotropy_max` getter
+    def anisotropy_max
+      get_anisotropy_max
+    end
+    # Property `anisotropy_max` setter
+    def anisotropy_max=(val : Number)
+      set_anisotropy_max(val.to_f64)
+    end
+    # Property `enable_compare` getter
+    def enable_compare
+      get_enable_compare
+    end
+    def enable_compare?
+      enable_compare
+    end
+    # Property `enable_compare` setter
+    def enable_compare=(val)
+      set_enable_compare(val)
+    end
+    # Property `compare_op` getter
+    def compare_op
+      get_compare_op
+    end
+    # Property `compare_op` setter
+    def compare_op=(val : Int)
+      set_compare_op(val.to_i64)
+    end
+    # Property `min_lod` getter
+    def min_lod
+      get_min_lod
+    end
+    # Property `min_lod` setter
+    def min_lod=(val : Number)
+      set_min_lod(val.to_f64)
+    end
+    # Property `max_lod` getter
+    def max_lod
+      get_max_lod
+    end
+    # Property `max_lod` setter
+    def max_lod=(val : Number)
+      set_max_lod(val.to_f64)
+    end
+    # Property `border_color` getter
+    def border_color
+      get_border_color
+    end
+    # Property `border_color` setter
+    def border_color=(val : Int)
+      set_border_color(val.to_i64)
+    end
+    # Property `unnormalized_uvw` getter
+    def unnormalized_uvw
+      get_unnormalized_uvw
+    end
+    def unnormalized_uvw?
+      unnormalized_uvw
+    end
+    # Property `unnormalized_uvw` setter
+    def unnormalized_uvw=(val)
+      set_unnormalized_uvw(val)
+    end
   end
   class RDShaderFile < Godot::Resource
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -22236,6 +27310,14 @@ module Godot
       end
       ""
     end
+    # Property `base_error` getter
+    def base_error
+      get_base_error
+    end
+    # Property `base_error` setter
+    def base_error=(val)
+      set_base_error(val)
+    end
   end
   class RDShaderSPIRV < Godot::Resource
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -22289,6 +27371,166 @@ module Godot
       args = [arg_0]
       ""
     end
+    # Property `bytecode_vertex` getter
+    def bytecode_vertex
+      get_stage_bytecode(0_i64)
+    end
+    # Property `bytecode_vertex` setter
+    def bytecode_vertex=(val)
+      set_stage_bytecode(0_i64, val)
+    end
+    # Property `bytecode_fragment` getter
+    def bytecode_fragment
+      get_stage_bytecode(1_i64)
+    end
+    # Property `bytecode_fragment` setter
+    def bytecode_fragment=(val)
+      set_stage_bytecode(1_i64, val)
+    end
+    # Property `bytecode_tesselation_control` getter
+    def bytecode_tesselation_control
+      get_stage_bytecode(2_i64)
+    end
+    # Property `bytecode_tesselation_control` setter
+    def bytecode_tesselation_control=(val)
+      set_stage_bytecode(2_i64, val)
+    end
+    # Property `bytecode_tesselation_evaluation` getter
+    def bytecode_tesselation_evaluation
+      get_stage_bytecode(3_i64)
+    end
+    # Property `bytecode_tesselation_evaluation` setter
+    def bytecode_tesselation_evaluation=(val)
+      set_stage_bytecode(3_i64, val)
+    end
+    # Property `bytecode_compute` getter
+    def bytecode_compute
+      get_stage_bytecode(4_i64)
+    end
+    # Property `bytecode_compute` setter
+    def bytecode_compute=(val)
+      set_stage_bytecode(4_i64, val)
+    end
+    # Property `bytecode_raygen` getter
+    def bytecode_raygen
+      get_stage_bytecode(5_i64)
+    end
+    # Property `bytecode_raygen` setter
+    def bytecode_raygen=(val)
+      set_stage_bytecode(5_i64, val)
+    end
+    # Property `bytecode_any_hit` getter
+    def bytecode_any_hit
+      get_stage_bytecode(6_i64)
+    end
+    # Property `bytecode_any_hit` setter
+    def bytecode_any_hit=(val)
+      set_stage_bytecode(6_i64, val)
+    end
+    # Property `bytecode_closest_hit` getter
+    def bytecode_closest_hit
+      get_stage_bytecode(7_i64)
+    end
+    # Property `bytecode_closest_hit` setter
+    def bytecode_closest_hit=(val)
+      set_stage_bytecode(7_i64, val)
+    end
+    # Property `bytecode_miss` getter
+    def bytecode_miss
+      get_stage_bytecode(8_i64)
+    end
+    # Property `bytecode_miss` setter
+    def bytecode_miss=(val)
+      set_stage_bytecode(8_i64, val)
+    end
+    # Property `bytecode_intersection` getter
+    def bytecode_intersection
+      get_stage_bytecode(9_i64)
+    end
+    # Property `bytecode_intersection` setter
+    def bytecode_intersection=(val)
+      set_stage_bytecode(9_i64, val)
+    end
+    # Property `compile_error_vertex` getter
+    def compile_error_vertex
+      get_stage_compile_error(0_i64)
+    end
+    # Property `compile_error_vertex` setter
+    def compile_error_vertex=(val)
+      set_stage_compile_error(0_i64, val)
+    end
+    # Property `compile_error_fragment` getter
+    def compile_error_fragment
+      get_stage_compile_error(1_i64)
+    end
+    # Property `compile_error_fragment` setter
+    def compile_error_fragment=(val)
+      set_stage_compile_error(1_i64, val)
+    end
+    # Property `compile_error_tesselation_control` getter
+    def compile_error_tesselation_control
+      get_stage_compile_error(2_i64)
+    end
+    # Property `compile_error_tesselation_control` setter
+    def compile_error_tesselation_control=(val)
+      set_stage_compile_error(2_i64, val)
+    end
+    # Property `compile_error_tesselation_evaluation` getter
+    def compile_error_tesselation_evaluation
+      get_stage_compile_error(3_i64)
+    end
+    # Property `compile_error_tesselation_evaluation` setter
+    def compile_error_tesselation_evaluation=(val)
+      set_stage_compile_error(3_i64, val)
+    end
+    # Property `compile_error_compute` getter
+    def compile_error_compute
+      get_stage_compile_error(4_i64)
+    end
+    # Property `compile_error_compute` setter
+    def compile_error_compute=(val)
+      set_stage_compile_error(4_i64, val)
+    end
+    # Property `compile_error_raygen` getter
+    def compile_error_raygen
+      get_stage_compile_error(5_i64)
+    end
+    # Property `compile_error_raygen` setter
+    def compile_error_raygen=(val)
+      set_stage_compile_error(5_i64, val)
+    end
+    # Property `compile_error_any_hit` getter
+    def compile_error_any_hit
+      get_stage_compile_error(6_i64)
+    end
+    # Property `compile_error_any_hit` setter
+    def compile_error_any_hit=(val)
+      set_stage_compile_error(6_i64, val)
+    end
+    # Property `compile_error_closest_hit` getter
+    def compile_error_closest_hit
+      get_stage_compile_error(7_i64)
+    end
+    # Property `compile_error_closest_hit` setter
+    def compile_error_closest_hit=(val)
+      set_stage_compile_error(7_i64, val)
+    end
+    # Property `compile_error_miss` getter
+    def compile_error_miss
+      get_stage_compile_error(8_i64)
+    end
+    # Property `compile_error_miss` setter
+    def compile_error_miss=(val)
+      set_stage_compile_error(8_i64, val)
+    end
+    # Property `compile_error_intersection` getter
+    def compile_error_intersection
+      get_stage_compile_error(9_i64)
+    end
+    # Property `compile_error_intersection` setter
+    def compile_error_intersection=(val)
+      set_stage_compile_error(9_i64, val)
+    end
   end
   class RDShaderSource < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -22336,6 +27578,94 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_language, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `source_vertex` getter
+    def source_vertex
+      get_stage_source(0_i64)
+    end
+    # Property `source_vertex` setter
+    def source_vertex=(val)
+      set_stage_source(0_i64, val)
+    end
+    # Property `source_fragment` getter
+    def source_fragment
+      get_stage_source(1_i64)
+    end
+    # Property `source_fragment` setter
+    def source_fragment=(val)
+      set_stage_source(1_i64, val)
+    end
+    # Property `source_tesselation_control` getter
+    def source_tesselation_control
+      get_stage_source(2_i64)
+    end
+    # Property `source_tesselation_control` setter
+    def source_tesselation_control=(val)
+      set_stage_source(2_i64, val)
+    end
+    # Property `source_tesselation_evaluation` getter
+    def source_tesselation_evaluation
+      get_stage_source(3_i64)
+    end
+    # Property `source_tesselation_evaluation` setter
+    def source_tesselation_evaluation=(val)
+      set_stage_source(3_i64, val)
+    end
+    # Property `source_compute` getter
+    def source_compute
+      get_stage_source(4_i64)
+    end
+    # Property `source_compute` setter
+    def source_compute=(val)
+      set_stage_source(4_i64, val)
+    end
+    # Property `source_raygen` getter
+    def source_raygen
+      get_stage_source(5_i64)
+    end
+    # Property `source_raygen` setter
+    def source_raygen=(val)
+      set_stage_source(5_i64, val)
+    end
+    # Property `source_any_hit` getter
+    def source_any_hit
+      get_stage_source(6_i64)
+    end
+    # Property `source_any_hit` setter
+    def source_any_hit=(val)
+      set_stage_source(6_i64, val)
+    end
+    # Property `source_closest_hit` getter
+    def source_closest_hit
+      get_stage_source(7_i64)
+    end
+    # Property `source_closest_hit` setter
+    def source_closest_hit=(val)
+      set_stage_source(7_i64, val)
+    end
+    # Property `source_miss` getter
+    def source_miss
+      get_stage_source(8_i64)
+    end
+    # Property `source_miss` setter
+    def source_miss=(val)
+      set_stage_source(8_i64, val)
+    end
+    # Property `source_intersection` getter
+    def source_intersection
+      get_stage_source(9_i64)
+    end
+    # Property `source_intersection` setter
+    def source_intersection=(val)
+      set_stage_source(9_i64, val)
+    end
+    # Property `language` getter
+    def language
+      get_language
+    end
+    # Property `language` setter
+    def language=(val : Int)
+      set_language(val.to_i64)
     end
   end
   class RDTextureFormat < Godot::RefCounted
@@ -22571,6 +27901,100 @@ module Godot
       args = [arg_0]
       Bridge.ptrcall(@@mb_remove_shareable_format, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
     end
+    # Property `format` getter
+    def format
+      get_format
+    end
+    # Property `format` setter
+    def format=(val : Int)
+      set_format(val.to_i64)
+    end
+    # Property `width` getter
+    def width
+      get_width
+    end
+    # Property `width` setter
+    def width=(val : Int)
+      set_width(val.to_i64)
+    end
+    # Property `height` getter
+    def height
+      get_height
+    end
+    # Property `height` setter
+    def height=(val : Int)
+      set_height(val.to_i64)
+    end
+    # Property `depth` getter
+    def depth
+      get_depth
+    end
+    # Property `depth` setter
+    def depth=(val : Int)
+      set_depth(val.to_i64)
+    end
+    # Property `array_layers` getter
+    def array_layers
+      get_array_layers
+    end
+    # Property `array_layers` setter
+    def array_layers=(val : Int)
+      set_array_layers(val.to_i64)
+    end
+    # Property `mipmaps` getter
+    def mipmaps
+      get_mipmaps
+    end
+    # Property `mipmaps` setter
+    def mipmaps=(val : Int)
+      set_mipmaps(val.to_i64)
+    end
+    # Property `texture_type` getter
+    def texture_type
+      get_texture_type
+    end
+    # Property `texture_type` setter
+    def texture_type=(val : Int)
+      set_texture_type(val.to_i64)
+    end
+    # Property `samples` getter
+    def samples
+      get_samples
+    end
+    # Property `samples` setter
+    def samples=(val : Int)
+      set_samples(val.to_i64)
+    end
+    # Property `usage_bits` getter
+    def usage_bits
+      get_usage_bits
+    end
+    # Property `usage_bits` setter
+    def usage_bits=(val : Int)
+      set_usage_bits(val.to_i64)
+    end
+    # Property `is_resolve_buffer` getter
+    def is_resolve_buffer
+      get_is_resolve_buffer
+    end
+    def is_resolve_buffer?
+      is_resolve_buffer
+    end
+    # Property `is_resolve_buffer` setter
+    def is_resolve_buffer=(val)
+      set_is_resolve_buffer(val)
+    end
+    # Property `is_discardable` getter
+    def is_discardable
+      get_is_discardable
+    end
+    def is_discardable?
+      is_discardable
+    end
+    # Property `is_discardable` setter
+    def is_discardable=(val)
+      set_is_discardable(val)
+    end
   end
   class RDTextureView < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -22671,6 +28095,46 @@ module Godot
       Bridge.ptrcall(@@mb_get_swizzle_a, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
+    # Property `format_override` getter
+    def format_override
+      get_format_override
+    end
+    # Property `format_override` setter
+    def format_override=(val : Int)
+      set_format_override(val.to_i64)
+    end
+    # Property `swizzle_r` getter
+    def swizzle_r
+      get_swizzle_r
+    end
+    # Property `swizzle_r` setter
+    def swizzle_r=(val : Int)
+      set_swizzle_r(val.to_i64)
+    end
+    # Property `swizzle_g` getter
+    def swizzle_g
+      get_swizzle_g
+    end
+    # Property `swizzle_g` setter
+    def swizzle_g=(val : Int)
+      set_swizzle_g(val.to_i64)
+    end
+    # Property `swizzle_b` getter
+    def swizzle_b
+      get_swizzle_b
+    end
+    # Property `swizzle_b` setter
+    def swizzle_b=(val : Int)
+      set_swizzle_b(val.to_i64)
+    end
+    # Property `swizzle_a` getter
+    def swizzle_a
+      get_swizzle_a
+    end
+    # Property `swizzle_a` setter
+    def swizzle_a=(val : Int)
+      set_swizzle_a(val.to_i64)
+    end
   end
   class RDUniform < Godot::RefCounted
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -22739,6 +28203,22 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_ids, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
       Godot::Array.new(ret_ptr)
+    end
+    # Property `uniform_type` getter
+    def uniform_type
+      get_uniform_type
+    end
+    # Property `uniform_type` setter
+    def uniform_type=(val : Int)
+      set_uniform_type(val.to_i64)
+    end
+    # Property `binding` getter
+    def binding
+      get_binding
+    end
+    # Property `binding` setter
+    def binding=(val : Int)
+      set_binding(val.to_i64)
     end
   end
   class RDVertexAttribute < Godot::RefCounted
@@ -22858,6 +28338,54 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_frequency, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `binding` getter
+    def binding
+      get_binding
+    end
+    # Property `binding` setter
+    def binding=(val : Int)
+      set_binding(val.to_i64)
+    end
+    # Property `location` getter
+    def location
+      get_location
+    end
+    # Property `location` setter
+    def location=(val : Int)
+      set_location(val.to_i64)
+    end
+    # Property `offset` getter
+    def offset
+      get_offset
+    end
+    # Property `offset` setter
+    def offset=(val : Int)
+      set_offset(val.to_i64)
+    end
+    # Property `format` getter
+    def format
+      get_format
+    end
+    # Property `format` setter
+    def format=(val : Int)
+      set_format(val.to_i64)
+    end
+    # Property `stride` getter
+    def stride
+      get_stride
+    end
+    # Property `stride` setter
+    def stride=(val : Int)
+      set_stride(val.to_i64)
+    end
+    # Property `frequency` getter
+    def frequency
+      get_frequency
+    end
+    # Property `frequency` setter
+    def frequency=(val : Int)
+      set_frequency(val.to_i64)
     end
   end
   class RandomNumberGenerator < Godot::RefCounted
@@ -22980,6 +28508,22 @@ module Godot
         @@mb_randomize = Bridge.get_method_bind("RandomNumberGenerator", "randomize", 3218959716_i64)
       end
       Bridge.ptrcall(@@mb_randomize, @pointer, Pointer(Pointer(Void)).null, Pointer(Void).null)
+    end
+    # Property `seed` getter
+    def seed
+      get_seed
+    end
+    # Property `seed` setter
+    def seed=(val : Int)
+      set_seed(val.to_i64)
+    end
+    # Property `state` getter
+    def state
+      get_state
+    end
+    # Property `state` setter
+    def state=(val : Int)
+      set_state(val.to_i64)
     end
   end
   class RayCast2D < Godot::Node2D
@@ -23250,6 +28794,77 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_hit_from_inside_enabled, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    # Property `enabled` getter
+    def enabled
+      is_enabled
+    end
+    def enabled?
+      enabled
+    end
+    # Property `enabled` setter
+    def enabled=(val)
+      set_enabled(val)
+    end
+    # Property `exclude_parent` getter
+    def exclude_parent
+      get_exclude_parent_body
+    end
+    def exclude_parent?
+      exclude_parent
+    end
+    # Property `exclude_parent` setter
+    def exclude_parent=(val)
+      set_exclude_parent_body(val)
+    end
+    # Property `target_position` getter
+    def target_position
+      get_target_position
+    end
+    # Property `target_position` setter
+    def target_position=(val)
+      set_target_position(val)
+    end
+    # Property `collision_mask` getter
+    def collision_mask
+      get_collision_mask
+    end
+    # Property `collision_mask` setter
+    def collision_mask=(val : Int)
+      set_collision_mask(val.to_i64)
+    end
+    # Property `hit_from_inside` getter
+    def hit_from_inside
+      is_hit_from_inside_enabled
+    end
+    def hit_from_inside?
+      hit_from_inside
+    end
+    # Property `hit_from_inside` setter
+    def hit_from_inside=(val)
+      set_hit_from_inside(val)
+    end
+    # Property `collide_with_areas` getter
+    def collide_with_areas
+      is_collide_with_areas_enabled
+    end
+    def collide_with_areas?
+      collide_with_areas
+    end
+    # Property `collide_with_areas` setter
+    def collide_with_areas=(val)
+      set_collide_with_areas(val)
+    end
+    # Property `collide_with_bodies` getter
+    def collide_with_bodies
+      is_collide_with_bodies_enabled
+    end
+    def collide_with_bodies?
+      collide_with_bodies
+    end
+    # Property `collide_with_bodies` setter
+    def collide_with_bodies=(val)
+      set_collide_with_bodies(val)
     end
   end
   class RayCast3D < Godot::Node3D
@@ -23586,6 +29201,85 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_debug_shape_thickness, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    # Property `exclude_parent` getter
+    def exclude_parent
+      get_exclude_parent_body
+    end
+    def exclude_parent?
+      exclude_parent
+    end
+    # Property `exclude_parent` setter
+    def exclude_parent=(val)
+      set_exclude_parent_body(val)
+    end
+    # Property `collision_mask` getter
+    def collision_mask
+      get_collision_mask
+    end
+    # Property `collision_mask` setter
+    def collision_mask=(val : Int)
+      set_collision_mask(val.to_i64)
+    end
+    # Property `hit_from_inside` getter
+    def hit_from_inside
+      is_hit_from_inside_enabled
+    end
+    def hit_from_inside?
+      hit_from_inside
+    end
+    # Property `hit_from_inside` setter
+    def hit_from_inside=(val)
+      set_hit_from_inside(val)
+    end
+    # Property `hit_back_faces` getter
+    def hit_back_faces
+      is_hit_back_faces_enabled
+    end
+    def hit_back_faces?
+      hit_back_faces
+    end
+    # Property `hit_back_faces` setter
+    def hit_back_faces=(val)
+      set_hit_back_faces(val)
+    end
+    # Property `collide_with_areas` getter
+    def collide_with_areas
+      is_collide_with_areas_enabled
+    end
+    def collide_with_areas?
+      collide_with_areas
+    end
+    # Property `collide_with_areas` setter
+    def collide_with_areas=(val)
+      set_collide_with_areas(val)
+    end
+    # Property `collide_with_bodies` getter
+    def collide_with_bodies
+      is_collide_with_bodies_enabled
+    end
+    def collide_with_bodies?
+      collide_with_bodies
+    end
+    # Property `collide_with_bodies` setter
+    def collide_with_bodies=(val)
+      set_collide_with_bodies(val)
+    end
+    # Property `debug_shape_custom_color` getter
+    def debug_shape_custom_color
+      get_debug_shape_custom_color
+    end
+    # Property `debug_shape_custom_color` setter
+    def debug_shape_custom_color=(val)
+      set_debug_shape_custom_color(val)
+    end
+    # Property `debug_shape_thickness` getter
+    def debug_shape_thickness
+      get_debug_shape_thickness
+    end
+    # Property `debug_shape_thickness` setter
+    def debug_shape_thickness=(val : Int)
+      set_debug_shape_thickness(val.to_i64)
     end
   end
 end

@@ -39,6 +39,11 @@ module Godot
       T.new(node.pointer)
     end
 
+    # Instantiates the scene and casts directly to wrapper type T (named argument alias)
+    def instantiate(as type : T.class, edit_state : Int64 = 0_i64) : T forall T
+      instantiate_as(type, edit_state)
+    end
+
     # Packs the node and all owned sub-nodes into this PackedScene via reflection.
     def pack(path : Node) : Int64
       call_i64("pack", path)
@@ -528,8 +533,25 @@ module Godot
     Resource.new(ptr)
   end
 
+  def self.load(path : String, as type : T.class, type_hint : String = "", cache_mode : Int64 = 0_i64) : T forall T
+    res = load(path, type_hint, cache_mode)
+    if res.pointer.null?
+      raise NilAssertionError.new("Failed to load resource at '#{path}' as #{T}")
+    end
+    if alive = Bridge.find_alive_instance(res.pointer)
+      if typed = alive.as?(T)
+        return typed
+      end
+    end
+    T.new(res.pointer)
+  end
+
+  def self.load_as(type : T.class, path : String, type_hint : String = "", cache_mode : Int64 = 0_i64) : T forall T
+    load(path, as: type, type_hint: type_hint, cache_mode: cache_mode)
+  end
+
   def self.load_scene(path : String) : PackedScene
-    load_as(PackedScene, path)
+    load(path, as: PackedScene)
   end
 
   def self.instantiate_scene(path : String, type : T.class) : T forall T

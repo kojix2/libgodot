@@ -149,6 +149,7 @@ def resolve_crystal_param_type(type_id : Int64, class_name : String?) : String?
   VARIANT_TYPE_MAP[type_id]?
 end
 
+Dir.mkdir_p(out_dir)
 generated_files = [] of String
 
 # =============================================================================
@@ -156,7 +157,7 @@ generated_files = [] of String
 # =============================================================================
 if gdscript_classes = data["gdscript_classes"]?.try(&.as_a)
   gdscript_classes.each do |c|
-    raw_name = c["name"].as_s
+    raw_name = c["name"]?.try(&.as_s) || ""
     clean_class_name = raw_name.gsub(/[^a-zA-Z0-9_]/, "")
     next if clean_class_name.empty?
 
@@ -189,9 +190,9 @@ if gdscript_classes = data["gdscript_classes"]?.try(&.as_a)
       # Properties
       if props = c["properties"]?.try(&.as_a)
         props.each do |p|
-          prop_name = p["name"].as_s
+          prop_name = p["name"]?.try(&.as_s) || ""
           next if prop_name.empty? || prop_name.starts_with?("@")
-          prop_type_id = p["type"].as_i64
+          prop_type_id = p["type"]?.try(&.as_i64) || 0_i64
           prop_class = p["class_name"]?.try(&.as_s)
           c_type = resolve_crystal_return_type(prop_type_id, prop_class)
           clean_getter = sanitize_ident(prop_name)
@@ -235,10 +236,10 @@ if gdscript_classes = data["gdscript_classes"]?.try(&.as_a)
       # Methods
       if methods = c["methods"]?.try(&.as_a)
         methods.each do |m|
-          m_name = m["name"].as_s
+          m_name = m["name"]?.try(&.as_s) || ""
           next if m_name.empty? || m_name.starts_with?("@") || m_name == "get" || m_name == "set"
           clean_m_name = sanitize_ident(m_name)
-          ret_type_id = m["return_type"].as_i64
+          ret_type_id = m["return_type"]?.try(&.as_i64) || 0_i64
           ret_class = m["return_class_name"]?.try(&.as_s)
           ret_c_type = resolve_crystal_return_type(ret_type_id, ret_class)
 
@@ -248,8 +249,8 @@ if gdscript_classes = data["gdscript_classes"]?.try(&.as_a)
           call_arg_names = [] of String
 
           args_entries.each_with_index do |a, idx|
-            a_name = sanitize_ident(a["name"].as_s)
-            a_type_id = a["type"].as_i64
+            a_name = sanitize_ident(a["name"]?.try(&.as_s) || "arg_#{idx}")
+            a_type_id = a["type"]?.try(&.as_i64) || 0_i64
             a_class = a["class_name"]?.try(&.as_s)
             a_c_type = resolve_crystal_param_type(a_type_id, a_class)
             if a_c_type
@@ -291,7 +292,8 @@ if gdscript_classes = data["gdscript_classes"]?.try(&.as_a)
       # Signals
       if sigs = c["signals"]?.try(&.as_a)
         sigs.each do |s|
-          sig_name = s["name"].as_s
+          sig_name = s["name"]?.try(&.as_s) || ""
+          next if sig_name.empty?
           clean_sig_name = sanitize_ident(sig_name)
           io.puts "    # Bound Signal `#{sig_name}`"
           io.puts "    def #{clean_sig_name} : Godot::BoundSignal"

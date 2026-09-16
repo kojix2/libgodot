@@ -559,9 +559,13 @@ if (-not $SkipStandaloneTests) {
     $pkgScript = Join-Path $RootDir "scripts/package_game.ps1"
     $standaloneExe = Join-Path $TestBinDir "tests$exeExt"
 
+    # Clean any stale shadow files before packaging
+    Get-ChildItem -Path $TestDir -Filter "~*" -Force -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+
     # 1. Package test suite into standalone executable (Debug)
     Write-Host "[Standalone Test] Packaging test project into standalone executable (Debug)..." -ForegroundColor Cyan
     & $pkgScript -ProjectPath $TestDir -Name "tests" -ForceCompile
+    Get-ChildItem -Path $TestDir -Filter "~*" -Force -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
 
     if (-not (Test-Path $standaloneExe)) {
         $candidateExe = Join-Path $TestBinDir "game$exeExt"
@@ -593,16 +597,13 @@ if (-not $SkipStandaloneTests) {
             if (Test-Path $m) { Remove-Item $m -Force }
         }
 
-        # Standalone exported templates forbid '--path', so we run directly in TestBinDir
+        # Standalone exported templates forbid '--path' and '--main-pack', so we run directly in TestBinDir
         $standaloneLogFile = Join-Path $scratchDir "standalone_tests.log"
         if (Test-Path $standaloneLogFile) { Remove-Item $standaloneLogFile -Force }
 
-        $pckCandidate = Join-Path $TestBinDir "tests.pck"
-        $mainPackArgs = if (Test-Path $pckCandidate) { @("--main-pack", $pckCandidate) } else { @() }
-
         $standaloneResult = Invoke-TestCommand -Name "Standalone Compiled Test Runner (tests$exeExt --autorun)" `
             -Executable $runExe `
-            -Arguments (@("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy") + $mainPackArgs + @("--quit-after", "600", "--", "--autorun")) `
+            -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--quit-after", "600", "--", "--autorun") `
             -WorkingDirectory $TestBinDir `
             -OutputFile $standaloneLogFile `
             -CustomVerification
@@ -644,8 +645,10 @@ if (-not $SkipStandaloneTests) {
 
     # 2. Package and verify in Standalone Release Mode if requested
     if ($env:RELEASE -eq "1") {
+        Get-ChildItem -Path $TestDir -Filter "~*" -Force -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
         Write-Host "[Standalone Test] Packaging test project in RELEASE mode..." -ForegroundColor Cyan
         & $pkgScript -ProjectPath $TestDir -Name "tests" -Release 1 -ForceCompile
+        Get-ChildItem -Path $TestDir -Filter "~*" -Force -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
 
         if (Test-Path $runExe) {
             foreach ($m in ($runPassMarkers + $runFailMarkers + $summaryFiles)) {
@@ -655,10 +658,9 @@ if (-not $SkipStandaloneTests) {
             $relLogFile = Join-Path $scratchDir "standalone_rel_tests.log"
             if (Test-Path $relLogFile) { Remove-Item $relLogFile -Force }
 
-            $relPackArgs = if (Test-Path $pckCandidate) { @("--main-pack", $pckCandidate) } else { @() }
             $relResult = Invoke-TestCommand -Name "Standalone Release Test Runner (tests$exeExt --autorun RELEASE=1)" `
                 -Executable $runExe `
-                -Arguments (@("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy") + $relPackArgs + @("--quit-after", "600", "--", "--autorun")) `
+                -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--quit-after", "600", "--", "--autorun") `
                 -WorkingDirectory $TestBinDir `
                 -OutputFile $relLogFile `
                 -CustomVerification

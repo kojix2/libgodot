@@ -98,11 +98,7 @@ if ($PurgeCache -or $TestBuildButton) {
 }
 
 # Clean up any stale temporary shadow copies or error logs from prior runs
-if ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';') {
-    cmd.exe /c "del /s /q /f /a:h `"$TargetDir\~*`" 2>nul & del /s /q /f `"$TargetDir\~*`" 2>nul" | Out-Null
-} else {
-    Get-ChildItem -Path $TargetDir -Filter "~*" -Recurse -Force -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
-}
+Get-ChildItem -Path $TargetDir -Filter "~*" -Recurse -Force -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
 if (Test-Path $logFile) { Remove-Item $logFile -Force }
 if (Test-Path $errLogFile) { Remove-Item $errLogFile -Force }
 

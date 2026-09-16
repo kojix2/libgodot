@@ -92,11 +92,7 @@ foreach ($dir in $targetDirs) {
         Get-ChildItem -Path $dir -Filter $pattern -File -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
     }
     # Purge stale temporary shadow copies from prior aborted Godot runs
-    if ($onWindows) {
-        cmd.exe /c "del /s /q /f /a:h `"$dir\~*`" 2>nul & del /s /q /f `"$dir\~*`" 2>nul" | Out-Null
-    } else {
-        Get-ChildItem -Path $dir -Filter "~*" -Force -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
-    }
+    Get-ChildItem -Path $dir -Filter "~*" -Force -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
     # Remove android folder from desktop bin directories if present
     $desktopAndroid = Join-Path $dir "android"
     if (Test-Path $desktopAndroid) {

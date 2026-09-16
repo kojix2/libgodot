@@ -293,24 +293,20 @@ if ($godotExe -and (Test-Path $godotExe)) {
     }
 
     # Clean up any leftover temporary shadow files before Godot export
-    if ($onWindows) {
-        cmd.exe /c "del /s /q /f /a:h `"$projFull\~*`" 2>nul & del /s /q /f `"$projFull\~*`" 2>nul" | Out-Null
-    } else {
-        Get-ChildItem -Path $projFull -Filter "~*" -Force -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
-    }
+    Get-ChildItem -Path $projFull -Filter "~*" -Force -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
 
     # Generate standalone project data pack ($Name.pck)
     $pckFile = Join-Path $binDir "$Name.pck"
     if (Test-Path $presetCfg) {
         Write-Host "  -> Generating standalone project pack: $pckFile..." -ForegroundColor Cyan
-        & $godotExe @($headlessGodotFlags + @("--path", $projFull, "--export-pack", $preset, $pckFile))
+        & $godotExe @($headlessGodotFlags + @("--path", $projFull, "--export-pack", $preset, $pckFile)) | Out-Host
         $packExit = $LASTEXITCODE
 
         if (-not (Test-Path $pckFile) -or (Get-Item $pckFile).Length -lt 100) {
             foreach ($altPreset in @("Linux", "Windows Desktop", "macOS")) {
                 if ($altPreset -ne $preset) {
                     Write-Host "  -> Retrying pack export using fallback preset '$altPreset'..." -ForegroundColor Yellow
-                    & $godotExe @($headlessGodotFlags + @("--path", $projFull, "--export-pack", $altPreset, $pckFile))
+                    & $godotExe @($headlessGodotFlags + @("--path", $projFull, "--export-pack", $altPreset, $pckFile)) | Out-Host
                     if ($LASTEXITCODE -eq 0 -and (Test-Path $pckFile) -and (Get-Item $pckFile).Length -ge 100) {
                         $packExit = 0
                         break
@@ -329,7 +325,13 @@ if ($godotExe -and (Test-Path $godotExe)) {
         }
 
         # Attempt native export only if export templates exist
-        $appDataGodot = if ($env:APPDATA) { Join-Path $env:APPDATA "Godot/export_templates" } else { "" }
+        $appDataGodot = if ($env:APPDATA) {
+            Join-Path $env:APPDATA "Godot/export_templates"
+        } elseif ($isMac) {
+            Join-Path $HOME "Library/Application Support/Godot/export_templates"
+        } else {
+            Join-Path $HOME ".local/share/godot/export_templates"
+        }
         $hasTemplates = $false
         if ($appDataGodot -and (Test-Path $appDataGodot)) {
             $hasTemplates = (Get-ChildItem -Path $appDataGodot -Recurse -Filter "*$exeExt" -File -ErrorAction SilentlyContinue).Count -gt 0
@@ -337,11 +339,14 @@ if ($godotExe -and (Test-Path $godotExe)) {
         if ($hasTemplates) {
             $exportMode = if ($Release -eq "1" -or $Release -eq "true") { "--export-release" } else { "--export-debug" }
             Write-Host "  -> Running standalone export ($exportMode $preset)..." -ForegroundColor Cyan
-            & $godotExe @($headlessGodotFlags + @("--path", $projFull, $exportMode, $preset, $binNamedExe))
+            & $godotExe @($headlessGodotFlags + @("--path", $projFull, $exportMode, $preset, $binNamedExe)) | Out-Host
             if ($LASTEXITCODE -eq 0) {
                 Write-Host "  -> Standalone executable exported with embedded PCK!" -ForegroundColor Green
             }
         }
+
+        # Clean up any leftover temporary shadow files generated during export
+        Get-ChildItem -Path $projFull -Filter "~*" -Force -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
     }
 
     Write-Host "  -> Created playable executable: $binNamedExe" -ForegroundColor Green
@@ -415,8 +420,9 @@ if ($TargetDir) {
         if (Test-Path $destFile) { Remove-Item $destFile -Force }
 
         Write-Host "  -> Running Godot standalone export (Preset: $preset) -> $destFile..." -ForegroundColor Cyan
-        & $godotExe @($headlessGodotFlags + @("--path", $projFull, "--export-release", $preset, $destFile))
+        & $godotExe @($headlessGodotFlags + @("--path", $projFull, "--export-release", $preset, $destFile)) | Out-Host
         $exportExitCode = $LASTEXITCODE
+        Get-ChildItem -Path $projFull -Filter "~*" -Force -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
         if ($exportExitCode -ne 0) {
             Write-Warning "  [PackageGame] Godot export exited with code $exportExitCode"
         }

@@ -77,6 +77,7 @@ CRYSTAL_FLAGS =
 ifeq ($(RELEASE), 1)
 	CRYSTAL_FLAGS += --release
 	CXXFLAGS      += -DLIBGODOT_RELEASE=1 -DNDEBUG
+	export RELEASE
 endif
 
 # Output artifacts

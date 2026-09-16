@@ -1823,3 +1823,144 @@ inline void bridge_object_disconnect_signal(GDExtensionObjectPtr instance, const
         gd_callable_destroy(callable_buf);
     }
 }
+
+// ==============================================================================
+// Tool Button Custom Callable Dispatcher
+// ==============================================================================
+
+struct ToolButtonBinding {
+    GenericExtensionInstance *inst;
+    uint64_t object_id;
+    char prop_name[128];
+};
+
+inline void tool_button_custom_callable_call(
+    void *callable_userdata,
+    const GDExtensionConstVariantPtr *p_args,
+    GDExtensionInt p_argument_count,
+    GDExtensionVariantPtr r_return,
+    GDExtensionCallError *r_error
+) {
+    if (r_error) {
+        r_error->error = GDEXTENSION_CALL_OK;
+        r_error->argument = 0;
+        r_error->expected = 0;
+    }
+    if (r_return && gd_variant_new_nil) {
+        gd_variant_new_nil(r_return);
+    }
+    if (!callable_userdata) return;
+    ensure_gc_thread_registered();
+    ToolButtonBinding *binding = (ToolButtonBinding*)callable_userdata;
+    if (!binding->inst || !binding->inst->crystal_instance || !binding->inst->desc) return;
+
+    // Check dead pointer / object alive
+    if (gd_object_get_instance_from_id && binding->object_id != 0) {
+        if (gd_object_get_instance_from_id((GDObjectInstanceID)binding->object_id) == nullptr) {
+            return;
+        }
+    }
+
+    if (binding->inst->desc->call_tool_button) {
+        binding->inst->desc->call_tool_button(binding->inst->crystal_instance, binding->prop_name);
+    }
+}
+
+inline GDExtensionBool tool_button_custom_callable_is_valid(void *callable_userdata) {
+    if (!callable_userdata) return 0;
+    ToolButtonBinding *b = (ToolButtonBinding*)callable_userdata;
+    if (!b->inst || !b->inst->crystal_instance) return 0;
+    if (gd_object_get_instance_from_id && b->object_id != 0) {
+        if (gd_object_get_instance_from_id((GDObjectInstanceID)b->object_id) == nullptr) return 0;
+    }
+    return 1;
+}
+
+inline void tool_button_custom_callable_free(void *callable_userdata) {
+    if (callable_userdata) {
+        delete (ToolButtonBinding*)callable_userdata;
+    }
+}
+
+inline uint32_t tool_button_custom_callable_hash(void *callable_userdata) {
+    if (!callable_userdata) return 0;
+    ToolButtonBinding *b = (ToolButtonBinding*)callable_userdata;
+    uint32_t h = (uint32_t)(uintptr_t)b->inst;
+    for (const char *p = b->prop_name; *p; p++) {
+        h = (h * 31) + (uint8_t)*p;
+    }
+    return h;
+}
+
+inline GDExtensionBool tool_button_custom_callable_equal(void *a, void *b) {
+    if (a == b) return 1;
+    if (!a || !b) return 0;
+    ToolButtonBinding *ba = (ToolButtonBinding*)a;
+    ToolButtonBinding *bb = (ToolButtonBinding*)b;
+    return (ba->inst == bb->inst && strcmp(ba->prop_name, bb->prop_name) == 0) ? 1 : 0;
+}
+
+inline GDExtensionBool tool_button_custom_callable_less_than(void *a, void *b) {
+    if (!a || !b) return a < b;
+    ToolButtonBinding *ba = (ToolButtonBinding*)a;
+    ToolButtonBinding *bb = (ToolButtonBinding*)b;
+    if (ba->inst != bb->inst) return ba->inst < bb->inst;
+    return strcmp(ba->prop_name, bb->prop_name) < 0 ? 1 : 0;
+}
+
+inline void tool_button_custom_callable_to_string(void *callable_userdata, GDExtensionBool *r_is_valid, GDExtensionStringPtr r_out) {
+    if (r_is_valid) *r_is_valid = (callable_userdata != nullptr);
+    if (r_out && gd_string_new_with_utf8_chars) {
+        gd_string_new_with_utf8_chars(r_out, "CrystalToolButtonCallable");
+    }
+}
+
+inline void create_tool_button_callable(GenericExtensionInstance *inst, const char *prop_name, GDExtensionVariantPtr r_ret) {
+    uint64_t obj_id = 0;
+    if (gd_object_get_instance_id && inst->godot_object) {
+        obj_id = (uint64_t)gd_object_get_instance_id(inst->godot_object);
+    }
+    ToolButtonBinding *binding = new ToolButtonBinding();
+    binding->inst = inst;
+    binding->object_id = obj_id;
+    strncpy(binding->prop_name, prop_name, sizeof(binding->prop_name) - 1);
+    binding->prop_name[sizeof(binding->prop_name) - 1] = '\0';
+
+    alignas(void*) char callable_buf[32] = {0};
+
+    if (gd_callable_custom_create2) {
+        GDExtensionCallableCustomInfo2 info;
+        memset(&info, 0, sizeof(info));
+        info.callable_userdata = binding;
+        info.token = g_library;
+        info.object_id = (GDObjectInstanceID)obj_id;
+        info.call_func = tool_button_custom_callable_call;
+        info.is_valid_func = tool_button_custom_callable_is_valid;
+        info.free_func = tool_button_custom_callable_free;
+        info.hash_func = tool_button_custom_callable_hash;
+        info.equal_func = tool_button_custom_callable_equal;
+        info.less_than_func = tool_button_custom_callable_less_than;
+        info.to_string_func = tool_button_custom_callable_to_string;
+        gd_callable_custom_create2(callable_buf, &info);
+    } else if (gd_callable_custom_create) {
+        GDExtensionCallableCustomInfo info;
+        memset(&info, 0, sizeof(info));
+        info.callable_userdata = binding;
+        info.token = g_library;
+        info.object_id = (GDObjectInstanceID)obj_id;
+        info.call_func = tool_button_custom_callable_call;
+        info.is_valid_func = tool_button_custom_callable_is_valid;
+        info.free_func = tool_button_custom_callable_free;
+        info.hash_func = tool_button_custom_callable_hash;
+        info.equal_func = tool_button_custom_callable_equal;
+        info.less_than_func = tool_button_custom_callable_less_than;
+        info.to_string_func = tool_button_custom_callable_to_string;
+        gd_callable_custom_create(callable_buf, &info);
+    }
+
+    bridge_variant_from_type(GDEXTENSION_VARIANT_TYPE_CALLABLE, r_ret, callable_buf);
+    if (gd_callable_destroy) {
+        gd_callable_destroy(callable_buf);
+    }
+}
+

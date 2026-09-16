@@ -2742,12 +2742,52 @@
 					"type_name": "int"
 				},
 				{
-					"class_name": "Bool",
+					"class_name": "Callable",
 					"hint": 39,
 					"hint_string": "Click Here",
 					"name": "tool_btn_prop",
+					"type": 25,
+					"type_name": "Callable"
+				},
+				{
+					"class_name": "Callable",
+					"hint": 39,
+					"hint_string": "Proc Method Pointer Button,Action",
+					"name": "proc_btn_ptr",
+					"type": 25,
+					"type_name": "Callable"
+				},
+				{
+					"class_name": "Callable",
+					"hint": 39,
+					"hint_string": "Proc Lambda Button",
+					"name": "proc_btn_lambda",
+					"type": 25,
+					"type_name": "Callable"
+				},
+				{
+					"class_name": "Callable",
+					"hint": 39,
+					"hint_string": "Proc Dynamic Button",
+					"name": "proc_btn_dyn",
+					"type": 25,
+					"type_name": "Callable"
+				},
+				{
+					"class_name": "Bool",
+					"hint": 0,
+					"hint_string": "",
+					"name": "proc_action_fired",
 					"type": 1,
 					"type_name": "bool"
+				},
+				{
+					"class_name": "Callable",
+					"hint": 39,
+					"hint_string": "Method Action,Play",
+					"name": "test_method_action",
+					"type": 25,
+					"type_name": "Callable"
 				},
 				{
 					"class_name": "Int32",
@@ -2957,12 +2997,20 @@
 			"name": "ToolTester2D",
 			"properties": [
 				{
-					"class_name": "Bool",
+					"class_name": "Callable",
 					"hint": 39,
 					"hint_string": "▶ Run 2D Tool Tests",
 					"name": "run_tests_button",
-					"type": 1,
-					"type_name": "bool"
+					"type": 25,
+					"type_name": "Callable"
+				},
+				{
+					"class_name": "Callable",
+					"hint": 39,
+					"hint_string": "Execute 2D Tests Direct,Play",
+					"name": "execute_2d_tests_direct",
+					"type": 25,
+					"type_name": "Callable"
 				},
 				{
 					"class_name": "String",
@@ -2983,12 +3031,20 @@
 			"name": "ToolTester3D",
 			"properties": [
 				{
-					"class_name": "Bool",
+					"class_name": "Callable",
 					"hint": 39,
 					"hint_string": "▶ Run 3D Tool Tests",
 					"name": "run_tests_button",
-					"type": 1,
-					"type_name": "bool"
+					"type": 25,
+					"type_name": "Callable"
+				},
+				{
+					"class_name": "Callable",
+					"hint": 39,
+					"hint_string": "Execute 3D Tests Direct,Play",
+					"name": "execute_3d_tests_direct",
+					"type": 25,
+					"type_name": "Callable"
 				},
 				{
 					"class_name": "String",

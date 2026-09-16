@@ -500,6 +500,7 @@ macro node(decl, &block)
     rpc_methods = [] of Nil
     node_groups = [] of Nil
     user_methods = [] of Nil
+    tool_buttons = [] of Nil
     class_constants = [] of Nil
     class_doc = ""
     raw_stmts = if block.is_a?(Nop)
@@ -939,6 +940,37 @@ macro node(decl, &block)
           {% end %}
         {% end %}
         {% rpc_methods << {stmt.name.stringify, r_mode, r_trans, r_local, r_chan} %}
+      {% elsif last_anno && last_anno.name.stringify == "ExportToolButton" %}
+        {% if stmt.args.size > 0 %}
+          {% raise "ExportToolButton method '#{stmt.name}' cannot have arguments" %}
+        {% end %}
+        {%
+          tb_label = ""
+          tb_icon = ""
+          if last_anno.args.size > 0
+            tb_label = (last_anno.args[0].is_a?(StringLiteral) ? last_anno.args[0] : last_anno.args[0].id.stringify).gsub(/^\"|\"$/, "")
+          end
+          if last_anno.args.size > 1
+            tb_icon = (last_anno.args[1].is_a?(StringLiteral) ? last_anno.args[1] : last_anno.args[1].id.stringify).gsub(/^\"|\"$/, "")
+          end
+        %}
+        {% if last_anno.named_args %}
+          {% for key, val in last_anno.named_args %}
+            {% if key.stringify == "icon" %}
+              {% tb_icon = (val.is_a?(StringLiteral) ? val : val.id.stringify).gsub(/^\"|\"$/, "") %}
+            {% elsif key.stringify == "text" || key.stringify == "label" %}
+              {% tb_label = (val.is_a?(StringLiteral) ? val : val.id.stringify).gsub(/^\"|\"$/, "") %}
+            {% end %}
+          {% end %}
+        {% end %}
+        {%
+          if tb_label.empty?
+            tb_label = stmt.name.stringify.split("_").map(&.capitalize).join(" ")
+          end
+          tb_hint_str = tb_icon.empty? ? tb_label : "#{tb_label.id},#{tb_icon.id}"
+        %}
+        {% tool_buttons << {stmt.name, tb_hint_str, :method} %}
+        {% props << {:tool_button, stmt.name, tb_hint_str} %}
       {% end %}
       {%
         m_name_str = stmt.name.stringify
@@ -951,12 +983,22 @@ macro node(decl, &block)
       {% last_anno = nil %}
     {% elsif stmt.is_a?(Call) && stmt.name.id == "property" %}
       {%
-        p_name_str = stmt.args[0].var.stringify
+        p_arg = stmt.args[0]
+        if p_arg.is_a?(Assign)
+          p_var_name = p_arg.target
+          p_val = p_arg.value
+          p_type = nil
+        else
+          p_var_name = p_arg.var
+          p_val = p_arg.value
+          p_type = p_arg.type
+        end
+        p_name_str = p_var_name.stringify
         p_doc = extracted_prop_docs[p_name_str] || ""
-        p_decl = stmt.args[0]
+        p_decl = p_arg
         enum_target = nil
-        if p_decl.type.is_a?(Path) && p_decl.type.resolve? && (p_decl.type.resolve < Enum)
-          enum_target = p_decl.type.resolve
+        if p_type && p_type.is_a?(Path) && p_type.resolve? && (p_type.resolve < Enum)
+          enum_target = p_type.resolve
         elsif last_anno && (last_anno.name.stringify == "ExportEnum" || last_anno.name.stringify == "ExportFlags") && last_anno.args.size > 0 && last_anno.args[0].is_a?(Path) && last_anno.args[0].resolve? && (last_anno.args[0].resolve < Enum)
           enum_target = last_anno.args[0].resolve
         end
@@ -980,15 +1022,51 @@ macro node(decl, &block)
       %}
       {% if last_anno && last_anno.name.stringify == "OnReady" %}
         {% onready_path = last_anno.args.size > 0 ? (last_anno.args[0].is_a?(StringLiteral) ? last_anno.args[0] : last_anno.args[0].id.stringify) : p_name_str %}
-        {% o_t = stmt.args[0].type %}
+        {% o_t = p_type %}
         {% if o_t.is_a?(Union) %}
           {% actual_o_t = o_t.types.reject { |sub_t| sub_t.stringify == "Nil" || sub_t.stringify == "::Nil" }[0] %}
         {% else %}
           {% actual_o_t = o_t %}
         {% end %}
-        {% onready_props << {stmt.args[0].var, actual_o_t, onready_path} %}
+        {% onready_props << {p_var_name, actual_o_t, onready_path} %}
       {% else %}
         {% if last_anno %}
+          {% a_name = last_anno.name.is_a?(Path) ? last_anno.name.names.last.stringify : last_anno.name.stringify %}
+          {% if a_name == "ExportToolButton" %}
+            {%
+              p_t_str = p_type ? p_type.stringify.gsub(/^(::)?/, "") : ""
+              is_proc = false
+              if p_val && (p_val.is_a?(ProcPointer) || p_val.is_a?(ProcLiteral))
+                is_proc = true
+              elsif p_t_str.starts_with?("Proc(")
+                is_proc = true
+              elsif p_val && p_val.is_a?(Call)
+                raise "ExportToolButton property '#{p_var_name}' must be assigned a Proc (e.g. '->some_method' or '->{ ... }'), not a method call '#{p_val.name}'. Tool buttons take only a no-args proc: Proc(Void)."
+              end
+
+              if is_proc
+                norm_t = p_t_str.gsub(/^(::)?/, "").gsub(/\s*\|\s*(::)?Nil/, "").gsub(/\?/, "").strip
+                if !norm_t.empty? && norm_t != "Proc(Void)" && norm_t != "Proc(Nil)"
+                  raise "ExportToolButton property '#{p_var_name}' must take only a no-args proc: Proc(Void), got '#{p_type}'"
+                end
+                if p_val && p_val.is_a?(ProcPointer) && p_val.args.size > 0
+                  raise "ExportToolButton proc pointer '#{p_var_name}' takes #{p_val.args.size} argument(s). Tool buttons must take only a no-args proc."
+                elsif p_val && p_val.is_a?(ProcLiteral) && p_val.args.size > 0
+                  raise "ExportToolButton proc literal '#{p_var_name}' takes #{p_val.args.size} argument(s). Tool buttons must take only a no-args proc."
+                end
+                tb_kind = :proc_property
+              else
+                tb_kind = :property
+              end
+            %}
+            {% tool_buttons << {p_var_name, "", tb_kind} %}
+          {% elsif a_name == "Export" && last_anno.named_args %}
+            {% for k, v in last_anno.named_args %}
+              {% if k.stringify == "tool_button" %}
+                {% tool_buttons << {p_var_name, "", :property} %}
+              {% end %}
+            {% end %}
+          {% end %}
           {% for key, val in last_anno.named_args %}
             {% if key.stringify == "doc" %}
               {% p_doc = val.stringify %}
@@ -1015,6 +1093,15 @@ macro node(decl, &block)
   {% if onready_props.size > 0 || rpc_methods.size > 0 %}
     {% has_ready = true %}
   {% end %}
+
+  {%
+    proc_tb_names = [] of StringLiteral
+    tool_buttons.each do |tb|
+      if tb[2] == :proc_property
+        proc_tb_names << tb[0].stringify
+      end
+    end
+  %}
 
   @[GodotClass]
   class {{class_name}} < {{parent_name}}
@@ -1044,6 +1131,62 @@ macro node(decl, &block)
         false
       end
     end
+
+    {% if proc_tb_names.size > 0 %}
+      # Intercept property definitions inside the node to support proc-based ExportToolButtons
+      # (e.g. `property my_button = ->some_method`, `property my_button : Proc(Void) = ->some_method`,
+      # or `property my_button = ->{ ... }`)
+      macro property(*names, &block)
+        \{% for name in names %}
+          \{%
+            p_name = nil
+            p_val = nil
+            if name.is_a?(Assign)
+              p_name = name.target.stringify
+              p_val = name.value
+            elsif name.is_a?(TypeDeclaration)
+              p_name = name.var.stringify
+              p_val = name.value
+            end
+          %}
+          \{% if p_name && {{proc_tb_names}}.includes?(p_name) && p_val && p_val.is_a?(ProcPointer) %}
+            \{% m_name = p_val.name %}
+            @\{{p_name.id}} : Proc(Void)? = nil
+            def \{{p_name.id}} : Proc(Void)
+              if val = @\{{p_name.id}}
+                val
+              else
+                fn = ->{ self.\{{m_name.id}}; nil }
+                @\{{p_name.id}} = fn
+                fn
+              end
+            end
+            def \{{p_name.id}}=(val : Proc(Void))
+              @\{{p_name.id}} = val
+            end
+          \{% elsif p_name && {{proc_tb_names}}.includes?(p_name) && p_val && p_val.is_a?(ProcLiteral) %}
+            @\{{p_name.id}} : Proc(Void)? = nil
+            def \{{p_name.id}} : Proc(Void)
+              if val = @\{{p_name.id}}
+                val
+              else
+                raw_proc = (\{{p_val}})
+                fn = ->{ raw_proc.call; nil }
+                @\{{p_name.id}} = fn
+                fn
+              end
+            end
+            def \{{p_name.id}}=(val : Proc(Void))
+              @\{{p_name.id}} = val
+            end
+          \{% elsif block %}
+            ::property \{{name}} \{{block}}
+          \{% else %}
+            ::property \{{name}}
+          \{% end %}
+        \{% end %}
+      end
+    {% end %}
 
     # Macro block containing fields, signals, and methods
     {{ yield }}
@@ -1176,8 +1319,8 @@ macro node(decl, &block)
       {% for item in props %}
         {% if item[0] == :prop %}
           {% arg = item[1] %}
-          {% var_name = arg.var %}
-          {% var_type = arg.type.stringify.gsub(/^(::)?Godot::/, "") %}
+          {% var_name = arg.is_a?(Assign) ? arg.target : arg.var %}
+          {% var_type = arg.is_a?(Assign) ? "Callable" : (arg.type ? arg.type.stringify.gsub(/^(::)?Godot::/, "") : "Callable") %}
           when "{{var_name.id}}"
             {% if var_type == "Float32" %}
               self.{{var_name.id}} = val_ptr.as(Float64*).value.to_f32
@@ -1206,7 +1349,7 @@ macro node(decl, &block)
             {% elsif var_type == "String" %}
               c_str = val_ptr.as(Pointer(UInt8)*).value
               self.{{var_name.id}} = c_str.null? ? "" : String.new(c_str)
-            {% elsif arg.type.is_a?(Path) && arg.type.resolve? && (arg.type.resolve < Enum) %}
+            {% elsif arg.is_a?(TypeDeclaration) && arg.type && arg.type.is_a?(Path) && arg.type.resolve? && (arg.type.resolve < Enum) %}
               self.{{var_name.id}} = {{arg.type.id}}.from_value?(val_ptr.as(Int64*).value) || self.{{var_name.id}}
             {% end %}
         {% end %}
@@ -1221,8 +1364,8 @@ macro node(decl, &block)
       {% for item in props %}
         {% if item[0] == :prop %}
           {% arg = item[1] %}
-          {% var_name = arg.var %}
-          {% var_type = arg.type.stringify.gsub(/^(::)?Godot::/, "") %}
+          {% var_name = arg.is_a?(Assign) ? arg.target : arg.var %}
+          {% var_type = arg.is_a?(Assign) ? "Callable" : (arg.type ? arg.type.stringify.gsub(/^(::)?Godot::/, "") : "Callable") %}
           when "{{var_name.id}}"
             {% if var_type == "Float32" || var_type == "Float64" %}
               ret_ptr.as(Float64*).value = self.{{var_name.id}}.to_f64
@@ -1246,9 +1389,28 @@ macro node(decl, &block)
               ret_ptr.as(::Godot::Transform3D*).value = self.{{var_name.id}}
             {% elsif var_type == "String" %}
               ret_ptr.as(Pointer(UInt8)*).value = self.{{var_name.id}}.to_unsafe
-            {% elsif arg.type.is_a?(Path) && arg.type.resolve? && (arg.type.resolve < Enum) %}
+            {% elsif arg.is_a?(TypeDeclaration) && arg.type && arg.type.is_a?(Path) && arg.type.resolve? && (arg.type.resolve < Enum) %}
               ret_ptr.as(Int64*).value = self.{{var_name.id}}.to_i64
             {% end %}
+        {% end %}
+      {% end %}
+      else
+        super
+      end
+    end
+
+    def _godot_call_tool_button(button_name : String) : Void
+      case button_name
+      {% for tb in tool_buttons %}
+      when "{{tb[0].id}}"
+        {% if tb[2] == :proc_property %}
+          if btn = self.{{tb[0].id}}
+            btn.call
+          end
+        {% elsif tb[2] == :property %}
+          self.{{tb[0].id}} = true
+        {% else %}
+          self.{{tb[0].id}}
         {% end %}
       {% end %}
       else
@@ -1296,17 +1458,26 @@ macro node(decl, &block)
         {{item[2]}},
         256_u32
       )
+    {% elsif item[0] == :tool_button %}
+      properties_{{class_name}} << ::Godot::PropertyInfo.new(
+        "{{item[1].id}}",
+        "Callable",
+        25,
+        39_u32,
+        "{{item[2].id}}",
+        4_u32
+      )
     {% elsif item[0] == :prop %}
       {% arg = item[1] %}
       {% anno = item[2] %}
-      {% var_name = arg.var %}
-      {% var_type = arg.type.stringify.gsub(/^(::)?Godot::/, "") %}
+      {% var_name = arg.is_a?(Assign) ? arg.target : arg.var %}
+      {% var_type = arg.is_a?(Assign) ? "Callable" : (arg.type ? arg.type.stringify.gsub(/^(::)?Godot::/, "") : "Callable") %}
       {%
         vtype = 0
         hint = 0
         hint_str = ""
         is_enum = false
-        if arg.type.is_a?(Path) && arg.type.resolve? && (arg.type.resolve < Enum)
+        if arg.is_a?(TypeDeclaration) && arg.type && arg.type.is_a?(Path) && arg.type.resolve? && (arg.type.resolve < Enum)
           is_enum = true
           vtype = 2
           hint = 2
@@ -1500,6 +1671,8 @@ macro node(decl, &block)
                 {% prop_usage = 2 %}
               {% elsif k_str == "tool_button" %}
                 {% hint = 39 %}
+                {% vtype = 25 %}
+                {% prop_usage = 4 %}
                 {% hint_str = val.id.stringify %}
               {% elsif k_str == "hint" %}
                 {% hint = val.id.gsub(/_[a-z0-9]+/, "") %}
@@ -1651,7 +1824,33 @@ macro node(decl, &block)
           {% prop_usage = 2 %}
         {% elsif a_name == "ExportToolButton" %}
           {% hint = 39 %}
-          {% hint_str = anno.args.size > 0 ? anno.args[0].id.stringify : "" %}
+          {% vtype = 25 %}
+          {% prop_usage = 4 %}
+          {%
+            tb_label = ""
+            tb_icon = ""
+            if anno.args.size > 0
+              tb_label = (anno.args[0].is_a?(StringLiteral) ? anno.args[0] : anno.args[0].id.stringify).gsub(/^\"|\"$/, "")
+            end
+            if anno.args.size > 1
+              tb_icon = (anno.args[1].is_a?(StringLiteral) ? anno.args[1] : anno.args[1].id.stringify).gsub(/^\"|\"$/, "")
+            end
+          %}
+          {% if anno.named_args %}
+            {% for key, val in anno.named_args %}
+              {% if key.stringify == "icon" %}
+                {% tb_icon = (val.is_a?(StringLiteral) ? val : val.id.stringify).gsub(/^\"|\"$/, "") %}
+              {% elsif key.stringify == "text" || key.stringify == "label" %}
+                {% tb_label = (val.is_a?(StringLiteral) ? val : val.id.stringify).gsub(/^\"|\"$/, "") %}
+              {% end %}
+            {% end %}
+          {% end %}
+          {%
+            if tb_label.empty?
+              tb_label = var_name.stringify.split("_").map(&.capitalize).join(" ")
+            end
+            hint_str = tb_icon.empty? ? tb_label : "#{tb_label.id},#{tb_icon.id}"
+          %}
         {% elsif a_name == "ExportCustom" %}
           {% if anno.args.size > 0 %}
             {% hint = anno.args[0].id.gsub(/_[a-z0-9]+/, "") %}
@@ -1674,7 +1873,7 @@ macro node(decl, &block)
       {% end %}
       properties_{{class_name}} << ::Godot::PropertyInfo.new(
         "{{var_name.id}}",
-        "{{var_type.id}}",
+        "{{hint == 39 ? "Callable".id : var_type.id}}",
         {{vtype}},
         {{hint || 0}}_u32,
         "{{hint_str.id}}",
@@ -1784,7 +1983,8 @@ macro node(decl, &block)
       {% if item[0] == :prop %}
         {% arg = item[1] %}
         {% p_doc = item[3] %}
-        {% var_type = arg.type.stringify %}
+        {% var_name = arg.is_a?(Assign) ? arg.target : arg.var %}
+        {% var_type = arg.is_a?(Assign) ? "Callable" : (arg.type ? arg.type.stringify.gsub(/^(::)?Godot::/, "") : "Callable") %}
         {%
           gtype = "Variant"
           if var_type == "Float32" || var_type == "Float64"
@@ -1803,9 +2003,11 @@ macro node(decl, &block)
             gtype = "Color"
           elsif var_type == "NodePath"
             gtype = "NodePath"
+          elsif var_type == "Callable"
+            gtype = "Callable"
           end
         %}
-        io << "    <member name=\"{{arg.var.id}}\" type=\"{{gtype.id}}\" setter=\"\" getter=\"\">"
+        io << "    <member name=\"{{var_name.id}}\" type=\"{{gtype.id}}\" setter=\"\" getter=\"\">"
         {% if p_doc && p_doc != "" %}
           io << ::Godot::XML.escape({{p_doc.stringify}})
         {% end %}

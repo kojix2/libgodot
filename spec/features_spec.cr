@@ -196,6 +196,23 @@ node TestAnnotationsSuite < CharacterBody3D do
   @[ExportToolButton("Reset Health")]
   property btn_reset : Bool = false
 
+  @[ExportToolButton("Method Pointer Button", icon: "Action")]
+  property btn_method_ptr = ->action_method
+
+  @[ExportToolButton("Lambda Button")]
+  property btn_lambda = ->{
+    @action_counter += 10
+  }
+
+  @[ExportToolButton("Dynamic Proc Button")]
+  property btn_dynamic : Proc(Void)? = nil
+
+  property action_counter : Int32 = 0
+
+  def action_method : Void
+    @action_counter += 1
+  end
+
   @[ExportCustom(1, "10,200,2", 6)]
   property custom_prop : Int32 = 50
 
@@ -206,7 +223,10 @@ node TestAnnotationsSuite < CharacterBody3D do
   @[OnReady]
   property camera_3d : Godot::Node?
 
-  onready hud : Godot::Node = "HUD"
+  @[ExportToolButton("Regenerate World", icon: "Play")]
+  def regenerate_world : Void
+    Godot.print("Regenerating world...")
+  end
 
   # Multiplayer Networking (@[RPC])
   @[RPC(mode: :any_peer, sync: :call_local, transfer_mode: :reliable, channel: 1)]
@@ -272,14 +292,39 @@ check_prop.call("jump_curve", 4_u32, "", 6_u32)
 check_prop.call("tint_color", 21_u32, "", 6_u32)
 check_prop.call("camera_path", 26_u32, "Camera3D", 6_u32)
 check_prop.call("internal_seed", 0_u32, "", 2_u32)
-check_prop.call("btn_reset", 39_u32, "Reset Health", 6_u32)
+check_prop.call("btn_reset", 39_u32, "Reset Health", 4_u32)
+check_prop.call("btn_method_ptr", 39_u32, "Method Pointer Button,Action", 4_u32)
+check_prop.call("btn_lambda", 39_u32, "Lambda Button", 4_u32)
+check_prop.call("btn_dynamic", 39_u32, "Dynamic Proc Button", 4_u32)
+check_prop.call("regenerate_world", 39_u32, "Regenerate World,Play", 4_u32)
 check_prop.call("custom_prop", 1_u32, "10,200,2", 6_u32)
 check_prop.call("role", 2_u32, "Warrior:0,Mage:1,Rogue:5", 6_u32)
 check_prop.call("role_id", 2_u32, "Warrior:0,Mage:1,Rogue:5", 6_u32)
 check_prop.call("role_auto", 2_u32, "Warrior:0,Mage:1,Rogue:5", 6_u32)
 check_prop.call("skills", 6_u32, "Slash,Shoot,Cast", 6_u32)
 
-puts "✓ All Export Hints & Grouping annotations verified!"
+# Verify Proc-based Tool Button Dispatch & Dynamic Reassignment
+tb_test_inst = TestAnnotationsSuite.new
+abort "Failed: Initial action_counter must be 0" unless tb_test_inst.action_counter == 0
+
+tb_test_inst._godot_call_tool_button("btn_method_ptr")
+abort "Failed: btn_method_ptr did not execute" unless tb_test_inst.action_counter == 1
+
+tb_test_inst._godot_call_tool_button("btn_lambda")
+abort "Failed: btn_lambda did not execute" unless tb_test_inst.action_counter == 11
+
+tb_test_inst._godot_call_tool_button("btn_dynamic") # nil proc initially
+abort "Failed: nil btn_dynamic should be a no-op" unless tb_test_inst.action_counter == 11
+
+tb_test_inst.btn_dynamic = ->{ tb_test_inst.action_counter += 100; nil }
+tb_test_inst._godot_call_tool_button("btn_dynamic")
+abort "Failed: dynamic proc did not execute" unless tb_test_inst.action_counter == 111
+
+tb_test_inst.btn_method_ptr = ->{ tb_test_inst.action_counter += 500; nil }
+tb_test_inst._godot_call_tool_button("btn_method_ptr")
+abort "Failed: reassigned method proc did not execute" unless tb_test_inst.action_counter == 611
+
+puts "✓ All Export Hints, Grouping annotations & Proc Tool Buttons verified!"
 
 # Verify RPC Methods
 abort "Failed: Expected 2 RPC methods" unless suite_entry.rpc_methods.size == 2
@@ -383,5 +428,57 @@ cc_entry = Godot::ClassRegistry.find("CustomCharacter")
 abort "Failed: CustomCharacter missing or wrong parent" unless cc_entry && cc_entry.parent_name == "CharacterBody3D"
 
 puts "✓ resource, gdclass, and node zero-block and default inheritance verified!"
+
+# Verify compile-time enforcement of no-args proc for ExportToolButton
+root_dir = File.expand_path(".")
+test_compile_error = ->(source : String, expected_err : String) {
+  tmp_path = File.join(root_dir, "spec", "temp_tb_err.cr")
+  begin
+    File.write(tmp_path, %(require "../src/libgodot"\n#{source}))
+    output = IO::Memory.new
+    status = Process.run("crystal", ["build", "--no-codegen", tmp_path], output: output, error: output)
+    abort "Failed: expected compile error but compilation succeeded!" if status.success?
+    err_text = output.to_s
+    abort "Failed: expected error containing '#{expected_err}', got: #{err_text}" unless err_text.includes?(expected_err)
+  ensure
+    File.delete(tmp_path) if File.exists?(tmp_path)
+  end
+}
+
+test_compile_error.call(%(
+node FailNode1 < Node do
+  @[ExportToolButton("Bad Button")]
+  property btn : Proc(Int32, Void)
+end
+), "must take only a no-args proc: Proc(Void)")
+
+test_compile_error.call(%(
+node FailNode2 < Node do
+  @[ExportToolButton("Bad Button 2")]
+  property btn = ->(x : Int32) { x }
+end
+), "takes 1 argument(s). Tool buttons must take only a no-args proc")
+
+test_compile_error.call(%(
+node FailNode3 < Node do
+  @[ExportToolButton("Bad Button 3")]
+  property btn = ->take_arg(Int32)
+
+  def take_arg(x : Int32) : Void
+  end
+end
+), "takes 1 argument(s). Tool buttons must take only a no-args proc")
+
+test_compile_error.call(%(
+node FailNodeCall < Node do
+  @[ExportToolButton("Bad Call Button")]
+  property btn = method_without_arrow
+
+  def method_without_arrow : Void
+  end
+end
+), "must be assigned a Proc (e.g. '->some_method' or '->{ ... }'), not a method call")
+
+puts "✓ Compile-time rejection of argument-taking and non-proc tool buttons verified!"
 puts "All new features passed specifications cleanly!"
 

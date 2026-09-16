@@ -312,6 +312,28 @@ node PropertyTestTarget < Godot::Node do
   @[ExportToolButton("Click Here")]
   property tool_btn_prop : Bool = false
 
+  @[ExportToolButton("Proc Method Pointer Button", icon: "Action")]
+  property proc_btn_ptr = ->tool_proc_method
+
+  @[ExportToolButton("Proc Lambda Button")]
+  property proc_btn_lambda = ->{
+	@proc_action_fired = true
+  }
+
+  @[ExportToolButton("Proc Dynamic Button")]
+  property proc_btn_dyn : Proc(Void)? = nil
+
+  property proc_action_fired : Bool = false
+
+  def tool_proc_method : Void
+	@proc_action_fired = true
+  end
+
+  @[ExportToolButton("Method Action", icon: "Play")]
+  def test_method_action : Void
+	@tool_action_fired = true
+  end
+
   @[ExportCustom(hint: 1_u32, hint_string: "0,50,5")]
   property custom_hint_prop : Int32 = 10
 
@@ -362,6 +384,11 @@ end
 node ToolTester2D < Godot::Node2D do
   @[ExportToolButton("▶ Run 2D Tool Tests")]
   property run_tests_button : Bool = false
+
+  @[ExportToolButton("Execute 2D Tests Direct", icon: "Play")]
+  def execute_2d_tests_direct : Void
+	run_tool_tests
+  end
 
   property test_status : String = "Ready"
 
@@ -419,6 +446,11 @@ end
 node ToolTester3D < Godot::Node3D do
   @[ExportToolButton("▶ Run 3D Tool Tests")]
   property run_tests_button : Bool = false
+
+  @[ExportToolButton("Execute 3D Tests Direct", icon: "Play")]
+  def execute_3d_tests_direct : Void
+	run_tool_tests
+  end
 
   property test_status : String = "Ready"
 
@@ -1477,6 +1509,73 @@ test_prop "Property hints registered correctly in ClassDB" do
   tool_prop = props.find { |p| p.name == "tool_btn_prop" }
   TestFramework.assert_not_nil tool_prop
   TestFramework.assert_eq tool_prop.not_nil!.hint, 39_u32
+  TestFramework.assert_eq tool_prop.not_nil!.variant_type, 25
+  TestFramework.assert_eq tool_prop.not_nil!.usage, 4_u32
+  TestFramework.assert_eq tool_prop.not_nil!.type_name, "Callable"
+  TestFramework.assert_eq tool_prop.not_nil!.hint_string, "Click Here"
+
+  method_tool_prop = props.find { |p| p.name == "test_method_action" }
+  TestFramework.assert_not_nil method_tool_prop
+  TestFramework.assert_eq method_tool_prop.not_nil!.hint, 39_u32
+  TestFramework.assert_eq method_tool_prop.not_nil!.variant_type, 25
+  TestFramework.assert_eq method_tool_prop.not_nil!.usage, 4_u32
+  TestFramework.assert_eq method_tool_prop.not_nil!.type_name, "Callable"
+  TestFramework.assert_eq method_tool_prop.not_nil!.hint_string, "Method Action,Play"
+
+  # Verify Proc Tool Buttons registered in PropertyInfo
+  ptr_tool_prop = props.find { |p| p.name == "proc_btn_ptr" }
+  TestFramework.assert_not_nil ptr_tool_prop
+  TestFramework.assert_eq ptr_tool_prop.not_nil!.hint, 39_u32
+  TestFramework.assert_eq ptr_tool_prop.not_nil!.variant_type, 25
+  TestFramework.assert_eq ptr_tool_prop.not_nil!.usage, 4_u32
+  TestFramework.assert_eq ptr_tool_prop.not_nil!.hint_string, "Proc Method Pointer Button,Action"
+
+  lambda_tool_prop = props.find { |p| p.name == "proc_btn_lambda" }
+  TestFramework.assert_not_nil lambda_tool_prop
+  TestFramework.assert_eq lambda_tool_prop.not_nil!.hint, 39_u32
+  TestFramework.assert_eq lambda_tool_prop.not_nil!.variant_type, 25
+  TestFramework.assert_eq lambda_tool_prop.not_nil!.usage, 4_u32
+  TestFramework.assert_eq lambda_tool_prop.not_nil!.hint_string, "Proc Lambda Button"
+
+  dyn_tool_prop = props.find { |p| p.name == "proc_btn_dyn" }
+  TestFramework.assert_not_nil dyn_tool_prop
+  TestFramework.assert_eq dyn_tool_prop.not_nil!.hint, 39_u32
+  TestFramework.assert_eq dyn_tool_prop.not_nil!.variant_type, 25
+  TestFramework.assert_eq dyn_tool_prop.not_nil!.usage, 4_u32
+  TestFramework.assert_eq dyn_tool_prop.not_nil!.hint_string, "Proc Dynamic Button"
+
+  target = PropertyTestTarget.new
+  TestFramework.assert_false target.tool_btn_prop
+  target._godot_call_tool_button("tool_btn_prop")
+  TestFramework.assert_true target.tool_btn_prop
+
+  TestFramework.assert_false target.tool_button_trigger
+  target._godot_call_tool_button("test_method_action")
+  TestFramework.assert_true target.tool_button_trigger
+
+  # Verify Proc Tool Button Dispatch & Reassignment
+  TestFramework.assert_false target.proc_action_fired
+  target._godot_call_tool_button("proc_btn_ptr")
+  TestFramework.assert_true target.proc_action_fired
+
+  target.proc_action_fired = false
+  target._godot_call_tool_button("proc_btn_lambda")
+  TestFramework.assert_true target.proc_action_fired
+
+  target.proc_action_fired = false
+  target._godot_call_tool_button("proc_btn_dyn") # nil, should safely be a no-op
+  TestFramework.assert_false target.proc_action_fired
+
+  target.proc_btn_dyn = ->{ target.proc_action_fired = true; nil }
+  target._godot_call_tool_button("proc_btn_dyn")
+  TestFramework.assert_true target.proc_action_fired
+
+  custom_called = false
+  target.proc_btn_ptr = ->{ custom_called = true; nil }
+  target._godot_call_tool_button("proc_btn_ptr")
+  TestFramework.assert_true custom_called
+
+  target.destroy
 
   storage_prop = props.find { |p| p.name == "storage_only_prop" }
   TestFramework.assert_not_nil storage_prop

@@ -1085,6 +1085,10 @@ inline GDExtensionBool generic_class_get(GDExtensionClassInstancePtr p_instance,
         for (int i = 0; i < curr->property_count; i++) {
             if (curr->properties[i].usage & (64 | 128 | 256)) continue;
             if (strcmp(prop_name_buf, curr->properties[i].name) == 0) {
+                if (curr->properties[i].hint == 39) {
+                    create_tool_button_callable(inst, curr->properties[i].name, r_ret);
+                    return 1;
+                }
                 alignas(void*) char raw_buf[128] = {};
                 inst->desc->get_property(inst->crystal_instance, curr->properties[i].name, raw_buf);
                 bridge_variant_from_type(curr->properties[i].variant_type, r_ret, raw_buf);

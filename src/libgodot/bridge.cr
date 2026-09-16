@@ -53,6 +53,7 @@ module Godot
 
       has_virtual_method : (CrystalClassDesc*, LibC::Char* -> Int32)
       call_virtual_with_data : (Void*, LibC::Char*, Void**, Void* -> Void)
+      call_tool_button : (Void*, LibC::Char* -> Void)
 
       property_count : Int32
       properties : CrystalPropertyDesc*
@@ -364,6 +365,18 @@ module Godot
         end
       }
 
+      call_tool_button_fn = ->(crystal_inst : Void*, btn_name : LibC::Char*) {
+        if !crystal_inst.null?
+          inst = Box(Godot::Object).unbox(crystal_inst)
+          b_name = String.new(btn_name)
+          begin
+            inst._godot_call_tool_button(b_name)
+          rescue ex
+            Godot.printerr("[CrystalBridge] Unhandled exception in tool button '#{b_name}': #{ex.message}")
+          end
+        end
+      }
+
       # Register every class defined in Crystal
       print "[CrystalBridge] Step 3: ClassRegistry has #{Godot::ClassRegistry.entries.size} entries"
       Godot::ClassRegistry.entries.each do |entry|
@@ -438,6 +451,7 @@ module Godot
         desc.get_property = get_prop_fn
         desc.has_virtual_method = has_virtual_fn
         desc.call_virtual_with_data = virtual_with_data_fn
+        desc.call_tool_button = call_tool_button_fn
 
         desc.property_count = p_count
         desc.properties = props

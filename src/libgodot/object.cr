@@ -667,6 +667,10 @@ module Godot
     def _godot_call_virtual_with_data(method_name : String, args : Void**, ret : Void*) : Void
     end
 
+    # Dispatches inspector tool button clicks on this object.
+    def _godot_call_tool_button(button_name : String) : Void
+    end
+
     # Emits a parameterless signal on this Godot object.
     def emit_signal(name : String) : Void
       check_alive!

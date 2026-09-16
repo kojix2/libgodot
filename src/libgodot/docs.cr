@@ -557,13 +557,36 @@ module Docs
 
   #
   # #### 10. Interactive Inspector Tool Buttons (`@[ExportToolButton]`)
-  # Creates a clickable button in the Godot inspector that triggers a method when pressed:
+  # Creates a clickable button in the Godot inspector that triggers a method or proc when pressed:
   # ```crystal
-  # @[ExportToolButton]
-  # def regenerate_world : Void
+  # # 1. Method pointer tool button (idiomatic Crystal method reference, takes only no-args proc):
+  # @[ExportToolButton("Regenerate World", icon: "Play")]
+  # property my_button = ->some_method
+  #
+  # # 2. Lambda tool button:
+  # @[ExportToolButton("Reset Counters")]
+  # property reset_button = ->{
+  #   self.health = 100
+  # }
+  #
+  # # 3. Dynamic runtime assignable tool button:
+  # @[ExportToolButton("Custom Action")]
+  # property dynamic_button : Proc(Void)? = nil
+  #
+  # # 4. Method-based tool button (directly decorates an instance method):
+  # @[ExportToolButton("Regenerate Voxel Terrain", icon: "Play")]
+  # def some_method : Void
   #   Godot.print("Regenerating voxel terrain...")
   # end
+  #
+  # # 5. Boolean property tool button (sets property to true when pressed):
+  # @[ExportToolButton("Toggle Mode")]
+  # property toggle_flag : Bool = false
   # ```
+  #
+  # > **Note on Syntax:** In Crystal, taking a method reference is written with the arrow operator
+  # > `->some_method` (or `->{ some_method }`), rather than `&some_method` (which in Crystal grammar
+  # > is reserved for block arguments). Tool button procs must take no arguments (`Proc(Void)`).
   module C_EXPORTS_AND_INSPECTOR
     # Dummy method for documentation visibility
     def self.supported_types : Array(String)

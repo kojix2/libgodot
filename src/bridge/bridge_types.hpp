@@ -80,6 +80,7 @@ struct CrystalClassDesc {
     void (*get_property)(void *crystal_instance, const char *prop_name, void *ret_ptr);
     int (*has_virtual_method)(const CrystalClassDesc *desc, const char *method_name);
     void (*call_virtual_with_data)(void *crystal_instance, const char *method_name, const void **args, void *ret);
+    void (*call_tool_button)(void *crystal_instance, const char *button_name);
 
     int property_count;
     const CrystalPropertyDesc *properties;

@@ -153,6 +153,21 @@ if (Test-Path $makefile) {
     Set-Content -Path $makefile -Value $mfContent -Force
 }
 
+# 7. Update build.ps1 and package.ps1
+$buildPs1 = Join-Path $TargetDir "build.ps1"
+if (Test-Path $buildPs1) {
+    $bContent = Get-Content -Path $buildPs1 -Raw
+    $bContent = $bContent -replace 'AddonName\s*=\s*"crystal_addon"', "AddonName = `"$Name`""
+    Set-Content -Path $buildPs1 -Value $bContent -Force
+}
+
+$pkgPs1 = Join-Path $TargetDir "package.ps1"
+if (Test-Path $pkgPs1) {
+    $pContent = Get-Content -Path $pkgPs1 -Raw
+    $pContent = $pContent -replace 'AddonName\s*=\s*"crystal_addon"', "AddonName = `"$Name`""
+    Set-Content -Path $pkgPs1 -Value $pContent -Force
+}
+
 Write-Host "==========================================================" -ForegroundColor Green
 Write-Host "  Addon '$Name' scaffolded successfully at:               " -ForegroundColor Green
 Write-Host "  $TargetDir                                              " -ForegroundColor Green

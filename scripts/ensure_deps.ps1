@@ -66,8 +66,10 @@ if ($onWindows) {
     }
 
     # Windows LibGodot engine DLL
+    $binDir = Join-Path $RootDir "bin"
+    if (-not (Test-Path $binDir)) { New-Item -ItemType Directory -Force -Path $binDir | Out-Null }
     $godotSrcDll = Join-Path $RootDir "godot-src/bin/godot.windows.template_debug.x86_64.dll"
-    $binLibgodot = Join-Path $RootDir "bin/libgodot.dll"
+    $binLibgodot = Join-Path $binDir "libgodot.dll"
     if ((Test-Path $godotSrcDll) -and (-not (Test-Path $binLibgodot))) {
         Copy-Item $godotSrcDll $binLibgodot -Force -ErrorAction SilentlyContinue
     }

@@ -97,7 +97,7 @@ PLUGIN_DLL       = $(PLUGIN_LIB)
 GAME_DLL         = $(GAME_LIB)
 LIBGODOT_DLL     = $(LIBGODOT_LIB)
 
-.PHONY: all bridge plugin test_project test_standalone package_tests examples examples_exe template template_addon perf perf_standalone perf_run perf_editor package_perf game_dll game_exe android package_android generate dump_api project_bindings deps addons sync engine spec test tests docs run editor clean help
+.PHONY: all bridge plugin test_project test_standalone package_tests package_template package_template_addon package_examples package_addon package_all examples examples_exe template template_addon perf perf_standalone perf_run perf_editor package_perf game_dll game_exe android package_android generate dump_api project_bindings deps addons sync engine spec test tests docs run editor clean help
 
 # Default target: compile bridge, plugin, test project, standalone runner, examples, template, template_addon, perf, sync DLLs, and run test suite
 all: dirs deps bridge plugin addons dummy_addons test_project test_standalone examples template template_addon perf perf_standalone sync test
@@ -182,6 +182,31 @@ perf_standalone: dirs deps bridge addons
 package_perf: perf_standalone
 	@echo [Package] Packaging standalone performance benchmark...
 	@$(PWSH_FILE) scripts/package_perf.ps1 $(if $(filter 1,$(RELEASE)),-Release 1,)
+
+# Package starter template project into template-project.zip
+package_template: template
+	@echo [Package] Packaging starter template project...
+	@$(PWSH_FILE) make-template.ps1 $(if $(filter 1,$(RELEASE)),-Release 1,)
+
+# Package addon starter template into template-addon-project.zip
+package_template_addon: template_addon
+	@echo [Package] Packaging addon starter template...
+	@$(PWSH_FILE) make-template-addon.ps1 $(if $(filter 1,$(RELEASE)),-Release 1,)
+
+# Package standalone examples (with source + installed scripts + binaries) into examples-<platform>.zip
+package_examples: examples
+	@echo [Package] Packaging standalone examples...
+	@$(PWSH_FILE) make-examples.ps1 $(if $(filter 1,$(RELEASE)),-Release 1,)
+
+# Package official crystal_integration addon into godot-crystal-addon.zip
+package_addon: plugin bridge
+	@echo [Package] Packaging official Crystal integration addon...
+	@$(PWSH_FILE) make-addon.ps1
+
+# Package all release archives and checksums into bin/release_dist/
+package_all:
+	@echo [Package] Packaging all release archives into bin/release_dist/...
+	@$(PWSH_FILE) make-release.ps1 $(if $(filter 1,$(RELEASE)),-Release 1,)
 
 perf_run: perf
 	@echo [Performance] Launching performance stress benchmark...

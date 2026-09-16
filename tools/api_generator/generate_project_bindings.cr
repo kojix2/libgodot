@@ -42,16 +42,16 @@ data = JSON.parse(File.read(json_path))
 
 # Mapping from Godot Variant Type ID to Crystal Type Name
 VARIANT_TYPE_MAP = {
-  0  => "Void",
-  1  => "Bool",
-  2  => "Int64",
-  3  => "Float64",
-  4  => "String",
-  5  => "Godot::Vector2",
-  6  => "Godot::Vector2i",
-  7  => "Godot::Rect2",
-  8  => "Godot::Rect2i",
-  9  => "Godot::Vector3",
+   0 => "Void",
+   1 => "Bool",
+   2 => "Int64",
+   3 => "Float64",
+   4 => "String",
+   5 => "Godot::Vector2",
+   6 => "Godot::Vector2i",
+   7 => "Godot::Rect2",
+   8 => "Godot::Rect2i",
+   9 => "Godot::Vector3",
   10 => "Godot::Vector3i",
   11 => "Godot::Transform2D",
   12 => "Godot::Vector4",
@@ -80,7 +80,7 @@ VARIANT_TYPE_MAP = {
   35 => "Godot::PackedVector2Array",
   36 => "Godot::PackedVector3Array",
   37 => "Godot::PackedColorArray",
-  38 => "Godot::PackedVector4Array"
+  38 => "Godot::PackedVector4Array",
 }
 
 KEYWORDS = {
@@ -98,7 +98,7 @@ KEYWORDS = {
   "self"    => "self_node",
   "nil"     => "nil_val",
   "true"    => "true_val",
-  "false"   => "false_val"
+  "false"   => "false_val",
 }
 
 def sanitize_ident(name : String) : String
@@ -121,11 +121,11 @@ def resolve_crystal_return_type(type_id : Int64, class_name : String?) : String
   end
 
   case type_id
-  when 0 then "Void"
-  when 1 then "Bool"
-  when 2 then "Int64"
-  when 3 then "Float64"
-  when 4 then "String"
+  when  0 then "Void"
+  when  1 then "Bool"
+  when  2 then "Int64"
+  when  3 then "Float64"
+  when  4 then "String"
   when 24 then "Godot::Object?"
   else
     "Void"
@@ -151,6 +151,18 @@ end
 
 Dir.mkdir_p(out_dir)
 generated_files = [] of String
+parent_map = Hash(String, String?).new
+
+# Collect all custom class names to detect inheritance between custom nodes
+custom_class_names = Set(String).new
+if gdscript_classes = data["gdscript_classes"]?.try(&.as_a)
+  gdscript_classes.each do |c|
+    if raw_name = c["name"]?.try(&.as_s)
+      clean = raw_name.gsub(/[^a-zA-Z0-9_]/, "")
+      custom_class_names << clean unless clean.empty?
+    end
+  end
+end
 
 # =============================================================================
 # 1. Generate GDScript Node Bindings
@@ -162,6 +174,9 @@ if gdscript_classes = data["gdscript_classes"]?.try(&.as_a)
     next if clean_class_name.empty?
 
     inherits_name = c["inherits"]?.try(&.as_s) || "Node"
+    clean_inherits = inherits_name.gsub(/[^a-zA-Z0-9_]/, "")
+    is_custom_parent = custom_class_names.includes?(clean_inherits)
+
     if inherits_name.starts_with?("Crystal")
       inherits_type = "Godot::Node"
     else
@@ -172,10 +187,14 @@ if gdscript_classes = data["gdscript_classes"]?.try(&.as_a)
     file_basename = "#{clean_class_name.underscore}.cr"
     target_path = File.join(out_dir, file_basename)
     generated_files << file_basename
+    parent_map[file_basename] = is_custom_parent ? "#{clean_inherits.underscore}.cr" : nil
 
     File.open(target_path, "w") do |io|
       io.puts "# Generated strongly typed wrapper for GDScript node `#{clean_class_name}`"
       io.puts "# Script Path: #{script_path}"
+      if is_custom_parent
+        io.puts "require \"./#{clean_inherits.underscore}.cr\""
+      end
       io.puts "module Godot"
       io.puts "  class #{clean_class_name} < #{inherits_type}"
       io.puts "    # Wrap a native pointer to an existing #{clean_class_name} instance"
@@ -311,12 +330,36 @@ if gdscript_classes = data["gdscript_classes"]?.try(&.as_a)
 end
 
 # =============================================================================
-# 2. Generate Manifest: all_project_nodes.cr
+# 2. Generate Manifest: all_project_nodes.cr (Topologically Ordered)
 # =============================================================================
+def add_with_parents(file : String, parent_map : Hash(String, String?), visited : Set(String), visiting : Set(String), ordered_files : Array(String)) : Nil
+  return if visited.includes?(file)
+  if visiting.includes?(file)
+    visited << file
+    ordered_files << file
+    return
+  end
+  visiting << file
+  if parent_file = parent_map[file]?
+    add_with_parents(parent_file, parent_map, visited, visiting, ordered_files)
+  end
+  visiting.delete(file)
+  visited << file
+  ordered_files << file
+end
+
+ordered_files = [] of String
+visited = Set(String).new
+visiting = Set(String).new
+
+generated_files.sort.each do |f|
+  add_with_parents(f, parent_map, visited, visiting, ordered_files)
+end
+
 manifest_path = File.join(out_dir, "all_project_nodes.cr")
 File.open(manifest_path, "w") do |io|
   io.puts "# Generated All Project Custom Nodes Manifest"
-  generated_files.sort.each do |f|
+  ordered_files.each do |f|
     io.puts "require \"./#{f}\""
   end
 end

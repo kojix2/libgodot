@@ -194,7 +194,9 @@ node TestAnnotationsSuite < CharacterBody3D do
   property internal_seed : Int64 = 123456_i64
 
   @[ExportToolButton("Reset Health")]
-  property btn_reset : Bool = false
+  property btn_reset = ->{
+    @action_counter = 0
+  }
 
   @[ExportToolButton("Method Pointer Button", icon: "Action")]
   property btn_method_ptr = ->action_method
@@ -457,7 +459,7 @@ node FailNode2 < Node do
   @[ExportToolButton("Bad Button 2")]
   property btn = ->(x : Int32) { x }
 end
-), "takes 1 argument(s). Tool buttons must take only a no-args proc")
+), "takes argument(s). Tool buttons must take only a no-args proc")
 
 test_compile_error.call(%(
 node FailNode3 < Node do
@@ -477,8 +479,52 @@ node FailNodeCall < Node do
   def method_without_arrow : Void
   end
 end
-), "must be assigned a Proc (e.g. '->some_method' or '->{ ... }'), not a method call")
+), "must be assigned a Proc (e.g. 'property btn = ->some_method' or 'property btn = ->{ ... }'), not a method call 'method_without_arrow'")
+
+test_compile_error.call(%(
+node FailNodeString < Node do
+  @[ExportToolButton("Build Map", "CollisionShape3D")]
+  property build_button : String = "build"
+end
+), "must be a no-args proc: Proc(Void)")
+
+test_compile_error.call(%(
+node FailNodeStringLiteral < Node do
+  @[ExportToolButton("Build Map", "CollisionShape3D")]
+  property build_button = "build"
+end
+), "must be a no-args proc: Proc(Void)")
+
+test_compile_error.call(%(
+node FailNodeBool < Node do
+  @[ExportToolButton("Click Here")]
+  property tool_btn_prop : Bool = false
+end
+), "must be a no-args proc: Proc(Void)")
+
+# Verify valid Proc literal compiles cleanly without error
+tmp_good = File.join(root_dir, "spec", "temp_good_tb.cr")
+begin
+  File.write(tmp_good, %(require "../src/libgodot"
+node GoodNodeProc < Node do
+  @[ExportToolButton("Build Map", "CollisionShape3D")]
+  property build_button = ->{ print "my proc" }
+
+  @[ExportToolButton("Pointer Button")]
+  property ptr_button = ->do_build
+
+  def do_build : Void
+  end
+end
+))
+  good_out = IO::Memory.new
+  good_status = Process.run("crystal", ["build", "--no-codegen", tmp_good], output: good_out, error: good_out)
+  abort "Failed: valid proc tool button failed to compile: #{good_out}" unless good_status.success?
+ensure
+  File.delete(tmp_good) if File.exists?(tmp_good)
+end
 
 puts "✓ Compile-time rejection of argument-taking and non-proc tool buttons verified!"
+puts "✓ Compile-time acceptance of no-arg proc literals and proc pointers verified!"
 puts "All new features passed specifications cleanly!"
 

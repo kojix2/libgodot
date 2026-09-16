@@ -80,6 +80,7 @@ if ($srcCand) {
 # Compile Crystal source
 if ($onWindows) {
     crystal build --link-flags "/DLL /ENTRY:_DllMainCRTStartup /EXPORT:crystal_godot_init" src/main.cr -o "bin/game.$soExt"
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 } else {
     $wrapperPath = Join-Path ([System.IO.Path]::GetTempPath()) "crystal_cc_wrapper.sh"
     $scriptContent = @'
@@ -143,6 +144,7 @@ exit $?
         $extraFlags = "-fuse-ld=lld $extraFlags"
     }
     crystal build --link-flags "-shared $extraFlags" src/main.cr -o "bin/game.$soExt"
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
 # Sync game library to addons bin if present so bridge and editor pick up the newest binary

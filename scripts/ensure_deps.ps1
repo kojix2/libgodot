@@ -78,6 +78,8 @@ if ($onWindows) {
             (Join-Path $RootDir "../bin/libgodot.dll")
         ) | Where-Object { Test-Path $_ } | Select-Object -First 1
         if ($candLibgodot) {
+            $binLibgodotDir = Split-Path -Parent $binLibgodot
+            if (-not (Test-Path $binLibgodotDir)) { New-Item -ItemType Directory -Path $binLibgodotDir -Force | Out-Null }
             Copy-Item $candLibgodot $binLibgodot -Force -ErrorAction SilentlyContinue
         }
     }
@@ -102,6 +104,8 @@ if ($onWindows) {
             (Join-Path $RootDir "../bin/crystal_bridge.dll")
         ) | Where-Object { Test-Path $_ } | Select-Object -First 1
         if ($candBridge) {
+            $binBridgeDir = Split-Path -Parent $binBridge
+            if (-not (Test-Path $binBridgeDir)) { New-Item -ItemType Directory -Path $binBridgeDir -Force | Out-Null }
             Copy-Item $candBridge $binBridge -Force -ErrorAction SilentlyContinue
         }
     }

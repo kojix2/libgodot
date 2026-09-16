@@ -310,7 +310,11 @@ node PropertyTestTarget < Godot::Node do
   property storage_only_prop : Int32 = 999
 
   @[ExportToolButton("Click Here")]
-  property tool_btn_prop : Bool = false
+  property tool_btn_prop = ->{
+	@tool_btn_fired = true
+  }
+
+  property tool_btn_fired : Bool = false
 
   @[ExportToolButton("Proc Method Pointer Button", icon: "Action")]
   property proc_btn_ptr = ->tool_proc_method
@@ -383,7 +387,7 @@ end
 @[Tool]
 node ToolTester2D < Godot::Node2D do
   @[ExportToolButton("▶ Run 2D Tool Tests")]
-  property run_tests_button : Bool = false
+  property run_tests_button = ->run_tool_tests
 
   @[ExportToolButton("Execute 2D Tests Direct", icon: "Play")]
   def execute_2d_tests_direct : Void
@@ -401,14 +405,6 @@ node ToolTester2D < Godot::Node2D do
 	if is_editor_environment
 	  Godot.print("[ToolTester2D] Editor detected. Auto-executing in-editor tests...")
 	  run_tool_tests
-	end
-  end
-
-  def run_tests_button=(val : Bool)
-	@run_tests_button = val
-	if val
-	  run_tool_tests
-	  @run_tests_button = false
 	end
   end
 
@@ -445,7 +441,7 @@ end
 @[Tool]
 node ToolTester3D < Godot::Node3D do
   @[ExportToolButton("▶ Run 3D Tool Tests")]
-  property run_tests_button : Bool = false
+  property run_tests_button = ->run_tool_tests
 
   @[ExportToolButton("Execute 3D Tests Direct", icon: "Play")]
   def execute_3d_tests_direct : Void
@@ -462,14 +458,6 @@ node ToolTester3D < Godot::Node3D do
 	if is_editor_environment
 	  Godot.print("[ToolTester3D] Editor detected. Auto-executing in-editor tests...")
 	  run_tool_tests
-	end
-  end
-
-  def run_tests_button=(val : Bool)
-	@run_tests_button = val
-	if val
-	  run_tool_tests
-	  @run_tests_button = false
 	end
   end
 
@@ -1545,9 +1533,9 @@ test_prop "Property hints registered correctly in ClassDB" do
   TestFramework.assert_eq dyn_tool_prop.not_nil!.hint_string, "Proc Dynamic Button"
 
   target = PropertyTestTarget.new
-  TestFramework.assert_false target.tool_btn_prop
+  TestFramework.assert_false target.tool_btn_fired
   target._godot_call_tool_button("tool_btn_prop")
-  TestFramework.assert_true target.tool_btn_prop
+  TestFramework.assert_true target.tool_btn_fired
 
   TestFramework.assert_false target.tool_button_trigger
   target._godot_call_tool_button("test_method_action")

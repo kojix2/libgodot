@@ -63,7 +63,7 @@ node SpecAnnotationsSuite < CharacterBody3D do
   property save_folder : String = "saves/"
 
   @[ExportToolButton("Reset")]
-  property btn_reset : Bool = false
+  property btn_reset = ->{ }
 
   @[RPC(mode: :any_peer, sync: :call_local, transfer_mode: :reliable, channel: 1)]
   def attack_target(target_id : Int32)

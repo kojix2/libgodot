@@ -1041,35 +1041,23 @@ macro node(decl, &block)
               elsif p_t_str.starts_with?("Proc(")
                 is_proc = true
               elsif p_val && p_val.is_a?(Call)
-                raise "ExportToolButton property '#{p_var_name}' must be assigned a Proc (e.g. '->some_method' or '->{ ... }'), not a method call '#{p_val.name}'. Tool buttons take only a no-args proc: Proc(Void)."
+                raise "ExportToolButton property '#{p_var_name}' must be assigned a Proc (e.g. 'property #{p_var_name} = ->some_method' or 'property #{p_var_name} = ->{ ... }'), not a method call '#{p_val.name}'. Tool buttons take only a no-args proc: Proc(Void)."
+              else
+                raise "ExportToolButton property '#{p_var_name}' must be a no-args proc: Proc(Void) (e.g. 'property #{p_var_name} = ->some_method' or 'property #{p_var_name} = ->{ ... }'), got '#{p_type || p_val}'"
               end
 
-              if is_proc
-                norm_t = p_t_str.gsub(/^(::)?/, "").gsub(/\s*\|\s*(::)?Nil/, "").gsub(/\?/, "").strip
-                if !norm_t.empty? && norm_t != "Proc(Void)" && norm_t != "Proc(Nil)"
-                  raise "ExportToolButton property '#{p_var_name}' must take only a no-args proc: Proc(Void), got '#{p_type}'"
-                end
-                if p_val && p_val.is_a?(ProcPointer) && p_val.args.size > 0
-                  raise "ExportToolButton proc pointer '#{p_var_name}' takes #{p_val.args.size} argument(s). Tool buttons must take only a no-args proc."
-                elsif p_val && p_val.is_a?(ProcLiteral) && p_val.args.size > 0
-                  raise "ExportToolButton proc literal '#{p_var_name}' takes #{p_val.args.size} argument(s). Tool buttons must take only a no-args proc."
-                end
-                tb_kind = :proc_property
-              elsif p_t_str == "String" || (p_val && p_val.is_a?(StringLiteral))
-                tb_kind = :string_property
-              elsif p_t_str == "Bool" || (p_val && (p_val.is_a?(BoolLiteral)))
-                tb_kind = :bool_property
-              else
-                tb_kind = :property
+              norm_t = p_t_str.gsub(/^(::)?/, "").gsub(/\s*\|\s*(::)?Nil/, "").gsub(/\?/, "").strip
+              if !norm_t.empty? && norm_t != "Proc(Void)" && norm_t != "Proc(Nil)"
+                raise "ExportToolButton property '#{p_var_name}' must take only a no-args proc: Proc(Void), got '#{p_type}'"
               end
+              if p_val && p_val.is_a?(ProcPointer) && p_val.args.size > 0
+                raise "ExportToolButton proc pointer '#{p_var_name}' takes #{p_val.args.size} argument(s). Tool buttons must take only a no-args proc."
+              elsif p_val && p_val.is_a?(ProcLiteral) && p_val.stringify.starts_with?("->(")
+                raise "ExportToolButton proc literal '#{p_var_name}' takes argument(s). Tool buttons must take only a no-args proc."
+              end
+              tb_kind = :proc_property
             %}
             {% tool_buttons << {p_var_name, "", tb_kind} %}
-          {% elsif a_name == "Export" && last_anno.named_args %}
-            {% for k, v in last_anno.named_args %}
-              {% if k.stringify == "tool_button" %}
-                {% tool_buttons << {p_var_name, "", :property} %}
-              {% end %}
-            {% end %}
           {% end %}
           {% for key, val in last_anno.named_args %}
             {% if key.stringify == "doc" %}
@@ -1411,17 +1399,6 @@ macro node(decl, &block)
           if btn = self.{{tb[0].id}}
             btn.call
           end
-        {% elsif tb[2] == :string_property %}
-          case self.{{tb[0].id}}
-          {% for m in user_methods %}
-          when "{{m.id}}"
-            self.{{m.id}}
-          {% end %}
-          end
-        {% elsif tb[2] == :bool_property %}
-          self.{{tb[0].id}} = true
-        {% elsif tb[2] == :property %}
-          self.{{tb[0].id}}
         {% else %}
           self.{{tb[0].id}}
         {% end %}

@@ -50,6 +50,18 @@ if ($libgodotCand) {
     }
 }
 
+# Copy plugin.dll if present (editor integration plugin)
+$pluginCand = @(
+    "../bin/plugin.dll",
+    "addons/crystal_integration/bin/plugin.dll",
+    "lib/libgodot/bin/plugin.dll"
+) | Where-Object { Test-Path $_ } | Select-Object -First 1
+if ($pluginCand -and (Test-Path "addons/crystal_integration/bin")) {
+    if ((Resolve-Path $pluginCand).Path -ne (Resolve-Path "addons/crystal_integration/bin/plugin.dll" -ErrorAction SilentlyContinue).Path) {
+        Copy-Item $pluginCand "addons/crystal_integration/bin/plugin.dll" -Force
+    }
+}
+
 $onWindows = ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';')
 $sep = if ($onWindows) { ";" } else { ":" }
 $soExt = if ($onWindows) { "dll" } else { "so" }
@@ -131,6 +143,11 @@ exit $?
         $extraFlags = "-fuse-ld=lld $extraFlags"
     }
     crystal build --link-flags "-shared $extraFlags" src/main.cr -o "bin/game.$soExt"
+}
+
+# Sync game library to addons bin if present so bridge and editor pick up the newest binary
+if (Test-Path "addons/crystal_integration/bin") {
+    Copy-Item "bin/game.$soExt" "addons/crystal_integration/bin/game.$soExt" -Force
 }
 
 # Ensure playable Godot game executable is in place

@@ -154,6 +154,11 @@ module Godot
       end
     end
 
+    # Safeguard signal emission against engine script-subclassing ClassDB lookup quirks
+    if !self.call_bool("has_signal", "ready_in_editor")
+      self.call("add_user_signal", "ready_in_editor") rescue nil
+    end
+
     emit_ready_in_editor
   end
 

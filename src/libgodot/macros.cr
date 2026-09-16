@@ -1055,6 +1055,10 @@ macro node(decl, &block)
                   raise "ExportToolButton proc literal '#{p_var_name}' takes #{p_val.args.size} argument(s). Tool buttons must take only a no-args proc."
                 end
                 tb_kind = :proc_property
+              elsif p_t_str == "String" || (p_val && p_val.is_a?(StringLiteral))
+                tb_kind = :string_property
+              elsif p_t_str == "Bool" || (p_val && (p_val.is_a?(BoolLiteral)))
+                tb_kind = :bool_property
               else
                 tb_kind = :property
               end
@@ -1407,8 +1411,17 @@ macro node(decl, &block)
           if btn = self.{{tb[0].id}}
             btn.call
           end
-        {% elsif tb[2] == :property %}
+        {% elsif tb[2] == :string_property %}
+          case self.{{tb[0].id}}
+          {% for m in user_methods %}
+          when "{{m.id}}"
+            self.{{m.id}}
+          {% end %}
+          end
+        {% elsif tb[2] == :bool_property %}
           self.{{tb[0].id}} = true
+        {% elsif tb[2] == :property %}
+          self.{{tb[0].id}}
         {% else %}
           self.{{tb[0].id}}
         {% end %}

@@ -52,7 +52,7 @@ ifeq ($(RELEASE), 1)
 	CRYSTAL_FLAGS += --release
 endif
 
-.PHONY: all game_dll game_exe deps bridge extension_list addons project_bindings bindings rebuild export export_release run editor clean help
+.PHONY: all game_dll game-dll game_exe game-exe package_game package-game deps bridge extension_list addons project_bindings project-bindings bindings rebuild export export_release export-release run editor run_editor run-editor setup_dev setup-dev clean help
 
 all: dirs deps bridge extension_list addons project_bindings game_dll game_exe
 	@echo ===================================================================
@@ -74,19 +74,23 @@ extension_list:
 addons:
 	@$(PWSH_CMD) "if (Test-Path '../addons') { & $(PWSH_FILE) $(SCRIPTS_DIR)/sync_addons.ps1 -Source ../addons -Destinations addons }"
 
-project_bindings: dirs
+project_bindings project-bindings: dirs
 	@echo [Template] Dumping project custom GDScript and plugin nodes...
 	@$(PWSH_FILE) $(SCRIPTS_DIR)/generate_project_bindings.ps1
 
 bindings: project_bindings
 
-game_dll: dirs deps bridge extension_list addons project_bindings
+game_dll game-dll: dirs deps bridge extension_list addons project_bindings
 	@echo [Template] Compiling game.$(SO_EXT) from $(ENTRY)...
 	@$(PWSH_FILE) $(SCRIPTS_DIR)/build_crystal.ps1 -Entry $(ENTRY) -Output $(GAME_LIB) -LinkFlags '$(LINK_FLAGS)' $(if $(filter 1,$(RELEASE)),-Release,) -SourcePath $(SOURCE_DIR)
 
-game_exe: dirs deps bridge extension_list addons game_dll
+game_exe game-exe: dirs deps bridge extension_list addons game_dll
 	@echo [Template] Packaging complete playable game executable...
-	@$(PWSH_FILE) $(SCRIPTS_DIR)/package_game.ps1 -ProjectPath . -Name game $(if $(filter 1,$(RELEASE)),-Release 1,)
+	@$(PWSH_FILE) $(SCRIPTS_DIR)/package_game.ps1 -ProjectPath . -Name $(or $(NAME),game) $(if $(filter 1,$(RELEASE)),-Release 1,)
+
+package_game package-game: all
+	@echo [Template] Packaging playable standalone game...
+	@$(PWSH_FILE) $(SCRIPTS_DIR)/package_game.ps1 -ProjectPath . $(if $(NAME),-Name "$(NAME)",-Name game) $(if $(filter 1,$(RELEASE)),-Release 1,) $(if $(or $(TARGET_DIR),$(EXPORT_DIR)),-TargetDir "$(or $(TARGET_DIR),$(EXPORT_DIR))",) $(if $(filter 1,$(FORCE)),-ForceCompile,)
 
 run: all
 	@echo [Template] Running project with Godot...
@@ -96,6 +100,12 @@ editor: all
 	@echo [Template] Opening project in Godot Editor...
 	$(GODOT) --editor --path .
 
+run_editor run-editor: all
+	@$(PWSH_FILE) $(SCRIPTS_DIR)/run_editor.ps1 -Path . $(if $(or $(LOG),$(LOG_FILE)),-LogFile "$(or $(LOG),$(LOG_FILE))",) $(if $(or $(QUIT),$(QUIT_AFTER)),-QuitAfter $(or $(QUIT),$(QUIT_AFTER)),) $(if $(filter 1,$(LLDB)),-LLDB,) $(if $(filter 1,$(BATCH)),-Batch,) $(ARGS)
+
+setup_dev setup-dev:
+	@$(PWSH_FILE) $(SCRIPTS_DIR)/setup_dev.ps1 $(if $(VERSION),-Version "$(VERSION)",)
+
 clean:
 	@$(RM) $(BIN_DIR)/*
 	@$(PWSH_CMD) "Remove-Item -Path 'game.exe', 'game', 'export' -Recurse -Force -ErrorAction SilentlyContinue"
@@ -104,11 +114,11 @@ rebuild: clean all
 
 export: all
 	@echo [Template] Exporting project to export/ directory...
-	@$(PWSH_FILE) $(SCRIPTS_DIR)/package_game.ps1 -ProjectPath . -Name game -TargetDir export -ForceCompile
+	@$(PWSH_FILE) $(SCRIPTS_DIR)/package_game.ps1 -ProjectPath . -Name $(or $(NAME),game) -TargetDir $(or $(TARGET_DIR),export) -ForceCompile
 
-export_release: dirs deps bridge extension_list addons project_bindings
+export_release export-release: dirs deps bridge extension_list addons project_bindings
 	@echo [Template] Exporting optimized release project to export/ directory...
-	@$(PWSH_FILE) $(SCRIPTS_DIR)/package_game.ps1 -ProjectPath . -Name game -TargetDir export -Release 1 -ForceCompile
+	@$(PWSH_FILE) $(SCRIPTS_DIR)/package_game.ps1 -ProjectPath . -Name $(or $(NAME),game) -TargetDir $(or $(TARGET_DIR),export) -Release 1 -ForceCompile
 
 help:
 	@echo ===================================================================
@@ -116,12 +126,15 @@ help:
 	@echo ===================================================================
 	@echo   make                Build game library, runnable executable, and sync
 	@echo   make rebuild        Clean and rebuild all artifacts
-	@echo   make game_dll       Compile game shared library (game.$(SO_EXT))
-	@echo   make game_exe       Package playable game executable into bin/
-	@echo   make project_bindings Generate typed Crystal wrappers for project GDScript nodes
+	@echo   make game-dll       Compile game shared library (game.$(SO_EXT))
+	@echo   make game-exe       Package playable game executable into bin/
+	@echo   make package-game   Package standalone game [TARGET_DIR=...] [RELEASE=1]
+	@echo   make project-bindings Generate typed Crystal wrappers for GDScript nodes
 	@echo   make export         Export standalone playable game package to export/
-	@echo   make export_release Export release optimized game package to export/
+	@echo   make export-release Export release optimized game package to export/
 	@echo   make run            Launch game in Godot
 	@echo   make editor         Open project in Godot Editor
+	@echo   make run-editor     Launch editor [LOG=...] [QUIT=...] [LLDB=1]
+	@echo   make setup-dev      Download/setup Godot engine binary [VERSION=...]
 	@echo   make clean          Remove built binaries and export directories
 	@echo ===================================================================

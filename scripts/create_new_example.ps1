@@ -15,19 +15,38 @@
 #>
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [string]$Name
+    [string]$Name,
+    [Parameter(Position = 1)]
+    [string]$TargetPath = ""
 )
 
 $ErrorActionPreference = "Stop"
 
-$Root = $PSScriptRoot
+$curr = $PSScriptRoot
+$Root = ""
+while ($curr) {
+    if ((Test-Path (Join-Path $curr "shard.yml")) -and (Test-Path (Join-Path $curr "src/libgodot.cr"))) {
+        $Root = $curr
+        break
+    }
+    $parent = Split-Path -Parent $curr
+    if ($parent -eq $curr) { break }
+    $curr = $parent
+}
+if (-not $Root) { $Root = Split-Path -Parent $PSScriptRoot }
 $ExamplesDir = Join-Path $Root "examples"
-$TargetDir = Join-Path $ExamplesDir $Name
 $TemplateDir = Join-Path $Root "template"
 
 if (-not (Test-Path $TemplateDir)) {
     Write-Error "Template directory '$TemplateDir' does not exist."
     exit 1
+}
+
+# Determine target directory
+if ([string]::IsNullOrWhiteSpace($TargetPath)) {
+    $TargetDir = Join-Path $ExamplesDir $Name
+} else {
+    $TargetDir = $TargetPath
 }
 
 if (Test-Path $TargetDir) {
@@ -40,9 +59,22 @@ Write-Host "  Scaffolding New LibGodot Example: $Name                  " -Foregr
 Write-Host "==========================================================" -ForegroundColor Cyan
 
 # 1. Create directory and copy from template
-Write-Host "[1/5] Copying template files to examples/$Name..."
+Write-Host "[1/5] Copying template files to $TargetDir..."
 New-Item -ItemType Directory -Force -Path $TargetDir | Out-Null
-Copy-Item -Path (Join-Path $TemplateDir "*") -Destination $TargetDir -Recurse -Force
+Get-ChildItem -Path $TemplateDir -Exclude "addons", "dist", ".godot", "lib", "bin", "*.log" | ForEach-Object {
+    Copy-Item -Path $_.FullName -Destination $TargetDir -Recurse -Force
+}
+
+# Resolve relative path to root for shard and scripts
+$targetFull = (Resolve-Path $TargetDir).Path.Replace('\', '/').Trim('/')
+$rootFull = (Resolve-Path $Root).Path.Replace('\', '/').Trim('/')
+if ($targetFull.StartsWith($rootFull)) {
+    $sub = $targetFull.Substring($rootFull.Length).Trim('/')
+    $depth = ($sub.Split('/')).Count
+    $relToRoot = "../" * $depth
+} else {
+    $relToRoot = "../../"
+}
 
 # 2. Update shard.yml with project name
 $shardPath = Join-Path $TargetDir "shard.yml"
@@ -60,7 +92,7 @@ crystal: '>= 1.10.0'
 
 dependencies:
   libgodot:
-    path: ../../
+    path: $relToRoot
 "@
     Set-Content -Path $shardPath -Value $shardContent -Force
 }
@@ -84,13 +116,13 @@ if (Test-Path $makefilePath) {
 # =============================================================================
 
 CRYSTAL      ?= crystal
-GODOT        ?= ../../godot.exe
+GODOT        ?= ${relToRoot}godot.exe
 ENTRY        ?= src/main.cr
 
 BIN_DIR       = bin
 GAME_DLL      = `$(BIN_DIR)/game.dll
 GAME_EXE      = `$(BIN_DIR)/game.exe
-BRIDGE_SRC    = ../../bin/crystal_bridge.dll
+BRIDGE_SRC    = ${relToRoot}bin/crystal_bridge.dll
 
 POWERSHELL   = powershell -NoProfile -Command
 CP           = `$(POWERSHELL) "Copy-Item -Force"
@@ -109,7 +141,7 @@ dirs:
 	@powershell -ExecutionPolicy Bypass -Command "if (-not (Test-Path '`$(BIN_DIR)')) { New-Item -ItemType Directory -Force -Path '`$(BIN_DIR)' | Out-Null }"
 
 deps: dirs
-	@powershell -ExecutionPolicy Bypass -File ../../scripts/ensure_deps.ps1 -TargetBin '`$(BIN_DIR)'
+	@powershell -ExecutionPolicy Bypass -File ${relToRoot}scripts/ensure_deps.ps1 -TargetBin '`$(BIN_DIR)'
 
 bridge: dirs
 	@powershell -ExecutionPolicy Bypass -Command "if (Test-Path '`$(BRIDGE_SRC)') { Copy-Item '`$(BRIDGE_SRC)' '`$(BIN_DIR)/crystal_bridge.dll' -Force -ErrorAction SilentlyContinue }"
@@ -118,16 +150,16 @@ extension_list:
 	@powershell -ExecutionPolicy Bypass -Command "if (-not (Test-Path '.godot')) { New-Item -ItemType Directory -Force -Path '.godot' | Out-Null }; Set-Content -Path '.godot/extension_list.cfg' -Value 'res://addons/crystal_integration/crystal.gdextension' -Force"
 
 addons:
-	@powershell -ExecutionPolicy Bypass -File ../../scripts/sync_addons.ps1 -Source ../../addons -Destinations addons
+	@powershell -ExecutionPolicy Bypass -File ${relToRoot}scripts/sync_addons.ps1 -Source ${relToRoot}addons -Destinations addons
 
 game_dll: dirs deps bridge extension_list addons
 	@echo [$Name] Compiling game.dll from `$(ENTRY)...
-	@powershell -ExecutionPolicy Bypass -File ../../scripts/build_crystal.ps1 -Entry `$(ENTRY) -Output `$(GAME_DLL) -LinkFlags '`$(LINK_FLAGS)' `$(if `$(filter 1,`$(RELEASE)),-Release,) -SourcePath ../../src
+	@powershell -ExecutionPolicy Bypass -File ${relToRoot}scripts/build_crystal.ps1 -Entry `$(ENTRY) -Output `$(GAME_DLL) -LinkFlags '`$(LINK_FLAGS)' `$(if `$(filter 1,`$(RELEASE)),-Release,) -SourcePath ${relToRoot}src
 	@powershell -ExecutionPolicy Bypass -Command "if (Test-Path '`$(GAME_DLL)') { Copy-Item '`$(GAME_DLL)' 'addons/crystal_integration/bin/game.dll' -Force -ErrorAction SilentlyContinue }"
 
 game_exe: dirs deps bridge extension_list addons game_dll
 	@echo [$Name] Packaging complete playable game executable...
-	@powershell -ExecutionPolicy Bypass -File ../../scripts/package_game.ps1 -ProjectPath . -Name $Name `$(if `$(filter 1,`$(RELEASE)),-Release 1,)
+	@powershell -ExecutionPolicy Bypass -File ${relToRoot}scripts/package_game.ps1 -ProjectPath . -Name $Name `$(if `$(filter 1,`$(RELEASE)),-Release 1,)
 
 run: all
 	@echo [$Name] Running example with Godot...
@@ -148,7 +180,7 @@ clean:
 param([switch]`$Release)
 `$ErrorActionPreference = "Stop"
 `$relArg = if (`$Release) { "1" } else { "" }
-`$packageScript = Join-Path (Resolve-Path "../../scripts/package_game.ps1")
+`$packageScript = Join-Path (Resolve-Path "${relToRoot}scripts/package_game.ps1")
 & powershell -NoProfile -ExecutionPolicy Bypass -File `$packageScript -ProjectPath `$PSScriptRoot -Name "$Name" -Release `$relArg
 "@ -Force
 
@@ -156,14 +188,14 @@ param([switch]`$Release)
     Set-Content -Path $runScript -Value @"
 `$ErrorActionPreference = "Stop"
 & .\build.ps1
-if (Test-Path ".\$Name.exe") { & ".\$Name.exe" } else { & "..\..\godot.exe" --path . }
+if (Test-Path ".\$Name.exe") { & ".\$Name.exe" } else { & "${relToRoot}godot.exe" --path . }
 "@ -Force
 
     $runEditorScript = Join-Path $TargetDir "run-editor.ps1"
     Set-Content -Path $runEditorScript -Value @"
 `$ErrorActionPreference = "Stop"
 & .\build.ps1
-& "..\..\godot.exe" --editor --path .
+& "${relToRoot}godot.exe" --editor --path .
 "@ -Force
 
     # Scaffold export_presets.cfg

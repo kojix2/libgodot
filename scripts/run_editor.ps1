@@ -38,7 +38,18 @@ if ($PSBoundParameters.ContainsKey("Path") -and $Path -match '^-(?!-)?[a-zA-Z]')
 
 $ErrorActionPreference = "Stop"
 
-$RootDir = $PSScriptRoot
+$curr = $PSScriptRoot
+$RootDir = ""
+while ($curr) {
+    if ((Test-Path (Join-Path $curr "shard.yml")) -and (Test-Path (Join-Path $curr "src/libgodot.cr"))) {
+        $RootDir = $curr
+        break
+    }
+    $parent = Split-Path -Parent $curr
+    if ($parent -eq $curr) { break }
+    $curr = $parent
+}
+if (-not $RootDir) { $RootDir = Split-Path -Parent $PSScriptRoot }
 
 # 1. Resolve target project path
 if ([System.IO.Path]::IsPathRooted($Path)) {

@@ -5,7 +5,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 $RootDir = Split-Path -Parent $PSScriptRoot
-$RunEditorScript = Join-Path $RootDir "run-editor.ps1"
+$RunEditorScript = Join-Path $RootDir "scripts/run_editor.ps1"
+if (-not (Test-Path $RunEditorScript)) { $RunEditorScript = Join-Path $RootDir "run-editor.ps1" }
 $ScratchDir = Join-Path $RootDir "scratch"
 if (-not (Test-Path $ScratchDir)) {
     New-Item -ItemType Directory -Force -Path $ScratchDir | Out-Null

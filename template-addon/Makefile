@@ -48,7 +48,7 @@ ifeq ($(RELEASE), 1)
 	CRYSTAL_FLAGS += --release
 endif
 
-.PHONY: all build deps bridge extension_list addons project_bindings bindings package export export_release rebuild run editor clean help
+.PHONY: all build deps bridge extension_list addons project_bindings project-bindings bindings package package_addon package-addon export export_release export-release rebuild run editor run_editor run-editor setup_dev setup-dev clean help
 
 all: dirs deps bridge extension_list addons project_bindings build
 	@echo ===================================================================
@@ -71,7 +71,7 @@ extension_list: dirs
 addons: dirs
 	@$(PWSH_FILE) $(SCRIPTS_DIR)/sync_addons.ps1 -Source ../addons -Destinations addons
 
-project_bindings: dirs
+project_bindings project-bindings: dirs
 	@echo [Addon] Dumping project custom GDScript and plugin nodes...
 	@$(PWSH_FILE) $(SCRIPTS_DIR)/generate_project_bindings.ps1
 
@@ -81,13 +81,13 @@ build: dirs deps bridge extension_list addons project_bindings
 	@echo [Addon] Compiling $(GAME_LIB) from $(ENTRY)...
 	@$(PWSH_FILE) $(SCRIPTS_DIR)/build_crystal.ps1 -Entry $(ENTRY) -Output $(GAME_LIB) -LinkFlags '$(LINK_FLAGS)' $(if $(filter 1,$(RELEASE)),-Release,) -SourcePath $(SOURCE_DIR) -Flags '-Dlibgodot_addon'
 
-package: all
+package package_addon package-addon: all
 	@echo [Addon] Packaging distributable zip for '$(ADDON_NAME)'...
-	@$(PWSH_FILE) $(SCRIPTS_DIR)/package.ps1 -AddonName $(ADDON_NAME)
+	@$(PWSH_FILE) $(SCRIPTS_DIR)/package.ps1 -AddonName $(ADDON_NAME) $(if $(TARGET_DIR),-TargetDir "$(TARGET_DIR)",)
 
 export: package
 
-export_release:
+export_release export-release:
 	@echo [Addon] Packaging release optimized distributable zip for '$(ADDON_NAME)'...
 	@$(MAKE) package RELEASE=1
 
@@ -101,6 +101,12 @@ run: all
 	@echo [Addon] Running Godot project with addon...
 	$(GODOT) --path .
 
+run_editor run-editor: all
+	@$(PWSH_FILE) $(SCRIPTS_DIR)/run_editor.ps1 -Path . $(if $(or $(LOG),$(LOG_FILE)),-LogFile "$(or $(LOG),$(LOG_FILE))",) $(if $(or $(QUIT),$(QUIT_AFTER)),-QuitAfter $(or $(QUIT),$(QUIT_AFTER)),) $(if $(filter 1,$(LLDB)),-LLDB,) $(if $(filter 1,$(BATCH)),-Batch,) $(ARGS)
+
+setup_dev setup-dev:
+	@$(PWSH_FILE) $(SCRIPTS_DIR)/setup_dev.ps1 $(if $(VERSION),-Version "$(VERSION)",)
+
 clean:
 	@$(RM) $(ADDON_BIN_DIR)/*
 	@$(RM) dist/*
@@ -111,12 +117,15 @@ help:
 	@echo ===================================================================
 	@echo   make                Build addon library and sync dependencies
 	@echo   make build          Compile addon Crystal library (game.$(SO_EXT))
-	@echo   make project_bindings Generate typed Crystal wrappers for GDScript nodes
+	@echo   make project-bindings Generate typed Crystal wrappers for GDScript nodes
 	@echo   make rebuild        Clean and rebuild all addon artifacts
 	@echo   make package        Package redistributable zip archive into dist/
+	@echo   make package-addon  Alias for 'make package'
 	@echo   make export         Alias for 'make package'
-	@echo   make export_release Package release optimized zip into dist/
+	@echo   make export-release Package release optimized zip into dist/
 	@echo   make run            Run test project with addon in Godot
 	@echo   make editor         Launch Godot Editor to test addon
+	@echo   make run-editor     Launch editor [LOG=...] [QUIT=...] [LLDB=1]
+	@echo   make setup-dev      Download/setup Godot engine binary [VERSION=...]
 	@echo   make clean          Remove compiled addon binaries and dist/
 	@echo ===================================================================

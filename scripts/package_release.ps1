@@ -14,7 +14,9 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$root = $PSScriptRoot
+$root = Split-Path -Parent $PSScriptRoot
+if (-not $root) { $root = (Get-Location).Path }
+$scriptsDir = $PSScriptRoot
 
 $targetFullDir = if ([System.IO.Path]::IsPathRooted($OutputDir)) { $OutputDir } else { Join-Path $root $OutputDir }
 if (-not (Test-Path $targetFullDir)) {
@@ -28,24 +30,24 @@ Write-Host "Target Directory: $targetFullDir" -ForegroundColor Cyan
 
 # 1. Package Template Project
 Write-Host "`n--- [1/6] Packaging Starter Template ---" -ForegroundColor Cyan
-& (Join-Path $root "make-template.ps1") -TargetDir $targetFullDir -Release $Release
+& (Join-Path $scriptsDir "package_template.ps1") -TargetDir $targetFullDir -Release $Release
 
 # 2. Package Addon Template Project
 Write-Host "`n--- [2/6] Packaging Addon Template ---" -ForegroundColor Cyan
-& (Join-Path $root "make-template-addon.ps1") -TargetDir $targetFullDir -Release $Release
+& (Join-Path $scriptsDir "package_template_addon.ps1") -TargetDir $targetFullDir -Release $Release
 
 # 3. Package Examples (Full Source + Scripts + Playable Binaries)
 Write-Host "`n--- [3/6] Packaging Standalone Examples ---" -ForegroundColor Cyan
-& (Join-Path $root "make-examples.ps1") -TargetDir $targetFullDir -Platform $Platform -Release $Release
+& (Join-Path $scriptsDir "package_examples.ps1") -TargetDir $targetFullDir -Platform $Platform -Release $Release
 
 # 4. Package Official Integration Addon
 Write-Host "`n--- [4/6] Packaging Crystal Integration Addon ---" -ForegroundColor Cyan
-& (Join-Path $root "make-addon.ps1") -TargetDir $targetFullDir
+& (Join-Path $scriptsDir "package_addon.ps1") -TargetDir $targetFullDir
 
 # 5. Package Standalone Test Suite
 if (-not $SkipTests) {
     Write-Host "`n--- [5/6] Packaging Standalone Test Suite ---" -ForegroundColor Cyan
-    & (Join-Path $root "make-tests.ps1") -TargetDir $targetFullDir -Platform $Platform -Release $Release -SkipVerify
+    & (Join-Path $scriptsDir "package_test_suite.ps1") -TargetDir $targetFullDir -Platform $Platform -Release $Release -SkipVerify
 } else {
     Write-Host "`n--- [5/6] Skipping Standalone Test Suite ---" -ForegroundColor Yellow
 }
@@ -53,7 +55,7 @@ if (-not $SkipTests) {
 # 6. Package Performance Stress Benchmark
 if (-not $SkipPerf) {
     Write-Host "`n--- [6/6] Packaging Performance Stress Benchmark ---" -ForegroundColor Cyan
-    & (Join-Path $root "make-perf.ps1") -TargetDir $targetFullDir -Platform $Platform -Release $Release -SkipVerify
+    & (Join-Path $scriptsDir "package_perf.ps1") -TargetDir $targetFullDir -Platform $Platform -Release $Release -SkipVerify
 } else {
     Write-Host "`n--- [6/6] Skipping Performance Stress Benchmark ---" -ForegroundColor Yellow
 }

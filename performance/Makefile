@@ -45,7 +45,7 @@ ifeq ($(RELEASE), 1)
 	CRYSTAL_FLAGS += --release
 endif
 
-.PHONY: all game_dll game_exe standalone package deps bridge extension_list addons run editor clean help
+.PHONY: all game_dll game-dll game_exe game-exe package package_perf package-perf package_game package-game standalone deps bridge extension_list addons run editor run_editor run-editor clean help
 
 all: dirs deps bridge extension_list addons game_dll
 	@echo ===================================================================
@@ -67,17 +67,22 @@ extension_list: dirs
 addons:
 	@$(PWSH_FILE) ../scripts/sync_addons.ps1 -Source ../addons -Destinations addons
 
-game_dll: dirs deps bridge extension_list addons
+game_dll game-dll: dirs deps bridge extension_list addons
 	@echo [Performance] Compiling game.$(SO_EXT) from $(ENTRY)...
 	@$(PWSH_FILE) ../scripts/build_crystal.ps1 -Entry $(ENTRY) -Output $(GAME_LIB) -LinkFlags '$(LINK_FLAGS)' $(if $(filter 1,$(RELEASE)),-Release,) -SourcePath ../src
 	@$(PWSH_CMD) "if (Test-Path '$(GAME_LIB)') { try { Copy-Item '$(GAME_LIB)' 'addons/crystal_integration/bin/game.$(SO_EXT)' -Force } catch {} }"
 
-standalone: dirs deps bridge extension_list addons game_dll
+standalone game_exe game-exe: dirs deps bridge extension_list addons game_dll
 	@echo [Performance] Packaging standalone benchmark executable...
 	@$(PWSH_FILE) ../scripts/package_game.ps1 -ProjectPath . -Name "perf" $(if $(filter 1,$(RELEASE)),-Release 1,) -ForceCompile
 
-game_exe: standalone
-package: standalone
+package package_perf package-perf: standalone
+	@echo [Performance] Packaging standalone benchmark archive...
+	@$(PWSH_FILE) ../scripts/package_perf.ps1 $(if $(TARGET_DIR),-TargetDir "$(TARGET_DIR)",) $(if $(PLATFORM),-Platform "$(PLATFORM)",) $(if $(or $(ARCHIVE_NAME),$(ZIP_NAME)),-ArchiveName "$(or $(ARCHIVE_NAME),$(ZIP_NAME))",) $(if $(filter 1,$(RELEASE)),-Release 1,) $(if $(filter 1,$(SKIP_VERIFY)),-SkipVerify,) $(if $(filter 1,$(FORCE)),-Force,)
+
+package_game package-game: dirs deps bridge extension_list addons game_dll
+	@echo [Performance] Packaging standalone benchmark game...
+	@$(PWSH_FILE) ../scripts/package_game.ps1 -ProjectPath . -Name "perf" $(if $(filter 1,$(RELEASE)),-Release 1,) $(if $(or $(TARGET_DIR),$(EXPORT_DIR)),-TargetDir "$(or $(TARGET_DIR),$(EXPORT_DIR))",) -ForceCompile
 
 run: all
 	@echo [Performance] Running Performance Stress Benchmark...
@@ -87,6 +92,24 @@ editor: all
 	@echo [Performance] Opening Performance project in Godot Editor...
 	$(GODOT) --editor --path .
 
+run_editor run-editor: all
+	@$(PWSH_FILE) ../scripts/run_editor.ps1 -Path . $(if $(or $(LOG),$(LOG_FILE)),-LogFile "$(or $(LOG),$(LOG_FILE))",) $(if $(or $(QUIT),$(QUIT_AFTER)),-QuitAfter $(or $(QUIT),$(QUIT_AFTER)),) $(if $(filter 1,$(LLDB)),-LLDB,) $(if $(filter 1,$(BATCH)),-Batch,) $(ARGS)
+
 clean:
 	@$(RM) $(BIN_DIR)/*
 	@$(PWSH_CMD) "Remove-Item -Path 'perf.exe', 'perf', 'perf.console.exe', 'game.exe', 'game' -Recurse -Force -ErrorAction SilentlyContinue"
+
+help:
+	@echo ===================================================================
+	@echo   LibGodot Performance Benchmark - Build Commands
+	@echo ===================================================================
+	@echo   make                Build performance library and sync dependencies
+	@echo   make game-dll       Compile game shared library (game.$(SO_EXT))
+	@echo   make standalone     Package standalone benchmark executable
+	@echo   make package-perf   Package benchmark archive into perf-^<platform^>.zip
+	@echo   make package-game   Package standalone playable game
+	@echo   make run            Launch performance benchmark in Godot
+	@echo   make editor         Open performance project in Godot Editor
+	@echo   make run-editor     Launch editor [LOG=...] [QUIT=...] [LLDB=1]
+	@echo   make clean          Remove built binaries and standalone executables
+	@echo ===================================================================

@@ -14,33 +14,34 @@ This skill outlines how to create new showcase examples and redistributable GDEx
 ## 1. Scaffolding a New Showcase Example
 
 To create a new showcase project under `examples/<name>`:
-```powershell
-.\create-new-example.ps1 -Name <example_name>
+```bash
+make new-example NAME=<example_name>
+# Or specify a custom target directory:
+make new-example NAME=<example_name> DIR=path/to/example
 ```
+*(Equivalent PowerShell command: `.\scripts\create_new_example.ps1 -Name <example_name> [-TargetPath <path>]`)*
 
-### What this script creates:
-1. `examples/<example_name>/`:
+### What this command creates:
+1. `examples/<example_name>/` (or custom `DIR`):
    - `project.godot`: Godot project configured with Crystal extension addon.
    - `shard.yml`: Crystal shard dependency pointing to root `../../src`.
    - `src/main.cr`: Entry point defining example nodes.
-   - `scenes/main.tscn`: Starter scene with your Crystal node.
-   - `Makefile`: Standalone build script.
-   - `bin/`: Target folder for compiled `game.dll`, `crystal_bridge.dll`, and runtime DLLs.
-2. Registers the new example in the root build pipeline:
-   - Compiling via `make examples` or `make all` will automatically include the new example.
-
-### Critical Rule for Examples:
-- **Never put example code in `src/`!**
-- All example game logic, character controllers, procedural generators, and UI panels must reside exclusively in `examples/<name>/src/main.cr` and associated files.
+   - `Makefile`: Configured with `all`, `game`, `clean`, `run`, `editor`.
+   - `scenes/main.tscn`: Minimal starting scene.
+2. Registers new example in root `Makefile` under `EXAMPLES` list (if scaffolded under `examples/`).
+3. Runs an initial `make all` in the newly created example project.
 
 ---
 
 ## 2. Scaffolding a New Redistributable Addon
 
 To create a standalone, redistributable Godot addon package:
-```powershell
-.\create-new-addon.ps1 -Name <addon_name>
+```bash
+make new-addon NAME=<addon_name>
+# Or with custom options:
+make new-addon NAME=<addon_name> DIR=addons_dev/<addon_name> AUTHOR="Your Name" DESC="Addon description"
 ```
+*(Equivalent PowerShell command: `.\scripts\create_new_addon.ps1 -Name <addon_name> [-TargetPath <path>] [-Author <author>] [-Description <desc>]`)*
 
 ### What this creates:
 1. An isolated Godot project designed to distribute a Crystal-backed GDExtension library.

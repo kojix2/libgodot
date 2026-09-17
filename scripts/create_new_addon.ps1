@@ -34,7 +34,18 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$Root = $PSScriptRoot
+$curr = $PSScriptRoot
+$Root = ""
+while ($curr) {
+    if ((Test-Path (Join-Path $curr "shard.yml")) -and (Test-Path (Join-Path $curr "src/libgodot.cr"))) {
+        $Root = $curr
+        break
+    }
+    $parent = Split-Path -Parent $curr
+    if ($parent -eq $curr) { break }
+    $curr = $parent
+}
+if (-not $Root) { $Root = Split-Path -Parent $PSScriptRoot }
 $TemplateDir = Join-Path $Root "template-addon"
 
 if (-not (Test-Path $TemplateDir)) {
@@ -61,7 +72,7 @@ Write-Host "==========================================================" -Foregro
 # 1. Create target directory and copy root template files (excluding addons, dist, .godot)
 Write-Host "[1/5] Copying template-addon files..."
 New-Item -ItemType Directory -Force -Path $TargetDir | Out-Null
-Get-ChildItem -Path $TemplateDir -Exclude "addons", "dist", ".godot" | ForEach-Object {
+Get-ChildItem -Path $TemplateDir -Exclude "addons", "dist", ".godot", "lib", "bin", "*.log" | ForEach-Object {
     Copy-Item -Path $_.FullName -Destination $TargetDir -Recurse -Force
 }
 

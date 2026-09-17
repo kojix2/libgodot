@@ -98,10 +98,10 @@ if File.exists?(sync_bins_path)
   puts "  ✓ scripts/sync_bins.ps1 enforces .gdignore placement"
 end
 
-create_example_path = File.join(root_dir, "create-new-example.ps1")
+create_example_path = File.exists?(File.join(root_dir, "scripts/create_new_example.ps1")) ? File.join(root_dir, "scripts/create_new_example.ps1") : File.join(root_dir, "create-new-example.ps1")
 if File.exists?(create_example_path)
   content = File.read(create_example_path)
-  puts "  ✓ create-new-example.ps1 verified"
+  puts "  ✓ create_new_example.ps1 verified"
 end
 
 puts "=== All Project Scaffolding & Directory Integrity Specifications Passed! ==="

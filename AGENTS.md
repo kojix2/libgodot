@@ -40,7 +40,8 @@ libgodot/
    - All test definitions, assertions, test scenes, `@tool` in-editor testers (`ToolTester2D`, `ToolTester3D`), and the interactive runtime UI panel (`RunTesterPanel`) reside in `test/` (entry point: `test/src/main.cr`).
 3. **`examples/` and `template/` are independent consumers**:
    - Each example and template project is a self-contained Godot project with its own `project.godot`, `shard.yml`, `Makefile`, and `scenes/`.
-   - New examples must be scaffolded using `.\create-new-example.ps1 -Name <name>`.
+   - New examples must be scaffolded using `make new-example NAME=<name> [DIR=<path>]` (or `.\scripts\create_new_example.ps1 -Name <name>`).
+   - New addons must be scaffolded using `make new-addon NAME=<name> [DIR=<path>] [AUTHOR="..."] [DESC="..."]` (or `.\scripts\create_new_addon.ps1`).
    - All examples are compiled via `make examples`.
 
 ---
@@ -114,11 +115,19 @@ LibGodot supports two distinct execution paradigms designed for both rapid in-ed
 - `make all`: Full workspace build, synchronization, and test run.
 - `make all RELEASE=1`: Full release build with `--release -O3` optimizations.
 - `make test`: Executes specs, headless in-editor tool tests, and runtime test project.
+- `make run-test`: Unified test runner (`UI=1`, `SKIP_SPECS=1`, etc.).
+- `make run-ci-local`: Executes local GitHub Actions CI matrix harness.
 - `make docs`: Generates offline HTML API documentation into `docs/` using `crystal docs`.
 - `make run`: Launches the test project directly in Godot.
 - `make editor`: Opens the test project in the Godot Editor (`godot.exe --editor --path test`).
+- `make run-editor`: Unified Godot editor launcher (`PROJECT=<path>`, `LOG=<file>`, `QUIT=<sec>`, `LLDB=1`).
 - `make debug`: Runs the test project (or `PROJECT=<path>`) under LLDB debugger.
 - `make debug-editor`: Launches the Godot Editor under LLDB debugger.
+- `make new-addon`: Scaffolds a new GDExtension addon (`NAME=<name>`, `DIR=<path>`, etc.).
+- `make new-example`: Scaffolds a new showcase example (`NAME=<name>`, `DIR=<path>`).
+- `make package-game`: Packages playable game (`PROJECT=<dir>`, `RELEASE=1`, `FORCE=1`).
+- `make package-release`: Packages all release archives and checksums into `bin/release_dist/`.
+- `make setup-dev`: Downloads and sets up the targeted Godot engine binary.
 - `make clean`: Cleans build artifacts while safely preserving runtime DLLs (`libgodot.dll`, `gc.dll`).
 
 ---

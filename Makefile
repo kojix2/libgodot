@@ -146,6 +146,36 @@ test_standalone: dirs deps bridge addons dummy_addons
 	@echo [Test] Building standalone test suite executable...
 	$(MAKE) -C test standalone RELEASE=$(RELEASE)
 
+# Build all showcase examples in examples/
+examples: dirs deps bridge addons
+	@echo [Examples] Building all projects in $(EXAMPLES_DIR)...
+	@$(PWSH_FILE) scripts/build_examples.ps1 $(if $(filter 1,$(RELEASE)),-Release 1,)
+
+# Build standalone executables for all projects in examples/
+examples_exe: dirs deps bridge addons
+	@echo [Examples] Building standalone executables for all projects in $(EXAMPLES_DIR)...
+	@$(PWSH_FILE) scripts/build_examples.ps1 -Exe $(if $(filter 1,$(RELEASE)),-Release 1,)
+
+# Build starter game template project
+template: dirs deps bridge addons
+	@echo [Template] Building template project...
+	$(MAKE) -C template RELEASE=$(RELEASE)
+
+# Build addon starter template project
+template_addon: dirs deps bridge addons
+	@echo [TemplateAddon] Building template-addon project...
+	$(MAKE) -C template-addon RELEASE=$(RELEASE)
+
+# Dedicated performance stress testing project
+perf: dirs deps bridge addons
+	@echo [Performance] Building performance stress benchmark...
+	$(MAKE) -C performance RELEASE=$(RELEASE)
+
+# Build standalone performance suite executable
+perf_standalone: dirs deps bridge addons
+	@echo [Performance] Building standalone performance benchmark executable...
+	$(MAKE) -C performance standalone RELEASE=$(RELEASE)
+
 # Package standalone test suite into tests-<platform>.zip
 package_tests package-tests: test_standalone
 	@echo [Package] Packaging standalone test suite...
@@ -352,10 +382,10 @@ debug-editor:
 
 # Clean build artifacts (preserves libgodot.dll and runtime DLLs)
 clean:
-	@echo Cleaning build artifacts across bin/, test/bin/, template/bin/, addons/crystal_integration/bin, and examples...
-	@$(PWSH_CMD) "Get-ChildItem -Path '$(BIN_DIR)', '$(TEST_BIN_DIR)', '$(TEMPLATE_BIN_DIR)', 'addons/crystal_integration/bin' -Include 'crystal_bridge.*', 'game.*', '~crystal_bridge.*' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue"
+	@echo Cleaning build artifacts across bin/, test/bin/, template/bin/, addons/crystal_integration/bin, template-addon, performance, and examples...
+	@$(PWSH_CMD) "Get-ChildItem -Path '$(BIN_DIR)', '$(TEST_BIN_DIR)', '$(TEMPLATE_BIN_DIR)', 'addons/crystal_integration/bin', 'template-addon/addons', 'performance/bin' -Include 'crystal_bridge.*', 'game.*', '~crystal_bridge.*' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue"
 	@$(PWSH_CMD) "if (Test-Path '$(EXAMPLES_DIR)') { Get-ChildItem -Path '$(EXAMPLES_DIR)' -Include 'crystal_bridge.*', 'game.*', '~crystal_bridge.*' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue }"
-	@$(PWSH_CMD) "Remove-Item -Path 'test/tests.exe', 'test/tests' -Force -ErrorAction SilentlyContinue"
+	@$(PWSH_CMD) "Remove-Item -Path 'test/tests.exe', 'test/tests', 'performance/perf.exe', 'performance/perf' -Force -ErrorAction SilentlyContinue"
 	@$(PWSH_CMD) "Get-ChildItem -Path 'scratch' -Include '*.obj', '*.exp' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue"
 	@echo Clean complete.
 

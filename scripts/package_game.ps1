@@ -287,37 +287,9 @@ if ($godotExe -and (Test-Path $godotExe)) {
 
     # Place runner inside bin/ following the preset name (e.g. bin/tests.exe or bin/basic_demo.exe)
     $binNamedExe = Join-Path $binDir "$Name$exeExt"
-    if ($isMac) {
-        # On macOS, standalone Godot runners cannot embed PCK into a single raw binary.
-        # Create an executable launcher script that passes --main-pack if running standalone.
-        $godotTarget = if (Test-Path $godotExe) { (Resolve-Path $godotExe).Path } else { $godotExe }
-        $launcherContent = @"
-#!/usr/bin/env bash
-DIR="`$(cd "`$(dirname "`"${BASH_SOURCE[0]}`")" && pwd)"
-PACK="`$DIR/$Name.pck"
-if [ -f "`$PACK" ]; then
-    has_pack=false
-    for arg in "`$@"; do
-        if [ "`$arg" = "--main-pack" ]; then
-            has_pack=true
-            break
-        fi
-    done
-    if [ "`$has_pack" = "false" ]; then
-        exec "$godotTarget" --main-pack "`$PACK" "`$@"
-    fi
-fi
-exec "$godotTarget" "`$@"
-"@
-        Set-Content -Path $binNamedExe -Value ($launcherContent -replace "`r`n", "`n") -NoNewline -Encoding utf8
-        if (Get-Command chmod -ErrorAction SilentlyContinue) {
-            & chmod +x $binNamedExe
-        }
-    } else {
-        Safe-Copy $godotExe $binNamedExe
-        if (-not $onWindows -and (Get-Command chmod -ErrorAction SilentlyContinue)) {
-            & chmod +x $binNamedExe
-        }
+    Safe-Copy $godotExe $binNamedExe
+    if (-not $onWindows -and (Get-Command chmod -ErrorAction SilentlyContinue)) {
+        & chmod +x $binNamedExe
     }
 
     # Clean up any leftover temporary shadow files before Godot export

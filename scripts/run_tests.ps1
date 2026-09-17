@@ -555,6 +555,15 @@ if (-not $SkipStandaloneTests) {
     Write-Host "--- Phase 3: Standalone Compiled Test Runner (./tests --autorun) ---" -ForegroundColor Magenta
 
     $onWindows = ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';')
+    $isMac = $false
+    try {
+        if ($IsMacOS -or [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::OSX)) {
+            $isMac = $true
+        }
+    } catch {}
+    if (-not $isMac -and -not $onWindows) {
+        if ((Get-Command uname -ErrorAction SilentlyContinue) -and ((& uname) -eq "Darwin")) { $isMac = $true }
+    }
     $exeExt = if ($onWindows) { ".exe" } else { "" }
     $pkgScript = Join-Path $RootDir "scripts/package_game.ps1"
     $standaloneExe = Join-Path $TestBinDir "tests$exeExt"
@@ -597,13 +606,21 @@ if (-not $SkipStandaloneTests) {
             if (Test-Path $m) { Remove-Item $m -Force }
         }
 
-        # Standalone exported templates forbid '--path' and '--main-pack', so we run directly in TestBinDir
+        # Standalone exported templates forbid '--path' and '--main-pack', so we run directly in TestBinDir.
+        # On macOS, Godot runs as a launcher wrapper around Godot.app which requires explicit --main-pack.
+        $standalonePackArgs = @()
+        if ($isMac) {
+            $pckCandidate = Join-Path $TestBinDir "tests.pck"
+            if (Test-Path $pckCandidate) {
+                $standalonePackArgs = @("--main-pack", $pckCandidate)
+            }
+        }
         $standaloneLogFile = Join-Path $scratchDir "standalone_tests.log"
         if (Test-Path $standaloneLogFile) { Remove-Item $standaloneLogFile -Force }
 
         $standaloneResult = Invoke-TestCommand -Name "Standalone Compiled Test Runner (tests$exeExt --autorun)" `
             -Executable $runExe `
-            -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--quit-after", "600", "--", "--autorun") `
+            -Arguments (@("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy") + $standalonePackArgs + @("--quit-after", "600", "--", "--autorun")) `
             -WorkingDirectory $TestBinDir `
             -OutputFile $standaloneLogFile `
             -CustomVerification
@@ -655,12 +672,19 @@ if (-not $SkipStandaloneTests) {
                 if (Test-Path $m) { Remove-Item $m -Force }
             }
 
+            $relPackArgs = @()
+            if ($isMac) {
+                $pckCandidate = Join-Path $TestBinDir "tests.pck"
+                if (Test-Path $pckCandidate) {
+                    $relPackArgs = @("--main-pack", $pckCandidate)
+                }
+            }
             $relLogFile = Join-Path $scratchDir "standalone_rel_tests.log"
             if (Test-Path $relLogFile) { Remove-Item $relLogFile -Force }
 
             $relResult = Invoke-TestCommand -Name "Standalone Release Test Runner (tests$exeExt --autorun RELEASE=1)" `
                 -Executable $runExe `
-                -Arguments @("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--quit-after", "600", "--", "--autorun") `
+                -Arguments (@("--headless", "--rendering-driver", "opengl3", "--audio-driver", "Dummy") + $relPackArgs + @("--quit-after", "600", "--", "--autorun")) `
                 -WorkingDirectory $TestBinDir `
                 -OutputFile $relLogFile `
                 -CustomVerification

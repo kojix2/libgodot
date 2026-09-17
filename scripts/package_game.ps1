@@ -287,9 +287,37 @@ if ($godotExe -and (Test-Path $godotExe)) {
 
     # Place runner inside bin/ following the preset name (e.g. bin/tests.exe or bin/basic_demo.exe)
     $binNamedExe = Join-Path $binDir "$Name$exeExt"
-    Safe-Copy $godotExe $binNamedExe
-    if (-not $onWindows -and (Get-Command chmod -ErrorAction SilentlyContinue)) {
-        & chmod +x $binNamedExe
+    if ($isMac) {
+        # On macOS, standalone Godot runners cannot embed PCK into a single raw binary.
+        # Create an executable launcher script that passes --main-pack if running standalone.
+        $godotTarget = if (Test-Path $godotExe) { (Resolve-Path $godotExe).Path } else { $godotExe }
+        $launcherContent = @"
+#!/usr/bin/env bash
+DIR="`$(cd "`$(dirname "`"${BASH_SOURCE[0]}`")" && pwd)"
+PACK="`$DIR/$Name.pck"
+if [ -f "`$PACK" ]; then
+    has_pack=false
+    for arg in "`$@"; do
+        if [ "`$arg" = "--main-pack" ]; then
+            has_pack=true
+            break
+        fi
+    done
+    if [ "`$has_pack" = "false" ]; then
+        exec "$godotTarget" --main-pack "`$PACK" "`$@"
+    fi
+fi
+exec "$godotTarget" "`$@"
+"@
+        Set-Content -Path $binNamedExe -Value ($launcherContent -replace "`r`n", "`n") -NoNewline -Encoding utf8
+        if (Get-Command chmod -ErrorAction SilentlyContinue) {
+            & chmod +x $binNamedExe
+        }
+    } else {
+        Safe-Copy $godotExe $binNamedExe
+        if (-not $onWindows -and (Get-Command chmod -ErrorAction SilentlyContinue)) {
+            & chmod +x $binNamedExe
+        }
     }
 
     # Clean up any leftover temporary shadow files before Godot export
@@ -324,7 +352,7 @@ if ($godotExe -and (Test-Path $godotExe)) {
             Write-Warning "  -> Failed to generate standalone pack via --export-pack"
         }
 
-        # Attempt native export only if export templates exist
+        # Attempt native export only if export templates exist and platform supports single-binary export (Windows/Linux)
         $appDataGodot = if ($env:APPDATA) {
             Join-Path $env:APPDATA "Godot/export_templates"
         } elseif ($isMac) {
@@ -336,7 +364,7 @@ if ($godotExe -and (Test-Path $godotExe)) {
         if ($appDataGodot -and (Test-Path $appDataGodot)) {
             $hasTemplates = (Get-ChildItem -Path $appDataGodot -Recurse -Filter "*$exeExt" -File -ErrorAction SilentlyContinue).Count -gt 0
         }
-        if ($hasTemplates) {
+        if ($hasTemplates -and -not $isMac) {
             $exportMode = if ($Release -eq "1" -or $Release -eq "true") { "--export-release" } else { "--export-debug" }
             Write-Host "  -> Running standalone export ($exportMode $preset)..." -ForegroundColor Cyan
             & $godotExe @($headlessGodotFlags + @("--path", $projFull, $exportMode, $preset, $binNamedExe)) | Out-Host

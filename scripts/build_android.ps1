@@ -17,7 +17,7 @@ $projFull = if ([System.IO.Path]::IsPathRooted($ProjectPath)) {
 }
 
 $versionFile = Join-Path $RootDir "godot-version.yml"
-$targetGodotVersion = "4.8-dev5"
+$targetGodotVersion = "4.8-dev6"
 if (Test-Path $versionFile) {
     $rawVer = Get-Content $versionFile -Raw
     if ($rawVer -match 'version:\s*[''"]?([^''"\r\n]+)[''"]?') {

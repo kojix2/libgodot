@@ -10,7 +10,7 @@ $ErrorActionPreference = "Stop"
 $RootDir = Split-Path -Parent $PSScriptRoot
 if (-not $RootDir) { $RootDir = (Get-Location).Path }
 $VersionFile = Join-Path $RootDir "godot-version.yml"
-$tagVersion = "4.8-dev5"
+$tagVersion = "4.8-dev6"
 if (Test-Path $VersionFile) {
     $rawVer = Get-Content $VersionFile -Raw
     if ($rawVer -match 'version:\s*"?([^"\r\n]+)"?') {

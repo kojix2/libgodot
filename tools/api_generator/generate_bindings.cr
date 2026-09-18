@@ -6,6 +6,10 @@ puts "Loading extension_api.json..."
 
 api_file = if File.exists?("extension_api.json")
   "extension_api.json"
+elsif File.exists?("rsrc/extension_api.json")
+  "rsrc/extension_api.json"
+elsif File.exists?(File.join(__DIR__, "..", "..", "rsrc", "extension_api.json"))
+  File.join(__DIR__, "..", "..", "rsrc", "extension_api.json")
 elsif File.exists?(File.join(__DIR__, "..", "..", "extension_api.json"))
   File.join(__DIR__, "..", "..", "extension_api.json")
 else
@@ -193,7 +197,10 @@ end
 # 3. Classes (Topologically Sorted)
 # =============================================================================
 puts "Sorting classes topologically..."
-classes = api_data["classes"].as_a
+classes = api_data["classes"].as_a.reject do |c|
+  api_type = c["api_type"]?.try(&.as_s)
+  api_type == "extension" || api_type == "editor_extension"
+end
 
 # Build dependency graph
 class_map = Hash(String, JSON::Any).new

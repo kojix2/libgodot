@@ -275,7 +275,7 @@ keystore_decode: dirs
 # Generate Crystal bindings from Godot extension_api.json
 dump_api:
 	@echo [API] Dumping extension_api.json from Godot...
-	$(GODOT) --headless --dump-extension-api
+	@$(PWSH_CMD) "New-Item -ItemType Directory -Force scratch/dump_tmp | Out-Null; Set-Content scratch/dump_tmp/project.godot 'config_version=5'; Start-Process -FilePath (Resolve-Path ./godot.exe) -ArgumentList '--headless', '--path', (Resolve-Path scratch/dump_tmp), '--dump-extension-api' -WorkingDirectory (Resolve-Path scratch/dump_tmp) -Wait; Start-Process -FilePath (Resolve-Path ./godot.exe) -ArgumentList '--headless', '--path', (Resolve-Path scratch/dump_tmp), '--dump-gdextension-interface' -WorkingDirectory (Resolve-Path scratch/dump_tmp) -Wait; Copy-Item scratch/dump_tmp/extension_api.json extension_api.json -Force; Copy-Item scratch/dump_tmp/extension_api.json rsrc/extension_api.json -Force; Copy-Item scratch/dump_tmp/gdextension_interface.h rsrc/gdextension_interface.h -Force; Remove-Item scratch/dump_tmp -Recurse -Force"
 
 generate:
 	@echo [Generator] Generating complete Godot bindings from extension_api.json...

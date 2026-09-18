@@ -21521,7 +21521,9 @@ module Godot
       ParamShadowBlur = 18_i64
       ParamTransmittanceBias = 19_i64
       ParamIntensity = 20_i64
-      ParamMax = 21_i64
+      ParamContactShadowOpacity = 21_i64
+      ParamContactShadowBlur = 22_i64
+      ParamMax = 23_i64
     end
     enum BakeMode : Int64
       BakeDisabled = 0_i64
@@ -21760,6 +21762,25 @@ module Godot
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_shadow_caster_mask, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
+    end
+    @@mb_set_allow_contact_shadows : Void* = Pointer(Void).null
+    def set_allow_contact_shadows(enabled : Bool) : Void
+      if @@mb_set_allow_contact_shadows.null?
+        @@mb_set_allow_contact_shadows = Bridge.get_method_bind("Light3D", "set_allow_contact_shadows", 2586408642_i64)
+      end
+      val_0 = enabled
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_allow_contact_shadows, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_get_allow_contact_shadows : Void* = Pointer(Void).null
+    def get_allow_contact_shadows() : Bool
+      if @@mb_get_allow_contact_shadows.null?
+        @@mb_get_allow_contact_shadows = Bridge.get_method_bind("Light3D", "get_allow_contact_shadows", 36873697_i64)
+      end
+      ret = 0_u8
+      Bridge.ptrcall(@@mb_get_allow_contact_shadows, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
+      ret != 0_u8
     end
     @@mb_set_bake_mode : Void* = Pointer(Void).null
     def set_bake_mode(bake_mode : Int64) : Void
@@ -22011,6 +22032,33 @@ module Godot
     # Property `shadow_caster_mask` setter
     def shadow_caster_mask=(val : Int)
       set_shadow_caster_mask(val.to_i64)
+    end
+    # Property `shadow_contact_shadows_allow` getter
+    def shadow_contact_shadows_allow
+      get_allow_contact_shadows
+    end
+    def shadow_contact_shadows_allow?
+      shadow_contact_shadows_allow
+    end
+    # Property `shadow_contact_shadows_allow` setter
+    def shadow_contact_shadows_allow=(val)
+      set_allow_contact_shadows(val)
+    end
+    # Property `shadow_contact_shadows_opacity` getter
+    def shadow_contact_shadows_opacity
+      get_param(21_i64)
+    end
+    # Property `shadow_contact_shadows_opacity` setter
+    def shadow_contact_shadows_opacity=(val : Number)
+      set_param(21_i64, val.to_f64)
+    end
+    # Property `shadow_contact_shadows_blur` getter
+    def shadow_contact_shadows_blur
+      get_param(22_i64)
+    end
+    # Property `shadow_contact_shadows_blur` setter
+    def shadow_contact_shadows_blur=(val : Number)
+      set_param(22_i64, val.to_f64)
     end
     # Property `distance_fade_enabled` getter
     def distance_fade_enabled
@@ -45040,6 +45088,219 @@ module Godot
     # Property `auto_exposure_max_sensitivity` setter
     def auto_exposure_max_sensitivity=(val : Number)
       set_auto_exposure_max_sensitivity(val.to_f64)
+    end
+  end
+  class CameraFeed < Godot::RefCounted
+    def initialize(pointer : Void* = Pointer(Void).null)
+      super(pointer)
+    end
+    enum FeedDataType : Int64
+      FeedNoimage = 0_i64
+      FeedRgb = 1_i64
+      FeedYcbcr = 2_i64
+      FeedYcbcrSep = 3_i64
+      FeedExternal = 4_i64
+    end
+    enum FeedPosition : Int64
+      FeedUnspecified = 0_i64
+      FeedFront = 1_i64
+      FeedBack = 2_i64
+    end
+    @@mb_get_id : Void* = Pointer(Void).null
+    def get_id() : Int64
+      if @@mb_get_id.null?
+        @@mb_get_id = Bridge.get_method_bind("CameraFeed", "get_id", 3905245786_i64)
+      end
+      ret = 0_i64
+      Bridge.ptrcall(@@mb_get_id, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
+      ret
+    end
+    @@mb_is_active : Void* = Pointer(Void).null
+    def is_active() : Bool
+      if @@mb_is_active.null?
+        @@mb_is_active = Bridge.get_method_bind("CameraFeed", "is_active", 36873697_i64)
+      end
+      ret = 0_u8
+      Bridge.ptrcall(@@mb_is_active, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
+      ret != 0_u8
+    end
+    @@mb_set_active : Void* = Pointer(Void).null
+    def set_active(active : Bool) : Void
+      if @@mb_set_active.null?
+        @@mb_set_active = Bridge.get_method_bind("CameraFeed", "set_active", 2586408642_i64)
+      end
+      val_0 = active
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_active, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_get_name : Void* = Pointer(Void).null
+    def get_name() : String
+      if @@mb_get_name.null?
+        @@mb_get_name = Bridge.get_method_bind("CameraFeed", "get_name", 201670096_i64)
+      end
+      ""
+    end
+    @@mb_set_name : Void* = Pointer(Void).null
+    def set_name(name : String) : Void
+      if @@mb_set_name.null?
+        @@mb_set_name = Bridge.get_method_bind("CameraFeed", "set_name", 83702148_i64)
+      end
+      str_0 = Bridge.make_string(name)
+      arg_0 = str_0
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_name, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    ensure
+      Bridge.free_string(str_0)
+    end
+    @@mb_get_position : Void* = Pointer(Void).null
+    def get_position() : Int64
+      if @@mb_get_position.null?
+        @@mb_get_position = Bridge.get_method_bind("CameraFeed", "get_position", 2711679033_i64)
+      end
+      ret = 0_i64
+      Bridge.ptrcall(@@mb_get_position, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
+      ret
+    end
+    @@mb_set_position : Void* = Pointer(Void).null
+    def set_position(position : Int64) : Void
+      if @@mb_set_position.null?
+        @@mb_set_position = Bridge.get_method_bind("CameraFeed", "set_position", 611162623_i64)
+      end
+      val_0 = position
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_position, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_get_transform : Void* = Pointer(Void).null
+    def get_transform() : Transform2D
+      if @@mb_get_transform.null?
+        @@mb_get_transform = Bridge.get_method_bind("CameraFeed", "get_transform", 3814499831_i64)
+      end
+      ret_ptr = Pointer(Void).null
+      Bridge.ptrcall(@@mb_get_transform, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
+      Transform2D.new(ret_ptr)
+    end
+    @@mb_set_transform : Void* = Pointer(Void).null
+    def set_transform(transform : Transform2D) : Void
+      if @@mb_set_transform.null?
+        @@mb_set_transform = Bridge.get_method_bind("CameraFeed", "set_transform", 2761652528_i64)
+      end
+      val_0 = transform
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_transform, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_set_rgb_image : Void* = Pointer(Void).null
+    def set_rgb_image(rgb_image : Image) : Void
+      if @@mb_set_rgb_image.null?
+        @@mb_set_rgb_image = Bridge.get_method_bind("CameraFeed", "set_rgb_image", 532598488_i64)
+      end
+      arg_ptr_0 = rgb_image ? rgb_image.pointer : Pointer(Void).null
+      arg_0 = pointerof(arg_ptr_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_rgb_image, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_set_ycbcr_image : Void* = Pointer(Void).null
+    def set_ycbcr_image(ycbcr_image : Image) : Void
+      if @@mb_set_ycbcr_image.null?
+        @@mb_set_ycbcr_image = Bridge.get_method_bind("CameraFeed", "set_ycbcr_image", 532598488_i64)
+      end
+      arg_ptr_0 = ycbcr_image ? ycbcr_image.pointer : Pointer(Void).null
+      arg_0 = pointerof(arg_ptr_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_ycbcr_image, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_set_ycbcr_images : Void* = Pointer(Void).null
+    def set_ycbcr_images(y_image : Image, cbcr_image : Image) : Void
+      if @@mb_set_ycbcr_images.null?
+        @@mb_set_ycbcr_images = Bridge.get_method_bind("CameraFeed", "set_ycbcr_images", 1986484629_i64)
+      end
+      arg_ptr_0 = y_image ? y_image.pointer : Pointer(Void).null
+      arg_0 = pointerof(arg_ptr_0).as(Void*)
+      arg_ptr_1 = cbcr_image ? cbcr_image.pointer : Pointer(Void).null
+      arg_1 = pointerof(arg_ptr_1).as(Void*)
+      args = [arg_0, arg_1]
+      Bridge.ptrcall(@@mb_set_ycbcr_images, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_set_external : Void* = Pointer(Void).null
+    def set_external(width : Int64, height : Int64) : Void
+      if @@mb_set_external.null?
+        @@mb_set_external = Bridge.get_method_bind("CameraFeed", "set_external", 3937882851_i64)
+      end
+      val_0 = width
+      arg_0 = pointerof(val_0).as(Void*)
+      val_1 = height
+      arg_1 = pointerof(val_1).as(Void*)
+      args = [arg_0, arg_1]
+      Bridge.ptrcall(@@mb_set_external, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_get_texture_tex_id : Void* = Pointer(Void).null
+    def get_texture_tex_id(feed_image_type : Int64) : Int64
+      if @@mb_get_texture_tex_id.null?
+        @@mb_get_texture_tex_id = Bridge.get_method_bind("CameraFeed", "get_texture_tex_id", 1135699418_i64)
+      end
+      val_0 = feed_image_type
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      ret = 0_i64
+      Bridge.ptrcall(@@mb_get_texture_tex_id, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
+      ret
+    end
+    @@mb_get_datatype : Void* = Pointer(Void).null
+    def get_datatype() : Int64
+      if @@mb_get_datatype.null?
+        @@mb_get_datatype = Bridge.get_method_bind("CameraFeed", "get_datatype", 1477782850_i64)
+      end
+      ret = 0_i64
+      Bridge.ptrcall(@@mb_get_datatype, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
+      ret
+    end
+    @@mb_get_formats : Void* = Pointer(Void).null
+    def get_formats() : Godot::Array
+      if @@mb_get_formats.null?
+        @@mb_get_formats = Bridge.get_method_bind("CameraFeed", "get_formats", 3995934104_i64)
+      end
+      ret_ptr = Pointer(Void).null
+      Bridge.ptrcall(@@mb_get_formats, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
+      Godot::Array.new(ret_ptr)
+    end
+    @@mb_set_format : Void* = Pointer(Void).null
+    def set_format(index : Int64, parameters : Void*) : Bool
+      if @@mb_set_format.null?
+        @@mb_set_format = Bridge.get_method_bind("CameraFeed", "set_format", 31872775_i64)
+      end
+      val_0 = index
+      arg_0 = pointerof(val_0).as(Void*)
+      val_1 = parameters
+      arg_1 = pointerof(val_1).as(Void*)
+      args = [arg_0, arg_1]
+      ret = 0_u8
+      Bridge.ptrcall(@@mb_set_format, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
+      ret != 0_u8
+    end
+    # Property `feed_is_active` getter
+    def feed_is_active
+      is_active
+    end
+    def feed_is_active?
+      feed_is_active
+    end
+    # Property `feed_is_active` setter
+    def feed_is_active=(val)
+      set_active(val)
+    end
+    # Property `feed_transform` getter
+    def feed_transform
+      get_transform
+    end
+    # Property `feed_transform` setter
+    def feed_transform=(val)
+      set_transform(val)
+    end
+    # Property `formats` getter
+    def formats
+      get_formats
     end
   end
 end

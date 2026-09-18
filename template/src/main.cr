@@ -24,5 +24,6 @@ node MainNode < Node3D do
 	  each_child {|c| Godot.print(c.name)}
 	
 	  Godot.print get_node_as(MyCrystalNode, "MyCrystalNode").my_var
+	  Godot.print("HELLO 12345678")
   end
 end

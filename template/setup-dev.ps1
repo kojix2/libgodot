@@ -75,7 +75,7 @@ if (-not $Version) {
     }
 }
 if (-not $Version) {
-    $Version = "4.8-dev5"
+    $Version = "4.8-dev6"
 }
 
 # Normalize version tag (e.g. '4.8.dev5' -> '4.8-dev5')

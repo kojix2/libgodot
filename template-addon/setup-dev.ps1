@@ -19,7 +19,7 @@ if (-not $Version) {
         }
     }
 }
-if (-not $Version) { $Version = "4.8-dev5" }
+if (-not $Version) { $Version = "4.8-dev6" }
 
 $onWindows = ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';')
 $isMac = $false

@@ -1,110 +1,5 @@
 # Generated classes part 4 (in topological order)
 module Godot
-  class OfflineMultiplayerPeer < Godot::MultiplayerPeer
-    def initialize(pointer : Void* = Pointer(Void).null)
-      super(pointer)
-    end
-  end
-  class OggPacketSequence < Godot::Resource
-    def initialize(pointer : Void* = Pointer(Void).null)
-      super(pointer)
-    end
-    @@mb_set_packet_data : Void* = Pointer(Void).null
-    def set_packet_data(packet_data : Godot::Array) : Void
-      if @@mb_set_packet_data.null?
-        @@mb_set_packet_data = Bridge.get_method_bind("OggPacketSequence", "set_packet_data", 381264803_i64)
-      end
-      arg_ptr_0 = packet_data ? packet_data.pointer : Pointer(Void).null
-      arg_0 = pointerof(arg_ptr_0).as(Void*)
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_packet_data, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    end
-    @@mb_get_packet_data : Void* = Pointer(Void).null
-    def get_packet_data() : Godot::Array
-      if @@mb_get_packet_data.null?
-        @@mb_get_packet_data = Bridge.get_method_bind("OggPacketSequence", "get_packet_data", 3995934104_i64)
-      end
-      ret_ptr = Pointer(Void).null
-      Bridge.ptrcall(@@mb_get_packet_data, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
-      Godot::Array.new(ret_ptr)
-    end
-    @@mb_set_packet_granule_positions : Void* = Pointer(Void).null
-    def set_packet_granule_positions(granule_positions : Void*) : Void
-      if @@mb_set_packet_granule_positions.null?
-        @@mb_set_packet_granule_positions = Bridge.get_method_bind("OggPacketSequence", "set_packet_granule_positions", 3709968205_i64)
-      end
-      val_0 = granule_positions
-      arg_0 = pointerof(val_0).as(Void*)
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_packet_granule_positions, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    end
-    @@mb_get_packet_granule_positions : Void* = Pointer(Void).null
-    def get_packet_granule_positions() : Void*
-      if @@mb_get_packet_granule_positions.null?
-        @@mb_get_packet_granule_positions = Bridge.get_method_bind("OggPacketSequence", "get_packet_granule_positions", 235988956_i64)
-      end
-      ret_ptr = Pointer(Void).null
-      Bridge.ptrcall(@@mb_get_packet_granule_positions, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
-      ret_ptr
-    end
-    @@mb_set_sampling_rate : Void* = Pointer(Void).null
-    def set_sampling_rate(sampling_rate : Float64) : Void
-      if @@mb_set_sampling_rate.null?
-        @@mb_set_sampling_rate = Bridge.get_method_bind("OggPacketSequence", "set_sampling_rate", 373806689_i64)
-      end
-      val_0 = sampling_rate
-      arg_0 = pointerof(val_0).as(Void*)
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_sampling_rate, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    end
-    @@mb_get_sampling_rate : Void* = Pointer(Void).null
-    def get_sampling_rate() : Float64
-      if @@mb_get_sampling_rate.null?
-        @@mb_get_sampling_rate = Bridge.get_method_bind("OggPacketSequence", "get_sampling_rate", 1740695150_i64)
-      end
-      ret = 0.0_f64
-      Bridge.ptrcall(@@mb_get_sampling_rate, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
-      ret
-    end
-    @@mb_get_length : Void* = Pointer(Void).null
-    def get_length() : Float64
-      if @@mb_get_length.null?
-        @@mb_get_length = Bridge.get_method_bind("OggPacketSequence", "get_length", 1740695150_i64)
-      end
-      ret = 0.0_f64
-      Bridge.ptrcall(@@mb_get_length, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
-      ret
-    end
-    # Property `packet_data` getter
-    def packet_data
-      get_packet_data
-    end
-    # Property `packet_data` setter
-    def packet_data=(val)
-      set_packet_data(val)
-    end
-    # Property `granule_positions` getter
-    def granule_positions
-      get_packet_granule_positions
-    end
-    # Property `granule_positions` setter
-    def granule_positions=(val)
-      set_packet_granule_positions(val)
-    end
-    # Property `sampling_rate` getter
-    def sampling_rate
-      get_sampling_rate
-    end
-    # Property `sampling_rate` setter
-    def sampling_rate=(val : Number)
-      set_sampling_rate(val.to_f64)
-    end
-  end
-  class OggPacketSequencePlayback < Godot::RefCounted
-    def initialize(pointer : Void* = Pointer(Void).null)
-      super(pointer)
-    end
-  end
   class OmniLight3D < Godot::Light3D
     def initialize(pointer : Void* = Pointer(Void).null)
       super(pointer)
@@ -332,6 +227,15 @@ module Godot
       end
       ret = 0_i64
       Bridge.ptrcall(@@mb_get_view_count, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
+      ret
+    end
+    @@mb_get_primary_view_count : Void* = Pointer(Void).null
+    def get_primary_view_count() : Int64
+      if @@mb_get_primary_view_count.null?
+        @@mb_get_primary_view_count = Bridge.get_method_bind("OpenXRAPIExtension", "get_primary_view_count", 3905245786_i64)
+      end
+      ret = 0_i64
+      Bridge.ptrcall(@@mb_get_primary_view_count, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret
     end
     @@mb_get_view_configuration : Void* = Pointer(Void).null
@@ -2823,6 +2727,211 @@ module Godot
       super(pointer)
     end
   end
+  class SubViewport < Godot::Viewport
+    def initialize(pointer : Void* = Pointer(Void).null)
+      super(pointer)
+    end
+    enum ClearMode : Int64
+      ClearModeAlways = 0_i64
+      ClearModeNever = 1_i64
+      ClearModeOnce = 2_i64
+    end
+    enum UpdateMode : Int64
+      UpdateDisabled = 0_i64
+      UpdateOnce = 1_i64
+      UpdateWhenVisible = 2_i64
+      UpdateWhenParentVisible = 3_i64
+      UpdateAlways = 4_i64
+    end
+    @@mb_set_size : Void* = Pointer(Void).null
+    def set_size(size : Vector2i) : Void
+      if @@mb_set_size.null?
+        @@mb_set_size = Bridge.get_method_bind("SubViewport", "set_size", 1130785943_i64)
+      end
+      val_0 = size
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_size, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_get_size : Void* = Pointer(Void).null
+    def get_size() : Vector2i
+      if @@mb_get_size.null?
+        @@mb_get_size = Bridge.get_method_bind("SubViewport", "get_size", 3690982128_i64)
+      end
+      ret_ptr = Pointer(Void).null
+      Bridge.ptrcall(@@mb_get_size, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
+      Vector2i.new(ret_ptr)
+    end
+    @@mb_set_size_2d_override : Void* = Pointer(Void).null
+    def set_size_2d_override(size : Vector2i) : Void
+      if @@mb_set_size_2d_override.null?
+        @@mb_set_size_2d_override = Bridge.get_method_bind("SubViewport", "set_size_2d_override", 1130785943_i64)
+      end
+      val_0 = size
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_size_2d_override, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_get_size_2d_override : Void* = Pointer(Void).null
+    def get_size_2d_override() : Vector2i
+      if @@mb_get_size_2d_override.null?
+        @@mb_get_size_2d_override = Bridge.get_method_bind("SubViewport", "get_size_2d_override", 3690982128_i64)
+      end
+      ret_ptr = Pointer(Void).null
+      Bridge.ptrcall(@@mb_get_size_2d_override, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
+      Vector2i.new(ret_ptr)
+    end
+    @@mb_set_size_2d_override_stretch : Void* = Pointer(Void).null
+    def set_size_2d_override_stretch(enable : Bool) : Void
+      if @@mb_set_size_2d_override_stretch.null?
+        @@mb_set_size_2d_override_stretch = Bridge.get_method_bind("SubViewport", "set_size_2d_override_stretch", 2586408642_i64)
+      end
+      val_0 = enable
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_size_2d_override_stretch, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_is_size_2d_override_stretch_enabled : Void* = Pointer(Void).null
+    def is_size_2d_override_stretch_enabled() : Bool
+      if @@mb_is_size_2d_override_stretch_enabled.null?
+        @@mb_is_size_2d_override_stretch_enabled = Bridge.get_method_bind("SubViewport", "is_size_2d_override_stretch_enabled", 36873697_i64)
+      end
+      ret = 0_u8
+      Bridge.ptrcall(@@mb_is_size_2d_override_stretch_enabled, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
+      ret != 0_u8
+    end
+    @@mb_set_view_count : Void* = Pointer(Void).null
+    def set_view_count(view_count : Int64) : Void
+      if @@mb_set_view_count.null?
+        @@mb_set_view_count = Bridge.get_method_bind("SubViewport", "set_view_count", 1286410249_i64)
+      end
+      val_0 = view_count
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_view_count, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_get_view_count : Void* = Pointer(Void).null
+    def get_view_count() : Int64
+      if @@mb_get_view_count.null?
+        @@mb_get_view_count = Bridge.get_method_bind("SubViewport", "get_view_count", 3905245786_i64)
+      end
+      ret = 0_i64
+      Bridge.ptrcall(@@mb_get_view_count, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
+      ret
+    end
+    @@mb_set_update_mode : Void* = Pointer(Void).null
+    def set_update_mode(mode : Int64) : Void
+      if @@mb_set_update_mode.null?
+        @@mb_set_update_mode = Bridge.get_method_bind("SubViewport", "set_update_mode", 1295690030_i64)
+      end
+      val_0 = mode
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_update_mode, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_get_update_mode : Void* = Pointer(Void).null
+    def get_update_mode() : Int64
+      if @@mb_get_update_mode.null?
+        @@mb_get_update_mode = Bridge.get_method_bind("SubViewport", "get_update_mode", 2980171553_i64)
+      end
+      ret = 0_i64
+      Bridge.ptrcall(@@mb_get_update_mode, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
+      ret
+    end
+    @@mb_set_clear_mode : Void* = Pointer(Void).null
+    def set_clear_mode(mode : Int64) : Void
+      if @@mb_set_clear_mode.null?
+        @@mb_set_clear_mode = Bridge.get_method_bind("SubViewport", "set_clear_mode", 2834454712_i64)
+      end
+      val_0 = mode
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_clear_mode, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_get_clear_mode : Void* = Pointer(Void).null
+    def get_clear_mode() : Int64
+      if @@mb_get_clear_mode.null?
+        @@mb_get_clear_mode = Bridge.get_method_bind("SubViewport", "get_clear_mode", 331324495_i64)
+      end
+      ret = 0_i64
+      Bridge.ptrcall(@@mb_get_clear_mode, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
+      ret
+    end
+    # Property `size` getter
+    def size
+      get_size
+    end
+    # Property `size` setter
+    def size=(val)
+      set_size(val)
+    end
+    # Property `size_2d_override` getter
+    def size_2d_override
+      get_size_2d_override
+    end
+    # Property `size_2d_override` setter
+    def size_2d_override=(val)
+      set_size_2d_override(val)
+    end
+    # Property `size_2d_override_stretch` getter
+    def size_2d_override_stretch
+      is_size_2d_override_stretch_enabled
+    end
+    def size_2d_override_stretch?
+      size_2d_override_stretch
+    end
+    # Property `size_2d_override_stretch` setter
+    def size_2d_override_stretch=(val)
+      set_size_2d_override_stretch(val)
+    end
+    # Property `view_count` getter
+    def view_count
+      get_view_count
+    end
+    # Property `view_count` setter
+    def view_count=(val : Int)
+      set_view_count(val.to_i64)
+    end
+    # Property `render_target_clear_mode` getter
+    def render_target_clear_mode
+      get_clear_mode
+    end
+    # Property `render_target_clear_mode` setter
+    def render_target_clear_mode=(val : Int)
+      set_clear_mode(val.to_i64)
+    end
+    # Property `render_target_update_mode` getter
+    def render_target_update_mode
+      get_update_mode
+    end
+    # Property `render_target_update_mode` setter
+    def render_target_update_mode=(val : Int)
+      set_update_mode(val.to_i64)
+    end
+  end
+  class OpenXRFoveatedInsetViewport < Godot::SubViewport
+    def initialize(pointer : Void* = Pointer(Void).null)
+      super(pointer)
+    end
+    @@mb_get_xr_origin3d : Void* = Pointer(Void).null
+    def get_xr_origin3d() : XROrigin3D
+      if @@mb_get_xr_origin3d.null?
+        @@mb_get_xr_origin3d = Bridge.get_method_bind("OpenXRFoveatedInsetViewport", "get_xr_origin3d", 505038244_i64)
+      end
+      ret_ptr = Pointer(Void).null
+      Bridge.ptrcall(@@mb_get_xr_origin3d, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
+      XROrigin3D.new(ret_ptr)
+    end
+    @@mb_get_xr_camera3d : Void* = Pointer(Void).null
+    def get_xr_camera3d() : XRCamera3D
+      if @@mb_get_xr_camera3d.null?
+        @@mb_get_xr_camera3d = Bridge.get_method_bind("OpenXRFoveatedInsetViewport", "get_xr_camera3d", 1715292258_i64)
+      end
+      ret_ptr = Pointer(Void).null
+      Bridge.ptrcall(@@mb_get_xr_camera3d, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
+      XRCamera3D.new(ret_ptr)
+    end
+  end
   class OpenXRFrameSynthesisExtension < Godot::OpenXRExtensionWrapper
     def initialize(pointer : Void* = Pointer(Void).null)
       super(pointer)
@@ -3692,6 +3801,13 @@ module Godot
       SessionStateLossPending = 7_i64
       SessionStateExiting = 8_i64
     end
+    enum ViewConfiguration : Int64
+      ViewConfigurationMono = 0_i64
+      ViewConfigurationStereo = 1_i64
+      ViewConfigurationStereoWithInset = 2_i64
+      ViewConfigurationUnset = 254_i64
+      ViewConfigurationUnknown = 255_i64
+    end
     enum Hand : Int64
       HandLeft = 0_i64
       HandRight = 1_i64
@@ -3788,6 +3904,15 @@ module Godot
       ret = 0_u8
       Bridge.ptrcall(@@mb_is_user_present, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
       ret != 0_u8
+    end
+    @@mb_get_active_view_configuration : Void* = Pointer(Void).null
+    def get_active_view_configuration() : Int64
+      if @@mb_get_active_view_configuration.null?
+        @@mb_get_active_view_configuration = Bridge.get_method_bind("OpenXRInterface", "get_active_view_configuration", 3905272016_i64)
+      end
+      ret = 0_i64
+      Bridge.ptrcall(@@mb_get_active_view_configuration, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
+      ret
     end
     @@mb_get_display_refresh_rate : Void* = Pointer(Void).null
     def get_display_refresh_rate() : Float64
@@ -29280,6 +29405,127 @@ module Godot
     # Property `debug_shape_thickness` setter
     def debug_shape_thickness=(val : Int)
       set_debug_shape_thickness(val.to_i64)
+    end
+  end
+  class RectangleShape2D < Godot::Shape2D
+    def initialize(pointer : Void* = Pointer(Void).null)
+      super(pointer)
+    end
+    @@mb_set_size : Void* = Pointer(Void).null
+    def set_size(size : Vector2) : Void
+      if @@mb_set_size.null?
+        @@mb_set_size = Bridge.get_method_bind("RectangleShape2D", "set_size", 743155724_i64)
+      end
+      val_0 = size
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_size, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_get_size : Void* = Pointer(Void).null
+    def get_size() : Vector2
+      if @@mb_get_size.null?
+        @@mb_get_size = Bridge.get_method_bind("RectangleShape2D", "get_size", 3341600327_i64)
+      end
+      ret = Vector2.new
+      Bridge.ptrcall(@@mb_get_size, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
+      ret
+    end
+    # Property `size` getter
+    def size
+      get_size
+    end
+    # Property `size` setter
+    def size=(val)
+      set_size(val)
+    end
+  end
+  class ReferenceRect < Godot::Control
+    def initialize(pointer : Void* = Pointer(Void).null)
+      super(pointer)
+    end
+    @@mb_get_border_color : Void* = Pointer(Void).null
+    def get_border_color() : Color
+      if @@mb_get_border_color.null?
+        @@mb_get_border_color = Bridge.get_method_bind("ReferenceRect", "get_border_color", 3444240500_i64)
+      end
+      ret = Color.new
+      Bridge.ptrcall(@@mb_get_border_color, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
+      ret
+    end
+    @@mb_set_border_color : Void* = Pointer(Void).null
+    def set_border_color(color : Color) : Void
+      if @@mb_set_border_color.null?
+        @@mb_set_border_color = Bridge.get_method_bind("ReferenceRect", "set_border_color", 2920490490_i64)
+      end
+      val_0 = color
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_border_color, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_get_border_width : Void* = Pointer(Void).null
+    def get_border_width() : Float64
+      if @@mb_get_border_width.null?
+        @@mb_get_border_width = Bridge.get_method_bind("ReferenceRect", "get_border_width", 1740695150_i64)
+      end
+      ret = 0.0_f64
+      Bridge.ptrcall(@@mb_get_border_width, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
+      ret
+    end
+    @@mb_set_border_width : Void* = Pointer(Void).null
+    def set_border_width(width : Float64) : Void
+      if @@mb_set_border_width.null?
+        @@mb_set_border_width = Bridge.get_method_bind("ReferenceRect", "set_border_width", 373806689_i64)
+      end
+      val_0 = width
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_border_width, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_get_editor_only : Void* = Pointer(Void).null
+    def get_editor_only() : Bool
+      if @@mb_get_editor_only.null?
+        @@mb_get_editor_only = Bridge.get_method_bind("ReferenceRect", "get_editor_only", 36873697_i64)
+      end
+      ret = 0_u8
+      Bridge.ptrcall(@@mb_get_editor_only, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
+      ret != 0_u8
+    end
+    @@mb_set_editor_only : Void* = Pointer(Void).null
+    def set_editor_only(enabled : Bool) : Void
+      if @@mb_set_editor_only.null?
+        @@mb_set_editor_only = Bridge.get_method_bind("ReferenceRect", "set_editor_only", 2586408642_i64)
+      end
+      val_0 = enabled
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_editor_only, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    # Property `border_color` getter
+    def border_color
+      get_border_color
+    end
+    # Property `border_color` setter
+    def border_color=(val)
+      set_border_color(val)
+    end
+    # Property `border_width` getter
+    def border_width
+      get_border_width
+    end
+    # Property `border_width` setter
+    def border_width=(val : Number)
+      set_border_width(val.to_f64)
+    end
+    # Property `editor_only` getter
+    def editor_only
+      get_editor_only
+    end
+    def editor_only?
+      editor_only
+    end
+    # Property `editor_only` setter
+    def editor_only=(val)
+      set_editor_only(val)
     end
   end
 end

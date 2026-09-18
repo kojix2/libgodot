@@ -48,7 +48,7 @@ if (-not $Version) {
 }
 
 if (-not $Version) {
-    $Version = "4.8-dev5"
+    $Version = "4.8-dev6"
 }
 
 Write-Host "=================================================================" -ForegroundColor Cyan
@@ -144,18 +144,25 @@ if (-not (Test-Path $RsrcDir)) {
 
 Write-Host "Regenerating GDExtension API definitions..." -ForegroundColor Yellow
 
+$DumpDir = Join-Path $TempDir "clean_project"
+if (-not (Test-Path $DumpDir)) {
+    New-Item -ItemType Directory -Path $DumpDir -Force | Out-Null
+}
+Set-Content -Path (Join-Path $DumpDir "project.godot") -Value "config_version=5`n"
+
 $ApiJson = Join-Path $RsrcDir "extension_api.json"
 Write-Host "  -> Dumping extension API to $ApiJson..." -ForegroundColor Gray
-& $TargetExe --dump-extension-api | Out-Null
-if (Test-Path "extension_api.json") {
-    Move-Item -Path "extension_api.json" -Destination $ApiJson -Force
+$proc = Start-Process -FilePath $TargetExe -ArgumentList "--headless", "--path", $DumpDir, "--dump-extension-api" -WorkingDirectory $DumpDir -PassThru -Wait
+if (Test-Path (Join-Path $DumpDir "extension_api.json")) {
+    Copy-Item -Path (Join-Path $DumpDir "extension_api.json") -Destination $ApiJson -Force
+    Copy-Item -Path (Join-Path $DumpDir "extension_api.json") -Destination (Join-Path $RootDir "extension_api.json") -Force
 }
 
 $ApiHeader = Join-Path $RsrcDir "gdextension_interface.h"
 Write-Host "  -> Dumping gdextension interface to $ApiHeader..." -ForegroundColor Gray
-& $TargetExe --dump-gdextension-interface | Out-Null
-if (Test-Path "gdextension_interface.h") {
-    Move-Item -Path "gdextension_interface.h" -Destination $ApiHeader -Force
+$proc = Start-Process -FilePath $TargetExe -ArgumentList "--headless", "--path", $DumpDir, "--dump-gdextension-interface" -WorkingDirectory $DumpDir -PassThru -Wait
+if (Test-Path (Join-Path $DumpDir "gdextension_interface.h")) {
+    Copy-Item -Path (Join-Path $DumpDir "gdextension_interface.h") -Destination $ApiHeader -Force
 }
 
 # 8. Regenerate Crystal API Bindings

@@ -1,620 +1,5 @@
 # Generated classes part 6 (in topological order)
 module Godot
-  class UDPServer < Godot::RefCounted
-    def initialize(pointer : Void* = Pointer(Void).null)
-      super(pointer)
-    end
-    @@mb_listen : Void* = Pointer(Void).null
-    def listen(port : Int64, bind_address : String) : Int64
-      if @@mb_listen.null?
-        @@mb_listen = Bridge.get_method_bind("UDPServer", "listen", 3167955072_i64)
-      end
-      val_0 = port
-      arg_0 = pointerof(val_0).as(Void*)
-      str_1 = Bridge.make_string(bind_address)
-      arg_1 = str_1
-      args = [arg_0, arg_1]
-      ret = 0_i64
-      Bridge.ptrcall(@@mb_listen, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
-      ret
-    ensure
-      Bridge.free_string(str_1)
-    end
-    @@mb_poll : Void* = Pointer(Void).null
-    def poll() : Int64
-      if @@mb_poll.null?
-        @@mb_poll = Bridge.get_method_bind("UDPServer", "poll", 166280745_i64)
-      end
-      ret = 0_i64
-      Bridge.ptrcall(@@mb_poll, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
-      ret
-    end
-    @@mb_is_connection_available : Void* = Pointer(Void).null
-    def is_connection_available() : Bool
-      if @@mb_is_connection_available.null?
-        @@mb_is_connection_available = Bridge.get_method_bind("UDPServer", "is_connection_available", 36873697_i64)
-      end
-      ret = 0_u8
-      Bridge.ptrcall(@@mb_is_connection_available, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
-      ret != 0_u8
-    end
-    @@mb_get_local_port : Void* = Pointer(Void).null
-    def get_local_port() : Int64
-      if @@mb_get_local_port.null?
-        @@mb_get_local_port = Bridge.get_method_bind("UDPServer", "get_local_port", 3905245786_i64)
-      end
-      ret = 0_i64
-      Bridge.ptrcall(@@mb_get_local_port, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
-      ret
-    end
-    @@mb_is_listening : Void* = Pointer(Void).null
-    def is_listening() : Bool
-      if @@mb_is_listening.null?
-        @@mb_is_listening = Bridge.get_method_bind("UDPServer", "is_listening", 36873697_i64)
-      end
-      ret = 0_u8
-      Bridge.ptrcall(@@mb_is_listening, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
-      ret != 0_u8
-    end
-    @@mb_take_connection : Void* = Pointer(Void).null
-    def take_connection() : PacketPeerUDP
-      if @@mb_take_connection.null?
-        @@mb_take_connection = Bridge.get_method_bind("UDPServer", "take_connection", 808734560_i64)
-      end
-      ret_ptr = Pointer(Void).null
-      Bridge.ptrcall(@@mb_take_connection, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
-      PacketPeerUDP.new(ret_ptr)
-    end
-    @@mb_stop : Void* = Pointer(Void).null
-    def stop() : Void
-      if @@mb_stop.null?
-        @@mb_stop = Bridge.get_method_bind("UDPServer", "stop", 3218959716_i64)
-      end
-      Bridge.ptrcall(@@mb_stop, @pointer, Pointer(Pointer(Void)).null, Pointer(Void).null)
-    end
-    @@mb_set_max_pending_connections : Void* = Pointer(Void).null
-    def set_max_pending_connections(max_pending_connections : Int64) : Void
-      if @@mb_set_max_pending_connections.null?
-        @@mb_set_max_pending_connections = Bridge.get_method_bind("UDPServer", "set_max_pending_connections", 1286410249_i64)
-      end
-      val_0 = max_pending_connections
-      arg_0 = pointerof(val_0).as(Void*)
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_max_pending_connections, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    end
-    @@mb_get_max_pending_connections : Void* = Pointer(Void).null
-    def get_max_pending_connections() : Int64
-      if @@mb_get_max_pending_connections.null?
-        @@mb_get_max_pending_connections = Bridge.get_method_bind("UDPServer", "get_max_pending_connections", 3905245786_i64)
-      end
-      ret = 0_i64
-      Bridge.ptrcall(@@mb_get_max_pending_connections, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
-      ret
-    end
-    # Property `max_pending_connections` getter
-    def max_pending_connections
-      get_max_pending_connections
-    end
-    # Property `max_pending_connections` setter
-    def max_pending_connections=(val : Int)
-      set_max_pending_connections(val.to_i64)
-    end
-  end
-  class UDSServer < Godot::SocketServer
-    def initialize(pointer : Void* = Pointer(Void).null)
-      super(pointer)
-    end
-    @@mb_listen : Void* = Pointer(Void).null
-    def listen(path : String) : Int64
-      if @@mb_listen.null?
-        @@mb_listen = Bridge.get_method_bind("UDSServer", "listen", 166001499_i64)
-      end
-      str_0 = Bridge.make_string(path)
-      arg_0 = str_0
-      args = [arg_0]
-      ret = 0_i64
-      Bridge.ptrcall(@@mb_listen, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
-      ret
-    ensure
-      Bridge.free_string(str_0)
-    end
-    @@mb_take_connection : Void* = Pointer(Void).null
-    def take_connection() : StreamPeerUDS
-      if @@mb_take_connection.null?
-        @@mb_take_connection = Bridge.get_method_bind("UDSServer", "take_connection", 1623851112_i64)
-      end
-      ret_ptr = Pointer(Void).null
-      Bridge.ptrcall(@@mb_take_connection, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
-      StreamPeerUDS.new(ret_ptr)
-    end
-  end
-  class UPNP < Godot::RefCounted
-    def initialize(pointer : Void* = Pointer(Void).null)
-      super(pointer)
-    end
-    enum UPNPResult : Int64
-      UpnpResultSuccess = 0_i64
-      UpnpResultNotAuthorized = 1_i64
-      UpnpResultPortMappingNotFound = 2_i64
-      UpnpResultInconsistentParameters = 3_i64
-      UpnpResultNoSuchEntryInArray = 4_i64
-      UpnpResultActionFailed = 5_i64
-      UpnpResultSrcIpWildcardNotPermitted = 6_i64
-      UpnpResultExtPortWildcardNotPermitted = 7_i64
-      UpnpResultIntPortWildcardNotPermitted = 8_i64
-      UpnpResultRemoteHostMustBeWildcard = 9_i64
-      UpnpResultExtPortMustBeWildcard = 10_i64
-      UpnpResultNoPortMapsAvailable = 11_i64
-      UpnpResultConflictWithOtherMechanism = 12_i64
-      UpnpResultConflictWithOtherMapping = 13_i64
-      UpnpResultSamePortValuesRequired = 14_i64
-      UpnpResultOnlyPermanentLeaseSupported = 15_i64
-      UpnpResultInvalidGateway = 16_i64
-      UpnpResultInvalidPort = 17_i64
-      UpnpResultInvalidProtocol = 18_i64
-      UpnpResultInvalidDuration = 19_i64
-      UpnpResultInvalidArgs = 20_i64
-      UpnpResultInvalidResponse = 21_i64
-      UpnpResultInvalidParam = 22_i64
-      UpnpResultHttpError = 23_i64
-      UpnpResultSocketError = 24_i64
-      UpnpResultMemAllocError = 25_i64
-      UpnpResultNoGateway = 26_i64
-      UpnpResultNoDevices = 27_i64
-      UpnpResultUnknownError = 28_i64
-    end
-    @@mb_get_device_count : Void* = Pointer(Void).null
-    def get_device_count() : Int64
-      if @@mb_get_device_count.null?
-        @@mb_get_device_count = Bridge.get_method_bind("UPNP", "get_device_count", 3905245786_i64)
-      end
-      ret = 0_i64
-      Bridge.ptrcall(@@mb_get_device_count, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
-      ret
-    end
-    @@mb_get_device : Void* = Pointer(Void).null
-    def get_device(index : Int64) : UPNPDevice
-      if @@mb_get_device.null?
-        @@mb_get_device = Bridge.get_method_bind("UPNP", "get_device", 2193290270_i64)
-      end
-      val_0 = index
-      arg_0 = pointerof(val_0).as(Void*)
-      args = [arg_0]
-      ret_ptr = Pointer(Void).null
-      Bridge.ptrcall(@@mb_get_device, @pointer, args.to_unsafe.as(Void**), pointerof(ret_ptr).as(Void*))
-      UPNPDevice.new(ret_ptr)
-    end
-    @@mb_add_device : Void* = Pointer(Void).null
-    def add_device(device : UPNPDevice) : Void
-      if @@mb_add_device.null?
-        @@mb_add_device = Bridge.get_method_bind("UPNP", "add_device", 986715920_i64)
-      end
-      arg_ptr_0 = device ? device.pointer : Pointer(Void).null
-      arg_0 = pointerof(arg_ptr_0).as(Void*)
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_add_device, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    end
-    @@mb_set_device : Void* = Pointer(Void).null
-    def set_device(index : Int64, device : UPNPDevice) : Void
-      if @@mb_set_device.null?
-        @@mb_set_device = Bridge.get_method_bind("UPNP", "set_device", 3015133723_i64)
-      end
-      val_0 = index
-      arg_0 = pointerof(val_0).as(Void*)
-      arg_ptr_1 = device ? device.pointer : Pointer(Void).null
-      arg_1 = pointerof(arg_ptr_1).as(Void*)
-      args = [arg_0, arg_1]
-      Bridge.ptrcall(@@mb_set_device, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    end
-    @@mb_remove_device : Void* = Pointer(Void).null
-    def remove_device(index : Int64) : Void
-      if @@mb_remove_device.null?
-        @@mb_remove_device = Bridge.get_method_bind("UPNP", "remove_device", 1286410249_i64)
-      end
-      val_0 = index
-      arg_0 = pointerof(val_0).as(Void*)
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_remove_device, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    end
-    @@mb_clear_devices : Void* = Pointer(Void).null
-    def clear_devices() : Void
-      if @@mb_clear_devices.null?
-        @@mb_clear_devices = Bridge.get_method_bind("UPNP", "clear_devices", 3218959716_i64)
-      end
-      Bridge.ptrcall(@@mb_clear_devices, @pointer, Pointer(Pointer(Void)).null, Pointer(Void).null)
-    end
-    @@mb_get_gateway : Void* = Pointer(Void).null
-    def get_gateway() : UPNPDevice
-      if @@mb_get_gateway.null?
-        @@mb_get_gateway = Bridge.get_method_bind("UPNP", "get_gateway", 2276800779_i64)
-      end
-      ret_ptr = Pointer(Void).null
-      Bridge.ptrcall(@@mb_get_gateway, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
-      UPNPDevice.new(ret_ptr)
-    end
-    @@mb_discover : Void* = Pointer(Void).null
-    def discover(timeout : Int64, ttl : Int64, device_filter : String) : Int64
-      if @@mb_discover.null?
-        @@mb_discover = Bridge.get_method_bind("UPNP", "discover", 1575334765_i64)
-      end
-      val_0 = timeout
-      arg_0 = pointerof(val_0).as(Void*)
-      val_1 = ttl
-      arg_1 = pointerof(val_1).as(Void*)
-      str_2 = Bridge.make_string(device_filter)
-      arg_2 = str_2
-      args = [arg_0, arg_1, arg_2]
-      ret = 0_i64
-      Bridge.ptrcall(@@mb_discover, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
-      ret
-    ensure
-      Bridge.free_string(str_2)
-    end
-    @@mb_query_external_address : Void* = Pointer(Void).null
-    def query_external_address() : String
-      if @@mb_query_external_address.null?
-        @@mb_query_external_address = Bridge.get_method_bind("UPNP", "query_external_address", 201670096_i64)
-      end
-      ""
-    end
-    @@mb_add_port_mapping : Void* = Pointer(Void).null
-    def add_port_mapping(port : Int64, port_internal : Int64, desc : String, proto : String, duration : Int64) : Int64
-      if @@mb_add_port_mapping.null?
-        @@mb_add_port_mapping = Bridge.get_method_bind("UPNP", "add_port_mapping", 818314583_i64)
-      end
-      val_0 = port
-      arg_0 = pointerof(val_0).as(Void*)
-      val_1 = port_internal
-      arg_1 = pointerof(val_1).as(Void*)
-      str_2 = Bridge.make_string(desc)
-      arg_2 = str_2
-      str_3 = Bridge.make_string(proto)
-      arg_3 = str_3
-      val_4 = duration
-      arg_4 = pointerof(val_4).as(Void*)
-      args = [arg_0, arg_1, arg_2, arg_3, arg_4]
-      ret = 0_i64
-      Bridge.ptrcall(@@mb_add_port_mapping, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
-      ret
-    ensure
-      Bridge.free_string(str_2)
-      Bridge.free_string(str_3)
-    end
-    @@mb_delete_port_mapping : Void* = Pointer(Void).null
-    def delete_port_mapping(port : Int64, proto : String) : Int64
-      if @@mb_delete_port_mapping.null?
-        @@mb_delete_port_mapping = Bridge.get_method_bind("UPNP", "delete_port_mapping", 3444187325_i64)
-      end
-      val_0 = port
-      arg_0 = pointerof(val_0).as(Void*)
-      str_1 = Bridge.make_string(proto)
-      arg_1 = str_1
-      args = [arg_0, arg_1]
-      ret = 0_i64
-      Bridge.ptrcall(@@mb_delete_port_mapping, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
-      ret
-    ensure
-      Bridge.free_string(str_1)
-    end
-    @@mb_set_discover_multicast_if : Void* = Pointer(Void).null
-    def set_discover_multicast_if(m_if : String) : Void
-      if @@mb_set_discover_multicast_if.null?
-        @@mb_set_discover_multicast_if = Bridge.get_method_bind("UPNP", "set_discover_multicast_if", 83702148_i64)
-      end
-      str_0 = Bridge.make_string(m_if)
-      arg_0 = str_0
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_discover_multicast_if, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    ensure
-      Bridge.free_string(str_0)
-    end
-    @@mb_get_discover_multicast_if : Void* = Pointer(Void).null
-    def get_discover_multicast_if() : String
-      if @@mb_get_discover_multicast_if.null?
-        @@mb_get_discover_multicast_if = Bridge.get_method_bind("UPNP", "get_discover_multicast_if", 201670096_i64)
-      end
-      ""
-    end
-    @@mb_set_discover_local_port : Void* = Pointer(Void).null
-    def set_discover_local_port(port : Int64) : Void
-      if @@mb_set_discover_local_port.null?
-        @@mb_set_discover_local_port = Bridge.get_method_bind("UPNP", "set_discover_local_port", 1286410249_i64)
-      end
-      val_0 = port
-      arg_0 = pointerof(val_0).as(Void*)
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_discover_local_port, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    end
-    @@mb_get_discover_local_port : Void* = Pointer(Void).null
-    def get_discover_local_port() : Int64
-      if @@mb_get_discover_local_port.null?
-        @@mb_get_discover_local_port = Bridge.get_method_bind("UPNP", "get_discover_local_port", 3905245786_i64)
-      end
-      ret = 0_i64
-      Bridge.ptrcall(@@mb_get_discover_local_port, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
-      ret
-    end
-    @@mb_set_discover_ipv6 : Void* = Pointer(Void).null
-    def set_discover_ipv6(ipv6 : Bool) : Void
-      if @@mb_set_discover_ipv6.null?
-        @@mb_set_discover_ipv6 = Bridge.get_method_bind("UPNP", "set_discover_ipv6", 2586408642_i64)
-      end
-      val_0 = ipv6
-      arg_0 = pointerof(val_0).as(Void*)
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_discover_ipv6, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    end
-    @@mb_is_discover_ipv6 : Void* = Pointer(Void).null
-    def is_discover_ipv6() : Bool
-      if @@mb_is_discover_ipv6.null?
-        @@mb_is_discover_ipv6 = Bridge.get_method_bind("UPNP", "is_discover_ipv6", 36873697_i64)
-      end
-      ret = 0_u8
-      Bridge.ptrcall(@@mb_is_discover_ipv6, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
-      ret != 0_u8
-    end
-    # Property `discover_multicast_if` getter
-    def discover_multicast_if
-      get_discover_multicast_if
-    end
-    # Property `discover_multicast_if` setter
-    def discover_multicast_if=(val)
-      set_discover_multicast_if(val)
-    end
-    # Property `discover_local_port` getter
-    def discover_local_port
-      get_discover_local_port
-    end
-    # Property `discover_local_port` setter
-    def discover_local_port=(val : Int)
-      set_discover_local_port(val.to_i64)
-    end
-    # Property `discover_ipv6` getter
-    def discover_ipv6
-      is_discover_ipv6
-    end
-    def discover_ipv6?
-      discover_ipv6
-    end
-    # Property `discover_ipv6` setter
-    def discover_ipv6=(val)
-      set_discover_ipv6(val)
-    end
-  end
-  class UPNPDevice < Godot::RefCounted
-    def initialize(pointer : Void* = Pointer(Void).null)
-      super(pointer)
-    end
-    enum IGDStatus : Int64
-      IgdStatusOk = 0_i64
-      IgdStatusHttpError = 1_i64
-      IgdStatusHttpEmpty = 2_i64
-      IgdStatusNoUrls = 3_i64
-      IgdStatusNoIgd = 4_i64
-      IgdStatusDisconnected = 5_i64
-      IgdStatusUnknownDevice = 6_i64
-      IgdStatusInvalidControl = 7_i64
-      IgdStatusMallocError = 8_i64
-      IgdStatusUnknownError = 9_i64
-    end
-    @@mb_is_valid_gateway : Void* = Pointer(Void).null
-    def is_valid_gateway() : Bool
-      if @@mb_is_valid_gateway.null?
-        @@mb_is_valid_gateway = Bridge.get_method_bind("UPNPDevice", "is_valid_gateway", 36873697_i64)
-      end
-      ret = 0_u8
-      Bridge.ptrcall(@@mb_is_valid_gateway, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
-      ret != 0_u8
-    end
-    @@mb_query_external_address : Void* = Pointer(Void).null
-    def query_external_address() : String
-      if @@mb_query_external_address.null?
-        @@mb_query_external_address = Bridge.get_method_bind("UPNPDevice", "query_external_address", 201670096_i64)
-      end
-      ""
-    end
-    @@mb_add_port_mapping : Void* = Pointer(Void).null
-    def add_port_mapping(port : Int64, port_internal : Int64, desc : String, proto : String, duration : Int64) : Int64
-      if @@mb_add_port_mapping.null?
-        @@mb_add_port_mapping = Bridge.get_method_bind("UPNPDevice", "add_port_mapping", 818314583_i64)
-      end
-      val_0 = port
-      arg_0 = pointerof(val_0).as(Void*)
-      val_1 = port_internal
-      arg_1 = pointerof(val_1).as(Void*)
-      str_2 = Bridge.make_string(desc)
-      arg_2 = str_2
-      str_3 = Bridge.make_string(proto)
-      arg_3 = str_3
-      val_4 = duration
-      arg_4 = pointerof(val_4).as(Void*)
-      args = [arg_0, arg_1, arg_2, arg_3, arg_4]
-      ret = 0_i64
-      Bridge.ptrcall(@@mb_add_port_mapping, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
-      ret
-    ensure
-      Bridge.free_string(str_2)
-      Bridge.free_string(str_3)
-    end
-    @@mb_delete_port_mapping : Void* = Pointer(Void).null
-    def delete_port_mapping(port : Int64, proto : String) : Int64
-      if @@mb_delete_port_mapping.null?
-        @@mb_delete_port_mapping = Bridge.get_method_bind("UPNPDevice", "delete_port_mapping", 3444187325_i64)
-      end
-      val_0 = port
-      arg_0 = pointerof(val_0).as(Void*)
-      str_1 = Bridge.make_string(proto)
-      arg_1 = str_1
-      args = [arg_0, arg_1]
-      ret = 0_i64
-      Bridge.ptrcall(@@mb_delete_port_mapping, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
-      ret
-    ensure
-      Bridge.free_string(str_1)
-    end
-    @@mb_set_description_url : Void* = Pointer(Void).null
-    def set_description_url(url : String) : Void
-      if @@mb_set_description_url.null?
-        @@mb_set_description_url = Bridge.get_method_bind("UPNPDevice", "set_description_url", 83702148_i64)
-      end
-      str_0 = Bridge.make_string(url)
-      arg_0 = str_0
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_description_url, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    ensure
-      Bridge.free_string(str_0)
-    end
-    @@mb_get_description_url : Void* = Pointer(Void).null
-    def get_description_url() : String
-      if @@mb_get_description_url.null?
-        @@mb_get_description_url = Bridge.get_method_bind("UPNPDevice", "get_description_url", 201670096_i64)
-      end
-      ""
-    end
-    @@mb_set_service_type : Void* = Pointer(Void).null
-    def set_service_type(get_type : String) : Void
-      if @@mb_set_service_type.null?
-        @@mb_set_service_type = Bridge.get_method_bind("UPNPDevice", "set_service_type", 83702148_i64)
-      end
-      str_0 = Bridge.make_string(get_type)
-      arg_0 = str_0
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_service_type, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    ensure
-      Bridge.free_string(str_0)
-    end
-    @@mb_get_service_type : Void* = Pointer(Void).null
-    def get_service_type() : String
-      if @@mb_get_service_type.null?
-        @@mb_get_service_type = Bridge.get_method_bind("UPNPDevice", "get_service_type", 201670096_i64)
-      end
-      ""
-    end
-    @@mb_set_igd_control_url : Void* = Pointer(Void).null
-    def set_igd_control_url(url : String) : Void
-      if @@mb_set_igd_control_url.null?
-        @@mb_set_igd_control_url = Bridge.get_method_bind("UPNPDevice", "set_igd_control_url", 83702148_i64)
-      end
-      str_0 = Bridge.make_string(url)
-      arg_0 = str_0
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_igd_control_url, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    ensure
-      Bridge.free_string(str_0)
-    end
-    @@mb_get_igd_control_url : Void* = Pointer(Void).null
-    def get_igd_control_url() : String
-      if @@mb_get_igd_control_url.null?
-        @@mb_get_igd_control_url = Bridge.get_method_bind("UPNPDevice", "get_igd_control_url", 201670096_i64)
-      end
-      ""
-    end
-    @@mb_set_igd_service_type : Void* = Pointer(Void).null
-    def set_igd_service_type(get_type : String) : Void
-      if @@mb_set_igd_service_type.null?
-        @@mb_set_igd_service_type = Bridge.get_method_bind("UPNPDevice", "set_igd_service_type", 83702148_i64)
-      end
-      str_0 = Bridge.make_string(get_type)
-      arg_0 = str_0
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_igd_service_type, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    ensure
-      Bridge.free_string(str_0)
-    end
-    @@mb_get_igd_service_type : Void* = Pointer(Void).null
-    def get_igd_service_type() : String
-      if @@mb_get_igd_service_type.null?
-        @@mb_get_igd_service_type = Bridge.get_method_bind("UPNPDevice", "get_igd_service_type", 201670096_i64)
-      end
-      ""
-    end
-    @@mb_set_igd_our_addr : Void* = Pointer(Void).null
-    def set_igd_our_addr(addr : String) : Void
-      if @@mb_set_igd_our_addr.null?
-        @@mb_set_igd_our_addr = Bridge.get_method_bind("UPNPDevice", "set_igd_our_addr", 83702148_i64)
-      end
-      str_0 = Bridge.make_string(addr)
-      arg_0 = str_0
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_igd_our_addr, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    ensure
-      Bridge.free_string(str_0)
-    end
-    @@mb_get_igd_our_addr : Void* = Pointer(Void).null
-    def get_igd_our_addr() : String
-      if @@mb_get_igd_our_addr.null?
-        @@mb_get_igd_our_addr = Bridge.get_method_bind("UPNPDevice", "get_igd_our_addr", 201670096_i64)
-      end
-      ""
-    end
-    @@mb_set_igd_status : Void* = Pointer(Void).null
-    def set_igd_status(status : Int64) : Void
-      if @@mb_set_igd_status.null?
-        @@mb_set_igd_status = Bridge.get_method_bind("UPNPDevice", "set_igd_status", 519504122_i64)
-      end
-      val_0 = status
-      arg_0 = pointerof(val_0).as(Void*)
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_igd_status, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    end
-    @@mb_get_igd_status : Void* = Pointer(Void).null
-    def get_igd_status() : Int64
-      if @@mb_get_igd_status.null?
-        @@mb_get_igd_status = Bridge.get_method_bind("UPNPDevice", "get_igd_status", 180887011_i64)
-      end
-      ret = 0_i64
-      Bridge.ptrcall(@@mb_get_igd_status, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
-      ret
-    end
-    # Property `description_url` getter
-    def description_url
-      get_description_url
-    end
-    # Property `description_url` setter
-    def description_url=(val)
-      set_description_url(val)
-    end
-    # Property `service_type` getter
-    def service_type
-      get_service_type
-    end
-    # Property `service_type` setter
-    def service_type=(val)
-      set_service_type(val)
-    end
-    # Property `igd_control_url` getter
-    def igd_control_url
-      get_igd_control_url
-    end
-    # Property `igd_control_url` setter
-    def igd_control_url=(val)
-      set_igd_control_url(val)
-    end
-    # Property `igd_service_type` getter
-    def igd_service_type
-      get_igd_service_type
-    end
-    # Property `igd_service_type` setter
-    def igd_service_type=(val)
-      set_igd_service_type(val)
-    end
-    # Property `igd_our_addr` getter
-    def igd_our_addr
-      get_igd_our_addr
-    end
-    # Property `igd_our_addr` setter
-    def igd_our_addr=(val)
-      set_igd_our_addr(val)
-    end
-    # Property `igd_status` getter
-    def igd_status
-      get_igd_status
-    end
-    # Property `igd_status` setter
-    def igd_status=(val : Int)
-      set_igd_status(val.to_i64)
-    end
-  end
   class UndoRedo < Godot::Object
     def initialize(pointer : Void* = Pointer(Void).null)
       super(pointer)
@@ -10528,6 +9913,33 @@ module Godot
     def initialize(pointer : Void* = Pointer(Void).null)
       super(pointer)
     end
+    @@mb_set_tracker : Void* = Pointer(Void).null
+    def set_tracker(tracker_name : String) : Void
+      if @@mb_set_tracker.null?
+        @@mb_set_tracker = Bridge.get_method_bind("XRCamera3D", "set_tracker", 3304788590_i64)
+      end
+      sn_0 = Bridge.make_string_name(tracker_name)
+      arg_0 = sn_0
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_set_tracker, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    ensure
+      Bridge.free_string_name(sn_0)
+    end
+    @@mb_get_tracker : Void* = Pointer(Void).null
+    def get_tracker() : String
+      if @@mb_get_tracker.null?
+        @@mb_get_tracker = Bridge.get_method_bind("XRCamera3D", "get_tracker", 2002593661_i64)
+      end
+      ""
+    end
+    # Property `tracker` getter
+    def tracker
+      get_tracker
+    end
+    # Property `tracker` setter
+    def tracker=(val)
+      set_tracker(val)
+    end
   end
   class XRController3D < Godot::XRNode3D
     def initialize(pointer : Void* = Pointer(Void).null)
@@ -11482,7 +10894,7 @@ module Godot
       super(pointer)
     end
     enum TrackerType : Int64
-      TrackerHead = 1_i64
+      TrackerCamera = 1_i64
       TrackerController = 2_i64
       TrackerBasestation = 4_i64
       TrackerAnchor = 8_i64
@@ -11492,6 +10904,7 @@ module Godot
       TrackerAnyKnown = 127_i64
       TrackerUnknown = 128_i64
       TrackerAny = 255_i64
+      TrackerHead = 1_i64
     end
     enum RotationMode : Int64
       ResetFullRotation = 0_i64
@@ -11699,6 +11112,40 @@ module Godot
       ret_ptr = Pointer(Void).null
       Bridge.ptrcall(@@mb_get_tracker, @pointer, args.to_unsafe.as(Void**), pointerof(ret_ptr).as(Void*))
       XRTracker.new(ret_ptr)
+    ensure
+      Bridge.free_string_name(sn_0)
+    end
+    @@mb_get_camera_projections : Void* = Pointer(Void).null
+    def get_camera_projections(tracker_name : String, aspect : Float64, near : Float64, far : Float64) : Godot::Array
+      if @@mb_get_camera_projections.null?
+        @@mb_get_camera_projections = Bridge.get_method_bind("XRServer", "get_camera_projections", 2969235509_i64)
+      end
+      sn_0 = Bridge.make_string_name(tracker_name)
+      arg_0 = sn_0
+      val_1 = aspect
+      arg_1 = pointerof(val_1).as(Void*)
+      val_2 = near
+      arg_2 = pointerof(val_2).as(Void*)
+      val_3 = far
+      arg_3 = pointerof(val_3).as(Void*)
+      args = [arg_0, arg_1, arg_2, arg_3]
+      ret_ptr = Pointer(Void).null
+      Bridge.ptrcall(@@mb_get_camera_projections, @pointer, args.to_unsafe.as(Void**), pointerof(ret_ptr).as(Void*))
+      Godot::Array.new(ret_ptr)
+    ensure
+      Bridge.free_string_name(sn_0)
+    end
+    @@mb_get_camera_offsets : Void* = Pointer(Void).null
+    def get_camera_offsets(tracker_name : String) : Godot::Array
+      if @@mb_get_camera_offsets.null?
+        @@mb_get_camera_offsets = Bridge.get_method_bind("XRServer", "get_camera_offsets", 689397652_i64)
+      end
+      sn_0 = Bridge.make_string_name(tracker_name)
+      arg_0 = sn_0
+      args = [arg_0]
+      ret_ptr = Pointer(Void).null
+      Bridge.ptrcall(@@mb_get_camera_offsets, @pointer, args.to_unsafe.as(Void**), pointerof(ret_ptr).as(Void*))
+      Godot::Array.new(ret_ptr)
     ensure
       Bridge.free_string_name(sn_0)
     end

@@ -40,7 +40,7 @@ if (-not (Test-Path $outputDir)) {
 }
 
 $versionFile = Join-Path $RootDir "godot-version.yml"
-$godotVer = "4.8-dev5"
+$godotVer = "4.8-dev6"
 if (Test-Path $versionFile) {
     $rawVer = Get-Content $versionFile -Raw
     if ($rawVer -match 'version:\s*[''"]?([^''"\r\n]+)[''"]?') {

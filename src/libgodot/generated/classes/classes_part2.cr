@@ -1,218 +1,5 @@
 # Generated classes part 2 (in topological order)
 module Godot
-  class CameraFeed < Godot::RefCounted
-    def initialize(pointer : Void* = Pointer(Void).null)
-      super(pointer)
-    end
-    enum FeedDataType : Int64
-      FeedNoimage = 0_i64
-      FeedRgb = 1_i64
-      FeedYcbcr = 2_i64
-      FeedYcbcrSep = 3_i64
-      FeedExternal = 4_i64
-    end
-    enum FeedPosition : Int64
-      FeedUnspecified = 0_i64
-      FeedFront = 1_i64
-      FeedBack = 2_i64
-    end
-    @@mb_get_id : Void* = Pointer(Void).null
-    def get_id() : Int64
-      if @@mb_get_id.null?
-        @@mb_get_id = Bridge.get_method_bind("CameraFeed", "get_id", 3905245786_i64)
-      end
-      ret = 0_i64
-      Bridge.ptrcall(@@mb_get_id, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
-      ret
-    end
-    @@mb_is_active : Void* = Pointer(Void).null
-    def is_active() : Bool
-      if @@mb_is_active.null?
-        @@mb_is_active = Bridge.get_method_bind("CameraFeed", "is_active", 36873697_i64)
-      end
-      ret = 0_u8
-      Bridge.ptrcall(@@mb_is_active, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
-      ret != 0_u8
-    end
-    @@mb_set_active : Void* = Pointer(Void).null
-    def set_active(active : Bool) : Void
-      if @@mb_set_active.null?
-        @@mb_set_active = Bridge.get_method_bind("CameraFeed", "set_active", 2586408642_i64)
-      end
-      val_0 = active
-      arg_0 = pointerof(val_0).as(Void*)
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_active, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    end
-    @@mb_get_name : Void* = Pointer(Void).null
-    def get_name() : String
-      if @@mb_get_name.null?
-        @@mb_get_name = Bridge.get_method_bind("CameraFeed", "get_name", 201670096_i64)
-      end
-      ""
-    end
-    @@mb_set_name : Void* = Pointer(Void).null
-    def set_name(name : String) : Void
-      if @@mb_set_name.null?
-        @@mb_set_name = Bridge.get_method_bind("CameraFeed", "set_name", 83702148_i64)
-      end
-      str_0 = Bridge.make_string(name)
-      arg_0 = str_0
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_name, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    ensure
-      Bridge.free_string(str_0)
-    end
-    @@mb_get_position : Void* = Pointer(Void).null
-    def get_position() : Int64
-      if @@mb_get_position.null?
-        @@mb_get_position = Bridge.get_method_bind("CameraFeed", "get_position", 2711679033_i64)
-      end
-      ret = 0_i64
-      Bridge.ptrcall(@@mb_get_position, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
-      ret
-    end
-    @@mb_set_position : Void* = Pointer(Void).null
-    def set_position(position : Int64) : Void
-      if @@mb_set_position.null?
-        @@mb_set_position = Bridge.get_method_bind("CameraFeed", "set_position", 611162623_i64)
-      end
-      val_0 = position
-      arg_0 = pointerof(val_0).as(Void*)
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_position, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    end
-    @@mb_get_transform : Void* = Pointer(Void).null
-    def get_transform() : Transform2D
-      if @@mb_get_transform.null?
-        @@mb_get_transform = Bridge.get_method_bind("CameraFeed", "get_transform", 3814499831_i64)
-      end
-      ret_ptr = Pointer(Void).null
-      Bridge.ptrcall(@@mb_get_transform, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
-      Transform2D.new(ret_ptr)
-    end
-    @@mb_set_transform : Void* = Pointer(Void).null
-    def set_transform(transform : Transform2D) : Void
-      if @@mb_set_transform.null?
-        @@mb_set_transform = Bridge.get_method_bind("CameraFeed", "set_transform", 2761652528_i64)
-      end
-      val_0 = transform
-      arg_0 = pointerof(val_0).as(Void*)
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_transform, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    end
-    @@mb_set_rgb_image : Void* = Pointer(Void).null
-    def set_rgb_image(rgb_image : Image) : Void
-      if @@mb_set_rgb_image.null?
-        @@mb_set_rgb_image = Bridge.get_method_bind("CameraFeed", "set_rgb_image", 532598488_i64)
-      end
-      arg_ptr_0 = rgb_image ? rgb_image.pointer : Pointer(Void).null
-      arg_0 = pointerof(arg_ptr_0).as(Void*)
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_rgb_image, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    end
-    @@mb_set_ycbcr_image : Void* = Pointer(Void).null
-    def set_ycbcr_image(ycbcr_image : Image) : Void
-      if @@mb_set_ycbcr_image.null?
-        @@mb_set_ycbcr_image = Bridge.get_method_bind("CameraFeed", "set_ycbcr_image", 532598488_i64)
-      end
-      arg_ptr_0 = ycbcr_image ? ycbcr_image.pointer : Pointer(Void).null
-      arg_0 = pointerof(arg_ptr_0).as(Void*)
-      args = [arg_0]
-      Bridge.ptrcall(@@mb_set_ycbcr_image, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    end
-    @@mb_set_ycbcr_images : Void* = Pointer(Void).null
-    def set_ycbcr_images(y_image : Image, cbcr_image : Image) : Void
-      if @@mb_set_ycbcr_images.null?
-        @@mb_set_ycbcr_images = Bridge.get_method_bind("CameraFeed", "set_ycbcr_images", 1986484629_i64)
-      end
-      arg_ptr_0 = y_image ? y_image.pointer : Pointer(Void).null
-      arg_0 = pointerof(arg_ptr_0).as(Void*)
-      arg_ptr_1 = cbcr_image ? cbcr_image.pointer : Pointer(Void).null
-      arg_1 = pointerof(arg_ptr_1).as(Void*)
-      args = [arg_0, arg_1]
-      Bridge.ptrcall(@@mb_set_ycbcr_images, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    end
-    @@mb_set_external : Void* = Pointer(Void).null
-    def set_external(width : Int64, height : Int64) : Void
-      if @@mb_set_external.null?
-        @@mb_set_external = Bridge.get_method_bind("CameraFeed", "set_external", 3937882851_i64)
-      end
-      val_0 = width
-      arg_0 = pointerof(val_0).as(Void*)
-      val_1 = height
-      arg_1 = pointerof(val_1).as(Void*)
-      args = [arg_0, arg_1]
-      Bridge.ptrcall(@@mb_set_external, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
-    end
-    @@mb_get_texture_tex_id : Void* = Pointer(Void).null
-    def get_texture_tex_id(feed_image_type : Int64) : Int64
-      if @@mb_get_texture_tex_id.null?
-        @@mb_get_texture_tex_id = Bridge.get_method_bind("CameraFeed", "get_texture_tex_id", 1135699418_i64)
-      end
-      val_0 = feed_image_type
-      arg_0 = pointerof(val_0).as(Void*)
-      args = [arg_0]
-      ret = 0_i64
-      Bridge.ptrcall(@@mb_get_texture_tex_id, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
-      ret
-    end
-    @@mb_get_datatype : Void* = Pointer(Void).null
-    def get_datatype() : Int64
-      if @@mb_get_datatype.null?
-        @@mb_get_datatype = Bridge.get_method_bind("CameraFeed", "get_datatype", 1477782850_i64)
-      end
-      ret = 0_i64
-      Bridge.ptrcall(@@mb_get_datatype, @pointer, Pointer(Pointer(Void)).null, pointerof(ret).as(Void*))
-      ret
-    end
-    @@mb_get_formats : Void* = Pointer(Void).null
-    def get_formats() : Godot::Array
-      if @@mb_get_formats.null?
-        @@mb_get_formats = Bridge.get_method_bind("CameraFeed", "get_formats", 3995934104_i64)
-      end
-      ret_ptr = Pointer(Void).null
-      Bridge.ptrcall(@@mb_get_formats, @pointer, Pointer(Pointer(Void)).null, pointerof(ret_ptr).as(Void*))
-      Godot::Array.new(ret_ptr)
-    end
-    @@mb_set_format : Void* = Pointer(Void).null
-    def set_format(index : Int64, parameters : Void*) : Bool
-      if @@mb_set_format.null?
-        @@mb_set_format = Bridge.get_method_bind("CameraFeed", "set_format", 31872775_i64)
-      end
-      val_0 = index
-      arg_0 = pointerof(val_0).as(Void*)
-      val_1 = parameters
-      arg_1 = pointerof(val_1).as(Void*)
-      args = [arg_0, arg_1]
-      ret = 0_u8
-      Bridge.ptrcall(@@mb_set_format, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
-      ret != 0_u8
-    end
-    # Property `feed_is_active` getter
-    def feed_is_active
-      is_active
-    end
-    def feed_is_active?
-      feed_is_active
-    end
-    # Property `feed_is_active` setter
-    def feed_is_active=(val)
-      set_active(val)
-    end
-    # Property `feed_transform` getter
-    def feed_transform
-      get_transform
-    end
-    # Property `feed_transform` setter
-    def feed_transform=(val)
-      set_transform(val)
-    end
-    # Property `formats` getter
-    def formats
-      get_formats
-    end
-  end
   class CameraServer < Godot::Object
     def initialize(pointer : Void* = Pointer(Void).null)
       super(pointer)
@@ -22479,6 +22266,9 @@ module Godot
       CustomizationLayout = 6_i64
       CustomizationOverwriteWarning = 7_i64
       CustomizationDelete = 8_i64
+      CustomizationNavigationButtons = 9_i64
+      CustomizationDriveSelector = 10_i64
+      CustomizationFilters = 11_i64
     end
     @@mb_clear_filters : Void* = Pointer(Void).null
     def clear_filters() : Void
@@ -23164,6 +22954,39 @@ module Godot
     # Property `deleting_enabled` setter
     def deleting_enabled=(val)
       set_customization_flag_enabled(8_i64, val)
+    end
+    # Property `navigation_buttons_enabled` getter
+    def navigation_buttons_enabled
+      is_customization_flag_enabled(9_i64)
+    end
+    def navigation_buttons_enabled?
+      navigation_buttons_enabled
+    end
+    # Property `navigation_buttons_enabled` setter
+    def navigation_buttons_enabled=(val)
+      set_customization_flag_enabled(9_i64, val)
+    end
+    # Property `drive_selector_enabled` getter
+    def drive_selector_enabled
+      is_customization_flag_enabled(10_i64)
+    end
+    def drive_selector_enabled?
+      drive_selector_enabled
+    end
+    # Property `drive_selector_enabled` setter
+    def drive_selector_enabled=(val)
+      set_customization_flag_enabled(10_i64, val)
+    end
+    # Property `filters_enabled` getter
+    def filters_enabled
+      is_customization_flag_enabled(11_i64)
+    end
+    def filters_enabled?
+      filters_enabled
+    end
+    # Property `filters_enabled` setter
+    def filters_enabled=(val)
+      set_customization_flag_enabled(11_i64, val)
     end
     # Property `current_dir` getter
     def current_dir
@@ -38504,6 +38327,339 @@ module Godot
   class GDScriptSyntaxHighlighter < Godot::EditorSyntaxHighlighter
     def initialize(pointer : Void* = Pointer(Void).null)
       super(pointer)
+    end
+  end
+  class GDScriptTextDocument < Godot::RefCounted
+    def initialize(pointer : Void* = Pointer(Void).null)
+      super(pointer)
+    end
+    @@mb_show_native_symbol_in_editor : Void* = Pointer(Void).null
+    def show_native_symbol_in_editor(symbol_id : String) : Void
+      if @@mb_show_native_symbol_in_editor.null?
+        @@mb_show_native_symbol_in_editor = Bridge.get_method_bind("GDScriptTextDocument", "show_native_symbol_in_editor", 83702148_i64)
+      end
+      str_0 = Bridge.make_string(symbol_id)
+      arg_0 = str_0
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_show_native_symbol_in_editor, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    ensure
+      Bridge.free_string(str_0)
+    end
+    @@mb_didOpen : Void* = Pointer(Void).null
+    def did_open(params : Void*) : Void
+      if @@mb_didOpen.null?
+        @@mb_didOpen = Bridge.get_method_bind("GDScriptTextDocument", "didOpen", 1114965689_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_didOpen, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_didClose : Void* = Pointer(Void).null
+    def did_close(params : Void*) : Void
+      if @@mb_didClose.null?
+        @@mb_didClose = Bridge.get_method_bind("GDScriptTextDocument", "didClose", 1114965689_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_didClose, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_didChange : Void* = Pointer(Void).null
+    def did_change(params : Void*) : Void
+      if @@mb_didChange.null?
+        @@mb_didChange = Bridge.get_method_bind("GDScriptTextDocument", "didChange", 1114965689_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_didChange, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_willSaveWaitUntil : Void* = Pointer(Void).null
+    def will_save_wait_until(params : Void*) : Void
+      if @@mb_willSaveWaitUntil.null?
+        @@mb_willSaveWaitUntil = Bridge.get_method_bind("GDScriptTextDocument", "willSaveWaitUntil", 1114965689_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_willSaveWaitUntil, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_didSave : Void* = Pointer(Void).null
+    def did_save(params : Void*) : Void
+      if @@mb_didSave.null?
+        @@mb_didSave = Bridge.get_method_bind("GDScriptTextDocument", "didSave", 1114965689_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_didSave, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_nativeSymbol : Void* = Pointer(Void).null
+    def native_symbol(params : Void*) : Void*
+      if @@mb_nativeSymbol.null?
+        @@mb_nativeSymbol = Bridge.get_method_bind("GDScriptTextDocument", "nativeSymbol", 3762224011_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      ret_var = StaticArray(UInt8, 24).new(0_u8)
+      Bridge.ptrcall(@@mb_nativeSymbol, @pointer, args.to_unsafe.as(Void**), ret_var.to_unsafe.as(Void*))
+      ret_ptr = Pointer(Void).null
+      Bridge.type_from_variant(24, pointerof(ret_ptr).as(Void*), ret_var.to_unsafe.as(Void*))
+      ret_ptr
+    end
+    @@mb_documentSymbol : Void* = Pointer(Void).null
+    def document_symbol(params : Void*) : Godot::Array
+      if @@mb_documentSymbol.null?
+        @@mb_documentSymbol = Bridge.get_method_bind("GDScriptTextDocument", "documentSymbol", 3877611628_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      ret_ptr = Pointer(Void).null
+      Bridge.ptrcall(@@mb_documentSymbol, @pointer, args.to_unsafe.as(Void**), pointerof(ret_ptr).as(Void*))
+      Godot::Array.new(ret_ptr)
+    end
+    @@mb_completion : Void* = Pointer(Void).null
+    def completion(params : Void*) : Godot::Array
+      if @@mb_completion.null?
+        @@mb_completion = Bridge.get_method_bind("GDScriptTextDocument", "completion", 3877611628_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      ret_ptr = Pointer(Void).null
+      Bridge.ptrcall(@@mb_completion, @pointer, args.to_unsafe.as(Void**), pointerof(ret_ptr).as(Void*))
+      Godot::Array.new(ret_ptr)
+    end
+    @@mb_resolve : Void* = Pointer(Void).null
+    def resolve(params : Void*) : Void*
+      if @@mb_resolve.null?
+        @@mb_resolve = Bridge.get_method_bind("GDScriptTextDocument", "resolve", 1333564645_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      ret_ptr = Pointer(Void).null
+      Bridge.ptrcall(@@mb_resolve, @pointer, args.to_unsafe.as(Void**), pointerof(ret_ptr).as(Void*))
+      ret_ptr
+    end
+    @@mb_rename : Void* = Pointer(Void).null
+    def rename(params : Void*) : Void*
+      if @@mb_rename.null?
+        @@mb_rename = Bridge.get_method_bind("GDScriptTextDocument", "rename", 1333564645_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      ret_ptr = Pointer(Void).null
+      Bridge.ptrcall(@@mb_rename, @pointer, args.to_unsafe.as(Void**), pointerof(ret_ptr).as(Void*))
+      ret_ptr
+    end
+    @@mb_prepareRename : Void* = Pointer(Void).null
+    def prepare_rename(params : Void*) : Void*
+      if @@mb_prepareRename.null?
+        @@mb_prepareRename = Bridge.get_method_bind("GDScriptTextDocument", "prepareRename", 3762224011_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      ret_var = StaticArray(UInt8, 24).new(0_u8)
+      Bridge.ptrcall(@@mb_prepareRename, @pointer, args.to_unsafe.as(Void**), ret_var.to_unsafe.as(Void*))
+      ret_ptr = Pointer(Void).null
+      Bridge.type_from_variant(24, pointerof(ret_ptr).as(Void*), ret_var.to_unsafe.as(Void*))
+      ret_ptr
+    end
+    @@mb_references : Void* = Pointer(Void).null
+    def references(params : Void*) : Godot::Array
+      if @@mb_references.null?
+        @@mb_references = Bridge.get_method_bind("GDScriptTextDocument", "references", 3877611628_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      ret_ptr = Pointer(Void).null
+      Bridge.ptrcall(@@mb_references, @pointer, args.to_unsafe.as(Void**), pointerof(ret_ptr).as(Void*))
+      Godot::Array.new(ret_ptr)
+    end
+    @@mb_documentLink : Void* = Pointer(Void).null
+    def document_link(params : Void*) : Godot::Array
+      if @@mb_documentLink.null?
+        @@mb_documentLink = Bridge.get_method_bind("GDScriptTextDocument", "documentLink", 3877611628_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      ret_ptr = Pointer(Void).null
+      Bridge.ptrcall(@@mb_documentLink, @pointer, args.to_unsafe.as(Void**), pointerof(ret_ptr).as(Void*))
+      Godot::Array.new(ret_ptr)
+    end
+    @@mb_hover : Void* = Pointer(Void).null
+    def hover(params : Void*) : Void*
+      if @@mb_hover.null?
+        @@mb_hover = Bridge.get_method_bind("GDScriptTextDocument", "hover", 3762224011_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      ret_var = StaticArray(UInt8, 24).new(0_u8)
+      Bridge.ptrcall(@@mb_hover, @pointer, args.to_unsafe.as(Void**), ret_var.to_unsafe.as(Void*))
+      ret_ptr = Pointer(Void).null
+      Bridge.type_from_variant(24, pointerof(ret_ptr).as(Void*), ret_var.to_unsafe.as(Void*))
+      ret_ptr
+    end
+    @@mb_definition : Void* = Pointer(Void).null
+    def definition(params : Void*) : Godot::Array
+      if @@mb_definition.null?
+        @@mb_definition = Bridge.get_method_bind("GDScriptTextDocument", "definition", 3877611628_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      ret_ptr = Pointer(Void).null
+      Bridge.ptrcall(@@mb_definition, @pointer, args.to_unsafe.as(Void**), pointerof(ret_ptr).as(Void*))
+      Godot::Array.new(ret_ptr)
+    end
+    @@mb_declaration : Void* = Pointer(Void).null
+    def declaration(params : Void*) : Void*
+      if @@mb_declaration.null?
+        @@mb_declaration = Bridge.get_method_bind("GDScriptTextDocument", "declaration", 3762224011_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      ret_var = StaticArray(UInt8, 24).new(0_u8)
+      Bridge.ptrcall(@@mb_declaration, @pointer, args.to_unsafe.as(Void**), ret_var.to_unsafe.as(Void*))
+      ret_ptr = Pointer(Void).null
+      Bridge.type_from_variant(24, pointerof(ret_ptr).as(Void*), ret_var.to_unsafe.as(Void*))
+      ret_ptr
+    end
+    @@mb_signatureHelp : Void* = Pointer(Void).null
+    def signature_help(params : Void*) : Void*
+      if @@mb_signatureHelp.null?
+        @@mb_signatureHelp = Bridge.get_method_bind("GDScriptTextDocument", "signatureHelp", 3762224011_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      ret_var = StaticArray(UInt8, 24).new(0_u8)
+      Bridge.ptrcall(@@mb_signatureHelp, @pointer, args.to_unsafe.as(Void**), ret_var.to_unsafe.as(Void*))
+      ret_ptr = Pointer(Void).null
+      Bridge.type_from_variant(24, pointerof(ret_ptr).as(Void*), ret_var.to_unsafe.as(Void*))
+      ret_ptr
+    end
+  end
+  class GDScriptWorkspace < Godot::RefCounted
+    def initialize(pointer : Void* = Pointer(Void).null)
+      super(pointer)
+    end
+    @@mb_apply_new_signal : Void* = Pointer(Void).null
+    def apply_new_signal(obj : Godot::Object, function : String, args : Void*) : Void
+      if @@mb_apply_new_signal.null?
+        @@mb_apply_new_signal = Bridge.get_method_bind("GDScriptWorkspace", "apply_new_signal", 3682583557_i64)
+      end
+      arg_ptr_0 = obj ? obj.pointer : Pointer(Void).null
+      arg_0 = pointerof(arg_ptr_0).as(Void*)
+      str_1 = Bridge.make_string(function)
+      arg_1 = str_1
+      val_2 = args
+      arg_2 = pointerof(val_2).as(Void*)
+      args = [arg_0, arg_1, arg_2]
+      Bridge.ptrcall(@@mb_apply_new_signal, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    ensure
+      Bridge.free_string(str_1)
+    end
+    @@mb_get_file_path : Void* = Pointer(Void).null
+    def get_file_path(uri : String) : String
+      if @@mb_get_file_path.null?
+        @@mb_get_file_path = Bridge.get_method_bind("GDScriptWorkspace", "get_file_path", 1703090593_i64)
+      end
+      str_0 = Bridge.make_string(uri)
+      arg_0 = str_0
+      args = [arg_0]
+      ""
+    ensure
+      Bridge.free_string(str_0)
+    end
+    @@mb_get_file_uri : Void* = Pointer(Void).null
+    def get_file_uri(path : String) : String
+      if @@mb_get_file_uri.null?
+        @@mb_get_file_uri = Bridge.get_method_bind("GDScriptWorkspace", "get_file_uri", 3135753539_i64)
+      end
+      str_0 = Bridge.make_string(path)
+      arg_0 = str_0
+      args = [arg_0]
+      ""
+    ensure
+      Bridge.free_string(str_0)
+    end
+    @@mb_generate_script_api : Void* = Pointer(Void).null
+    def generate_script_api(path : String) : Void*
+      if @@mb_generate_script_api.null?
+        @@mb_generate_script_api = Bridge.get_method_bind("GDScriptWorkspace", "generate_script_api", 2786125124_i64)
+      end
+      str_0 = Bridge.make_string(path)
+      arg_0 = str_0
+      args = [arg_0]
+      ret_ptr = Pointer(Void).null
+      Bridge.ptrcall(@@mb_generate_script_api, @pointer, args.to_unsafe.as(Void**), pointerof(ret_ptr).as(Void*))
+      ret_ptr
+    ensure
+      Bridge.free_string(str_0)
+    end
+    @@mb_didDeleteFiles : Void* = Pointer(Void).null
+    def did_delete_files(params : Void*) : Void
+      if @@mb_didDeleteFiles.null?
+        @@mb_didDeleteFiles = Bridge.get_method_bind("GDScriptWorkspace", "didDeleteFiles", 4155329257_i64)
+      end
+      val_0 = params
+      arg_0 = pointerof(val_0).as(Void*)
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_didDeleteFiles, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    end
+    @@mb_parse_script : Void* = Pointer(Void).null
+    def parse_script(path : String, content : String) : Int64
+      if @@mb_parse_script.null?
+        @@mb_parse_script = Bridge.get_method_bind("GDScriptWorkspace", "parse_script", 852856452_i64)
+      end
+      str_0 = Bridge.make_string(path)
+      arg_0 = str_0
+      str_1 = Bridge.make_string(content)
+      arg_1 = str_1
+      args = [arg_0, arg_1]
+      ret = 0_i64
+      Bridge.ptrcall(@@mb_parse_script, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
+      ret
+    ensure
+      Bridge.free_string(str_0)
+      Bridge.free_string(str_1)
+    end
+    @@mb_parse_local_script : Void* = Pointer(Void).null
+    def parse_local_script(path : String) : Int64
+      if @@mb_parse_local_script.null?
+        @@mb_parse_local_script = Bridge.get_method_bind("GDScriptWorkspace", "parse_local_script", 166001499_i64)
+      end
+      str_0 = Bridge.make_string(path)
+      arg_0 = str_0
+      args = [arg_0]
+      ret = 0_i64
+      Bridge.ptrcall(@@mb_parse_local_script, @pointer, args.to_unsafe.as(Void**), pointerof(ret).as(Void*))
+      ret
+    ensure
+      Bridge.free_string(str_0)
+    end
+    @@mb_publish_diagnostics : Void* = Pointer(Void).null
+    def publish_diagnostics(path : String) : Void
+      if @@mb_publish_diagnostics.null?
+        @@mb_publish_diagnostics = Bridge.get_method_bind("GDScriptWorkspace", "publish_diagnostics", 83702148_i64)
+      end
+      str_0 = Bridge.make_string(path)
+      arg_0 = str_0
+      args = [arg_0]
+      Bridge.ptrcall(@@mb_publish_diagnostics, @pointer, args.to_unsafe.as(Void**), Pointer(Void).null)
+    ensure
+      Bridge.free_string(str_0)
     end
   end
 end

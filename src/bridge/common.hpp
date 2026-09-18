@@ -43,6 +43,8 @@
 #include <utility>
 #include <memory>
 #include <algorithm>
+#include <mutex>
+#include <atomic>
 
 #include "gdextension_interface.h"
 

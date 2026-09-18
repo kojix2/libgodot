@@ -96,8 +96,10 @@ try {
         $destExDir = Join-Path $stagingDir $exName
         New-Item -ItemType Directory -Force -Path $destExDir | Out-Null
 
-        # A. Copy full source files (excluding .godot, lib, bin, dist, .git)
-        Get-ChildItem -Path $ex.FullName -Exclude ".godot", "lib", "bin", "dist", ".git" | ForEach-Object {
+        # A. Copy full source files (excluding .godot, lib, bin, dist, .git, .crystal)
+        Get-ChildItem -Path $ex.FullName | Where-Object {
+            $_.Name -notin @(".godot", "lib", "bin", "dist", ".git", ".crystal")
+        } | ForEach-Object {
             Copy-Item -Path $_.FullName -Destination $destExDir -Recurse -Force
         }
 

@@ -16,10 +16,12 @@
 // ==============================================================================
 
 static std::unordered_map<std::string, void*> s_string_name_cache;
+static std::mutex s_string_name_mutex;
 
 /** Allocates and initializes a heap-backed Godot StringName instance (interned) */
 inline void* make_string_name(const char *name) {
     const char *k = name ? name : "";
+    std::lock_guard<std::mutex> lock(s_string_name_mutex);
     auto it = s_string_name_cache.find(k);
     if (it != s_string_name_cache.end()) {
         return it->second;
@@ -135,21 +137,26 @@ inline void bridge_type_from_variant(int variant_type, void *dst, const void *va
         return;
     }
     if (variant_type == GDEXTENSION_VARIANT_TYPE_STRING) {
-        static thread_local char s_type_str_buf[1024];
-        s_type_str_buf[0] = '\0';
+        static thread_local std::string s_type_str_pool[8];
+        static thread_local size_t s_pool_idx = 0;
+        size_t idx = (s_pool_idx++) % 8;
+        std::string &s_type_str = s_type_str_pool[idx];
+        s_type_str.clear();
+
         if (gd_string_to_utf8_chars && gd_get_variant_to_type_constructor) {
             alignas(void*) char gd_str[8] = {0};
             GDExtensionTypeFromVariantConstructorFunc conv = gd_get_variant_to_type_constructor(GDEXTENSION_VARIANT_TYPE_STRING);
             if (conv) {
                 conv(gd_str, (GDExtensionVariantPtr)variant);
-                int64_t len = gd_string_to_utf8_chars(gd_str, s_type_str_buf, sizeof(s_type_str_buf) - 1);
-                if (len >= 0 && len < (int64_t)sizeof(s_type_str_buf)) {
-                    s_type_str_buf[len] = '\0';
+                int64_t len = gd_string_to_utf8_chars(gd_str, nullptr, 0);
+                if (len > 0) {
+                    s_type_str.resize(len, '\0');
+                    gd_string_to_utf8_chars(gd_str, &s_type_str[0], len);
                 }
             }
             if (gd_string_destroy) gd_string_destroy(gd_str);
         }
-        *(const char**)dst = s_type_str_buf;
+        *(const char**)dst = s_type_str.c_str();
         return;
     }
     if (variant_type == GDEXTENSION_VARIANT_TYPE_OBJECT && gd_variant_get_type) {
@@ -481,10 +488,7 @@ inline uint8_t bridge_is_instance_valid(uint64_t id) {
 inline void bridge_object_emit_signal(GDExtensionObjectPtr instance, const char *signal_name, const BridgeSignalArg *args, int arg_count) {
     if (!instance || !signal_name || !gd_classdb_get_method_bind || !gd_object_method_bind_call) return;
     if (!mb_object_emit_signal) {
-        void *sn_obj = make_string_name("Object");
-        void *sn_emit = make_string_name("emit_signal");
-        mb_object_emit_signal = gd_classdb_get_method_bind(sn_obj, sn_emit, 4047867050ULL);
-        free_string_name(sn_obj); free_string_name(sn_emit);
+        mb_object_emit_signal = bridge_get_method_bind("Object", "emit_signal", 4047867050ULL);
     }
     if (!mb_object_emit_signal) return;
     bridge_call_method_vararg(mb_object_emit_signal, instance, signal_name, args, arg_count);
@@ -493,10 +497,7 @@ inline void bridge_object_emit_signal(GDExtensionObjectPtr instance, const char 
 inline void bridge_object_call_deferred(GDExtensionObjectPtr instance, const char *method_name, const BridgeSignalArg *args, int arg_count) {
     if (!instance || !method_name || !gd_classdb_get_method_bind || !gd_object_method_bind_call) return;
     if (!mb_object_call_deferred) {
-        void *sn_obj = make_string_name("Object");
-        void *sn_cd = make_string_name("call_deferred");
-        mb_object_call_deferred = gd_classdb_get_method_bind(sn_obj, sn_cd, 3400424181ULL);
-        free_string_name(sn_obj); free_string_name(sn_cd);
+        mb_object_call_deferred = bridge_get_method_bind("Object", "call_deferred", 3400424181ULL);
     }
     if (!mb_object_call_deferred) return;
     bridge_call_method_vararg(mb_object_call_deferred, instance, method_name, args, arg_count);
@@ -505,10 +506,7 @@ inline void bridge_object_call_deferred(GDExtensionObjectPtr instance, const cha
 inline void bridge_object_call(GDExtensionObjectPtr instance, const char *method_name, const BridgeSignalArg *args, int arg_count) {
     if (!instance || !method_name || !gd_classdb_get_method_bind || !gd_object_method_bind_call) return;
     if (!mb_object_call) {
-        void *sn_obj = make_string_name("Object");
-        void *sn_c = make_string_name("call");
-        mb_object_call = gd_classdb_get_method_bind(sn_obj, sn_c, 3400424181ULL);
-        free_string_name(sn_obj); free_string_name(sn_c);
+        mb_object_call = bridge_get_method_bind("Object", "call", 3400424181ULL);
     }
     if (!mb_object_call) return;
     bridge_call_method_vararg(mb_object_call, instance, method_name, args, arg_count);
@@ -517,10 +515,7 @@ inline void bridge_object_call(GDExtensionObjectPtr instance, const char *method
 inline bool bridge_is_object_refcounted(GDExtensionObjectPtr obj) {
     if (!obj || !gd_classdb_get_method_bind || !gd_object_method_bind_ptrcall) return false;
     if (!mb_object_is_class) {
-        void *sn_obj = make_string_name("Object");
-        void *sn_ic = make_string_name("is_class");
-        mb_object_is_class = gd_classdb_get_method_bind(sn_obj, sn_ic, 2619796661ULL);
-        free_string_name(sn_obj); free_string_name(sn_ic);
+        mb_object_is_class = bridge_get_method_bind("Object", "is_class", 2619796661ULL);
     }
     if (!mb_object_is_class) return false;
     void *str_rc = make_string("RefCounted");
@@ -534,10 +529,7 @@ inline bool bridge_is_object_refcounted(GDExtensionObjectPtr obj) {
 inline GDExtensionObjectPtr bridge_object_call_ret_object(GDExtensionObjectPtr instance, const char *method_name, const BridgeSignalArg *args, int arg_count) {
     if (!instance || !method_name || !gd_classdb_get_method_bind || !gd_object_method_bind_call) return nullptr;
     if (!mb_object_call) {
-        void *sn_obj = make_string_name("Object");
-        void *sn_c = make_string_name("call");
-        mb_object_call = gd_classdb_get_method_bind(sn_obj, sn_c, 3400424181ULL);
-        free_string_name(sn_obj); free_string_name(sn_c);
+        mb_object_call = bridge_get_method_bind("Object", "call", 3400424181ULL);
     }
     if (!mb_object_call) return nullptr;
 
@@ -547,10 +539,7 @@ inline GDExtensionObjectPtr bridge_object_call_ret_object(GDExtensionObjectPtr i
     GDExtensionObjectPtr ret_obj = bridge_object_from_variant(var_ret);
     if (ret_obj && bridge_is_object_refcounted(ret_obj)) {
         if (!mb_refcounted_reference) {
-            void *sn_rc = make_string_name("RefCounted");
-            void *sn_ref = make_string_name("reference");
-            mb_refcounted_reference = gd_classdb_get_method_bind(sn_rc, sn_ref, 2240911060ULL);
-            free_string_name(sn_rc); free_string_name(sn_ref);
+            mb_refcounted_reference = bridge_get_method_bind("RefCounted", "reference", 2240911060ULL);
         }
         if (mb_refcounted_reference && gd_object_method_bind_ptrcall) {
             uint8_t success = 0;
@@ -564,10 +553,7 @@ inline GDExtensionObjectPtr bridge_object_call_ret_object(GDExtensionObjectPtr i
 inline int64_t bridge_object_call_ret_int(GDExtensionObjectPtr instance, const char *method_name, const BridgeSignalArg *args, int arg_count) {
     if (!instance || !method_name || !gd_classdb_get_method_bind || !gd_object_method_bind_call) return 0;
     if (!mb_object_call) {
-        void *sn_obj = make_string_name("Object");
-        void *sn_c = make_string_name("call");
-        mb_object_call = gd_classdb_get_method_bind(sn_obj, sn_c, 3400424181ULL);
-        free_string_name(sn_obj); free_string_name(sn_c);
+        mb_object_call = bridge_get_method_bind("Object", "call", 3400424181ULL);
     }
     if (!mb_object_call) return 0;
 
@@ -583,10 +569,7 @@ inline int64_t bridge_object_call_ret_int(GDExtensionObjectPtr instance, const c
 inline double bridge_object_call_ret_float(GDExtensionObjectPtr instance, const char *method_name, const BridgeSignalArg *args, int arg_count) {
     if (!instance || !method_name || !gd_classdb_get_method_bind || !gd_object_method_bind_call) return 0.0;
     if (!mb_object_call) {
-        void *sn_obj = make_string_name("Object");
-        void *sn_c = make_string_name("call");
-        mb_object_call = gd_classdb_get_method_bind(sn_obj, sn_c, 3400424181ULL);
-        free_string_name(sn_obj); free_string_name(sn_c);
+        mb_object_call = bridge_get_method_bind("Object", "call", 3400424181ULL);
     }
     if (!mb_object_call) return 0.0;
 
@@ -602,10 +585,7 @@ inline double bridge_object_call_ret_float(GDExtensionObjectPtr instance, const 
 inline bool bridge_object_call_ret_bool(GDExtensionObjectPtr instance, const char *method_name, const BridgeSignalArg *args = nullptr, int arg_count = 0) {
     if (!instance || !method_name || !gd_classdb_get_method_bind || !gd_object_method_bind_call) return false;
     if (!mb_object_call) {
-        void *sn_obj = make_string_name("Object");
-        void *sn_c = make_string_name("call");
-        mb_object_call = gd_classdb_get_method_bind(sn_obj, sn_c, 3400424181ULL);
-        free_string_name(sn_obj); free_string_name(sn_c);
+        mb_object_call = bridge_get_method_bind("Object", "call", 3400424181ULL);
     }
     if (!mb_object_call) return false;
 
@@ -623,10 +603,7 @@ inline const char* bridge_object_call_ret_string(GDExtensionObjectPtr instance, 
     s_call_str_storage.clear();
     if (!instance || !method_name || !gd_classdb_get_method_bind || !gd_object_method_bind_call) return "";
     if (!mb_object_call) {
-        void *sn_obj = make_string_name("Object");
-        void *sn_c = make_string_name("call");
-        mb_object_call = gd_classdb_get_method_bind(sn_obj, sn_c, 3400424181ULL);
-        free_string_name(sn_obj); free_string_name(sn_c);
+        mb_object_call = bridge_get_method_bind("Object", "call", 3400424181ULL);
     }
     if (!mb_object_call) return "";
 
@@ -654,10 +631,7 @@ inline const char* bridge_object_call_ret_string(GDExtensionObjectPtr instance, 
 inline GDExtensionObjectPtr bridge_node_find_child(GDExtensionObjectPtr node, const char *pattern, bool recursive, bool owned) {
     if (!node || !pattern || !gd_classdb_get_method_bind || !gd_object_method_bind_ptrcall) return nullptr;
     if (!mb_node_find_child) {
-        void *sn_node = make_string_name("Node");
-        void *sn_fc = make_string_name("find_child");
-        mb_node_find_child = gd_classdb_get_method_bind(sn_node, sn_fc, 2008217037ULL);
-        free_string_name(sn_node); free_string_name(sn_fc);
+        mb_node_find_child = bridge_get_method_bind("Node", "find_child", 2008217037ULL);
     }
     if (!mb_node_find_child) return nullptr;
 
@@ -675,10 +649,7 @@ inline GDExtensionObjectPtr bridge_node_find_child(GDExtensionObjectPtr node, co
 inline GDExtensionObjectPtr bridge_node_get_node(GDExtensionObjectPtr node, const char *path) {
     if (!node || !path || !gd_classdb_get_method_bind) return nullptr;
     if (!mb_node_get_node) {
-        void *sn_node = make_string_name("Node");
-        void *sn_gn = make_string_name("get_node_or_null");
-        mb_node_get_node = gd_classdb_get_method_bind(sn_node, sn_gn, 2734337346ULL);
-        free_string_name(sn_node); free_string_name(sn_gn);
+        mb_node_get_node = bridge_get_method_bind("Node", "get_node_or_null", 2734337346ULL);
     }
     if (!mb_node_get_node) return nullptr;
 
@@ -732,10 +703,7 @@ inline GDExtensionObjectPtr bridge_node_get_node(GDExtensionObjectPtr node, cons
 inline void bridge_range_set_value(GDExtensionObjectPtr range_obj, double value) {
     if (!range_obj || !gd_classdb_get_method_bind || !gd_object_method_bind_ptrcall) return;
     if (!mb_range_set_value) {
-        void *sn_range = make_string_name("Range");
-        void *sn_sv = make_string_name("set_value");
-        mb_range_set_value = gd_classdb_get_method_bind(sn_range, sn_sv, 373806689ULL);
-        free_string_name(sn_range); free_string_name(sn_sv);
+        mb_range_set_value = bridge_get_method_bind("Range", "set_value", 373806689ULL);
     }
     if (mb_range_set_value) {
         const void *args[1] = { &value };
@@ -747,10 +715,7 @@ inline void bridge_node_rpc_config(GDExtensionObjectPtr node, const char *method
     (void)rpc_mode; (void)transfer_mode; (void)call_local; (void)channel;
     if (!node || !method || !gd_classdb_get_method_bind || !gd_object_method_bind_ptrcall) return;
     if (!mb_node_rpc_config) {
-        void *sn_node = make_string_name("Node");
-        void *sn_rc = make_string_name("rpc_config");
-        mb_node_rpc_config = gd_classdb_get_method_bind(sn_node, sn_rc, 3776071444ULL);
-        free_string_name(sn_node); free_string_name(sn_rc);
+        mb_node_rpc_config = bridge_get_method_bind("Node", "rpc_config", 3776071444ULL);
     }
     if (!mb_node_rpc_config) return;
 
@@ -771,10 +736,7 @@ inline GDExtensionObjectPtr bridge_resource_loader_load(const char *path, const 
     if (!res_loader) return nullptr;
 
     if (!mb_res_loader_load) {
-        void *sn_rl = make_string_name("ResourceLoader");
-        void *sn_load = make_string_name("load");
-        mb_res_loader_load = gd_classdb_get_method_bind(sn_rl, sn_load, 3358495409ULL);
-        free_string_name(sn_rl); free_string_name(sn_load);
+        mb_res_loader_load = bridge_get_method_bind("ResourceLoader", "load", 3358495409ULL);
     }
     if (!mb_res_loader_load) return nullptr;
 
@@ -802,10 +764,7 @@ inline GDExtensionObjectPtr bridge_resource_loader_load(const char *path, const 
     bridge_type_from_variant(GDEXTENSION_VARIANT_TYPE_OBJECT, &ret_obj, var_ret);
 
     if (ret_obj && !mb_refcounted_reference) {
-        void *sn_rc = make_string_name("RefCounted");
-        void *sn_ref = make_string_name("reference");
-        mb_refcounted_reference = gd_classdb_get_method_bind(sn_rc, sn_ref, 2240911060ULL);
-        free_string_name(sn_rc); free_string_name(sn_ref);
+        mb_refcounted_reference = bridge_get_method_bind("RefCounted", "reference", 2240911060ULL);
     }
     if (ret_obj && mb_refcounted_reference && gd_object_method_bind_ptrcall) {
         uint8_t success = 0;
@@ -827,10 +786,7 @@ inline GDExtensionObjectPtr bridge_resource_loader_load(const char *path, const 
 inline GDExtensionObjectPtr bridge_packed_scene_instantiate(GDExtensionObjectPtr scene, int64_t edit_state) {
     if (!scene || !gd_classdb_get_method_bind) return nullptr;
     if (!mb_packed_scene_instantiate) {
-        void *sn_ps = make_string_name("PackedScene");
-        void *sn_inst = make_string_name("instantiate");
-        mb_packed_scene_instantiate = gd_classdb_get_method_bind(sn_ps, sn_inst, 2628778455ULL);
-        free_string_name(sn_ps); free_string_name(sn_inst);
+        mb_packed_scene_instantiate = bridge_get_method_bind("PackedScene", "instantiate", 2628778455ULL);
     }
     if (!mb_packed_scene_instantiate) return nullptr;
 
@@ -871,10 +827,7 @@ inline GDExtensionObjectPtr bridge_packed_scene_instantiate(GDExtensionObjectPtr
 inline const char* bridge_node_get_name(GDExtensionObjectPtr node) {
     if (!node || !gd_classdb_get_method_bind || !gd_object_method_bind_ptrcall) return "";
     if (!mb_node_get_name) {
-        void *sn_node = make_string_name("Node");
-        void *sn_gn = make_string_name("get_name");
-        mb_node_get_name = gd_classdb_get_method_bind(sn_node, sn_gn, 2002593661ULL);
-        free_string_name(sn_node); free_string_name(sn_gn);
+        mb_node_get_name = bridge_get_method_bind("Node", "get_name", 2002593661ULL);
     }
     if (!mb_node_get_name) return "";
 

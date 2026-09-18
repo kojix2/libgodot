@@ -23,10 +23,9 @@ inline bool is_editor_active() {
     if (!gd_global_get_singleton || !gd_classdb_get_method_bind || !gd_object_method_bind_ptrcall) return false;
     void *sn_engine = make_string_name("Engine");
     GDExtensionObjectPtr engine = gd_global_get_singleton(sn_engine);
-    if (!engine) { free_string_name(sn_engine); return false; }
-    void *sn_is_editor = make_string_name("is_editor_hint");
-    GDExtensionMethodBindPtr mb = gd_classdb_get_method_bind(sn_engine, sn_is_editor, 36873697);
-    free_string_name(sn_engine); free_string_name(sn_is_editor);
+    free_string_name(sn_engine);
+    if (!engine) return false;
+    GDExtensionMethodBindPtr mb = bridge_get_method_bind("Engine", "is_editor_hint", 36873697);
     if (!mb) return false;
     uint8_t ret_bool = 0;
     gd_object_method_bind_ptrcall(mb, engine, nullptr, &ret_bool);
@@ -40,10 +39,9 @@ inline bool is_headless_display() {
     if (!gd_global_get_singleton || !gd_classdb_get_method_bind || !gd_object_method_bind_ptrcall) return false;
     void *sn_ds = make_string_name("DisplayServer");
     GDExtensionObjectPtr ds = gd_global_get_singleton(sn_ds);
-    if (!ds) { free_string_name(sn_ds); return false; }
-    void *sn_get_name = make_string_name("get_name");
-    GDExtensionMethodBindPtr mb = gd_classdb_get_method_bind(sn_ds, sn_get_name, 201670096);
-    free_string_name(sn_ds); free_string_name(sn_get_name);
+    free_string_name(sn_ds);
+    if (!ds) return false;
+    GDExtensionMethodBindPtr mb = bridge_get_method_bind("DisplayServer", "get_name", 201670096);
     if (!mb) return false;
     alignas(void*) char ret_str[8] = {0};
     gd_object_method_bind_ptrcall(mb, ds, nullptr, ret_str);
@@ -722,10 +720,7 @@ inline void generic_class_call_virtual_with_data(
 
                     static GDExtensionMethodBindPtr mb_set_source_code = nullptr;
                     if (!mb_set_source_code) {
-                        void *sn_script = make_string_name("Script");
-                        void *sn_set_src = make_string_name("set_source_code");
-                        mb_set_source_code = gd_classdb_get_method_bind(sn_script, sn_set_src, 83702148ULL);
-                        free_string_name(sn_script); free_string_name(sn_set_src);
+                        mb_set_source_code = bridge_get_method_bind("Script", "set_source_code", 83702148ULL);
                     }
                     if (mb_set_source_code) {
                         alignas(void*) char src_str[8] = {0};
@@ -835,10 +830,7 @@ inline void generic_class_call_virtual_with_data(
                 if (script_obj) {
                     static GDExtensionMethodBindPtr mb_set_path = nullptr;
                     if (!mb_set_path) {
-                        void *sn_res = make_string_name("Resource");
-                        void *sn_sp = make_string_name("set_path");
-                        mb_set_path = gd_classdb_get_method_bind(sn_res, sn_sp, 83702148ULL);
-                        free_string_name(sn_res); free_string_name(sn_sp);
+                        mb_set_path = bridge_get_method_bind("Resource", "set_path", 83702148ULL);
                     }
                     if (mb_set_path && target_path[0] != '\0') {
                         alignas(void*) char p_str[8] = {0};
@@ -850,10 +842,7 @@ inline void generic_class_call_virtual_with_data(
 
                     static GDExtensionMethodBindPtr mb_set_src = nullptr;
                     if (!mb_set_src) {
-                        void *sn_script = make_string_name("Script");
-                        void *sn_set_sc = make_string_name("set_source_code");
-                        mb_set_src = gd_classdb_get_method_bind(sn_script, sn_set_sc, 83702148ULL);
-                        free_string_name(sn_script); free_string_name(sn_set_sc);
+                        mb_set_src = bridge_get_method_bind("Script", "set_source_code", 83702148ULL);
                     }
                     if (mb_set_src) {
                         alignas(void*) char src_str[8] = {0};

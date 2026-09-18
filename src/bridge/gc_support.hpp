@@ -282,15 +282,14 @@ inline void ensure_gc_thread_registered() {
     record_main_thread();
 #endif
 
-    if (t_gc_registered_module_count >= g_gc_modules.size() && !g_gc_modules.empty()) {
-        return;
-    }
-
     std::vector<GCModuleEntry> modules_snapshot;
     {
         std::lock_guard<std::recursive_mutex> lock(g_gc_modules_mutex);
         if (g_gc_modules.empty()) {
             init_gc_library();
+        }
+        if (t_gc_registered_module_count >= g_gc_modules.size() && !g_gc_modules.empty()) {
+            return;
         }
         modules_snapshot = g_gc_modules;
     }

@@ -213,6 +213,25 @@ module Docs
   #
   # > **Rule**: Always execute `make all` rather than partial builds to guarantee all consumer
   # > directories and bridge DLLs remain synchronized.
+  #
+  # ### macOS builds and tests
+  #
+  # On macOS, `make all` and `make test` use `scripts/macos.py` with Python 3,
+  # Crystal, and the system C++ compiler. These targets do not require PowerShell.
+  # Both rebuild and synchronize the bridge, editor plugin, test addons, and all
+  # consumer libraries before running verification. Shared Crystal libraries use
+  # `-Dwithout_mt` and export only `crystal_godot_init` to isolate their runtimes.
+  # The workspace is rebuilt before dumping project bindings so the engine never
+  # loads an old consumer library against the new bridge ABI.
+  #
+  # Tests cover Crystal specs, in-editor tool nodes, the compiled addon, editor
+  # shutdown, runtime assertions, exported standalone packs, and consumer smoke
+  # tests. Completion markers must be freshly produced; process failures,
+  # script loading errors, crashes, and timeouts fail the command. Logs are saved
+  # in `scratch/` and reports in `test/test_report.json` and `test/test_report.md`.
+  # Set `GODOT` to override automatic engine discovery, for example
+  # `make test GODOT=/Applications/Godot.app/Contents/MacOS/Godot`.
+  # Use `TEST_STEP_TIMEOUT` to set the timeout for each verification step.
   module B_COMPILATION_AND_BUILD
     # Dummy method for documentation visibility
     def self.rules : Array(String)

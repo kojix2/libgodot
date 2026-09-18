@@ -64,7 +64,15 @@ graph TD
 - **Godot Engine**: 4.3+ or 4.4+ (Standard build, 64-bit)
 - **C++ Compiler**: GCC (`g++`) or Clang (for compiling the GDExtension loader bridge)
 - **Make**: GNU Make
-- **Powershell**: Used for support scripts and make process
+- **Python 3 (macOS)**: Used by `make all` and `make test`; PowerShell is not required for these targets.
+- **PowerShell**: Used for other support scripts and the Windows/Linux make process.
+
+On macOS, run `make test` from the repository root. It builds and synchronizes the
+workspace, then runs Crystal specs, editor/tool tests, runtime tests, standalone
+pack tests, and template/example smoke tests. Godot is detected from the local
+`godot` executable, `Godot.app`, `/Applications/Godot.app`, or `PATH`. Override it
+with `make test GODOT=/path/to/Godot`. Logs are written to `scratch/`, and reports
+to `test/test_report.json` and `test/test_report.md`.
 
 ### Native In-Editor Debugging Prerequisite (LLDB)
 For native in-editor debugging, breakpoint synchronization, and multiplayer lockstep inspection, install **LLDB**:

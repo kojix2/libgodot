@@ -27,10 +27,10 @@
 # =============================================================================
 
 # Tool configuration
+.DEFAULT_GOAL := all
 CRYSTAL      ?= crystal
 CXX          ?= g++
 SCONS        ?= scons
-GODOT        ?= ./godot.exe
 ENTRY        ?= test/src/main.cr
 SCONS_JOBS   ?= 7
 
@@ -50,11 +50,11 @@ else
 		PLATFORM        = macos
 		SO_EXT          = dylib
 		EXE_EXT         =
-		GODOT           ?= ./godot
+		GODOT           ?= $(or $(GODOT4),$(GODOT4_BIN),$(if $(wildcard ./godot),./godot,$(if $(wildcard ./Godot.app/Contents/MacOS/Godot),./Godot.app/Contents/MacOS/Godot,$(if $(wildcard /Applications/Godot.app/Contents/MacOS/Godot),/Applications/Godot.app/Contents/MacOS/Godot,godot))))
 		PWSH_CMD        ?= pwsh -NoProfile -Command
 		PWSH_FILE       ?= pwsh -NoProfile -File
 		CXX             ?= clang++
-		CXXFLAGS        ?= -std=c++17 -O2 -fPIC -I rsrc
+		CXXFLAGS        ?= -std=c++17 -O2 -g -fPIC -I rsrc
 		LINK_FLAGS      ?= -dynamiclib -Wl,-exported_symbol,_crystal_godot_init
 	else
 		PLATFORM        = linux
@@ -101,7 +101,16 @@ LIBGODOT_DLL     = $(LIBGODOT_LIB)
 .PHONY: all bridge plugin test_project test_standalone package_tests package-tests package_template package-template package_template_addon package-template-addon package_examples package-examples package_addon package-addon package_all package-all package_release package-release package_perf package-perf package_game package-game new_addon new-addon new_example new-example setup_dev setup-dev run_editor run-editor run_test run-test run_ci_local run-ci-local ci-local ci export_templates export-templates recompile_addons recompile-addons verify_editor verify-editor test_wsl test-wsl report_android report-android examples examples_exe template template_addon perf perf_standalone perf_run perf_editor game_dll game_exe android package_android generate dump_api project_bindings deps addons sync engine spec test tests docs run editor clean help
 
 # Default target: compile bridge, plugin, test project, standalone runner, examples, template, template_addon, perf, sync DLLs, and run test suite
+ifeq ($(PLATFORM),macos)
+PYTHON ?= python3
+export CRYSTAL CXX CXXFLAGS GODOT RELEASE
+.PHONY: macos_build
+macos_build:
+	@$(PYTHON) scripts/macos.py build
+all: macos_build test
+else
 all: dirs deps bridge plugin addons dummy_addons test_project test_standalone examples template template_addon perf perf_standalone sync test
+endif
 	@echo ===================================================================
 	@echo   LibGodot Crystal library build completed successfully!
 	@echo   Run 'make run' to launch test runner or 'make editor' for editor.
@@ -309,8 +318,13 @@ spec:
 	$(CRYSTAL) spec test/spec
 
 # Run complete test suites and verification (Crystal specs, in-editor @tool tests, standalone runner, runtime project tests, smoke tests)
+ifeq ($(PLATFORM),macos)
+test tests: macos_build
+	@$(PYTHON) scripts/macos.py test $(if $(filter 1,$(SKIP_SPECS)),--skip-specs,) $(if $(filter 1,$(SKIP_TOOL_TESTS)),--skip-tool-tests,) $(if $(filter 1,$(SKIP_RUNTIME_TESTS)),--skip-runtime-tests,) $(ARGS)
+else
 test tests: test_standalone
 	@$(PWSH_FILE) scripts/run_tests.ps1 $(if $(filter 1,$(SKIP_SPECS)),-SkipSpecs,) $(if $(filter 1,$(SKIP_TOOL_TESTS)),-SkipToolTests,) $(if $(filter 1,$(SKIP_RUNTIME_TESTS)),-SkipRuntimeTests,) $(ARGS)
+endif
 
 # Unified test runner (supports interactive UI or automated suite)
 run_test run-test:
@@ -318,7 +332,11 @@ ifeq ($(or $(filter 1,$(INTERACTIVE)),$(filter 1,$(UI))),1)
 	@echo Launching Crystal LibGodot Interactive Test Runner...
 	$(GODOT) --path test $(ARGS)
 else
+ifeq ($(PLATFORM),macos)
+	@$(PYTHON) scripts/macos.py test $(if $(filter 1,$(SKIP_SPECS)),--skip-specs,) $(if $(filter 1,$(SKIP_TOOL_TESTS)),--skip-tool-tests,) $(if $(filter 1,$(SKIP_RUNTIME_TESTS)),--skip-runtime-tests,) $(ARGS)
+else
 	@$(PWSH_FILE) scripts/run_tests.ps1 $(if $(filter 1,$(SKIP_SPECS)),-SkipSpecs,) $(if $(filter 1,$(SKIP_TOOL_TESTS)),-SkipToolTests,) $(if $(filter 1,$(SKIP_RUNTIME_TESTS)),-SkipRuntimeTests,) $(ARGS)
+endif
 endif
 
 # Run complete local CI test matrix harness

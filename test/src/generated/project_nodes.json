@@ -1995,7 +1995,7 @@
 		{
 			"constants": {},
 			"inherits": "EditorPlugin",
-			"is_instantiable": false,
+			"is_instantiable": true,
 			"methods": [],
 			"name": "DummyAudioPlugin",
 			"properties": [
@@ -2033,7 +2033,7 @@
 		{
 			"constants": {},
 			"inherits": "EditorPlugin",
-			"is_instantiable": false,
+			"is_instantiable": true,
 			"methods": [],
 			"name": "DummyDialoguePlugin",
 			"properties": [
@@ -2069,7 +2069,7 @@
 		{
 			"constants": {},
 			"inherits": "EditorPlugin",
-			"is_instantiable": false,
+			"is_instantiable": true,
 			"methods": [],
 			"name": "DummyInventoryPlugin",
 			"properties": [

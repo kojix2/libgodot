@@ -1,6 +1,7 @@
 # Godot engine artifacts
 .godot/
-bin/
+bin/*
+!bin/.gitkeep
 
 # Crystal dependencies
 lib/

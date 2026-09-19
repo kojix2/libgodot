@@ -1,6 +1,7 @@
 godot.exe
 /.godot/
-/bin/
+/bin/*
+!/bin/.gitkeep
 /addons/*/bin/
 
 /examples/*/.godot/
@@ -9,7 +10,8 @@ godot.exe
 /examples/*/*.exe
 
 /template/.godot/
-/template/bin/
+/template/bin/*
+!/template/bin/.gitkeep
 /template/addons/
 /template/scripts/
 /template/src/generated/
@@ -33,7 +35,8 @@ godot.exe
 /examples/*/*.log
 
 /test/.godot/
-/test/bin
+/test/bin/*
+!/test/bin/.gitkeep
 /test/*.exe
 /test/tests
 /test/addons/*/bin/

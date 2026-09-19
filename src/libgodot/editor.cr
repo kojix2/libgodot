@@ -1128,7 +1128,7 @@ module Godot
       # Check if any .cr file inside the addon was modified after target_bin
       needs_recompile = !File.exists?(target_bin)
       unless needs_recompile
-        Dir.glob(File.join(addon_path, "**", "*.cr")).each do |src_file|
+        Dir.glob(File.join(addon_path, "**", "*.cr").gsub('\\', '/')).each do |src_file|
           if File.info(src_file).modification_time > target_mtime
             needs_recompile = true
             break

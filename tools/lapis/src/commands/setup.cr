@@ -169,7 +169,7 @@ HELP
           Core::Logger.step("Setup", "Packaging export templates zip -> #{zo}...")
           File.open(zo, "w") do |file|
             Compress::Zip::Writer.open(file) do |zip|
-              Dir.glob(target_dir.join("**/*").to_s).each do |t_file|
+              Dir.glob(target_dir.to_s.gsub('\\', '/') + "/**/*").each do |t_file|
                 next if Dir.exists?(t_file)
                 rel = Path.new(t_file).relative_to(target_dir).to_s.gsub('\\', '/')
                 zip.add(rel, File.open(t_file))

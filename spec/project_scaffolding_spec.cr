@@ -74,7 +74,7 @@ consumer_projects.each do |proj|
     if !File.exists?(ext_manifest)
       # Check if any .gdextension exists under addons/
       addons_dir = File.join(proj_dir, "addons")
-      has_ext = Dir.glob("#{addons_dir}/**/*.gdextension").size > 0
+      has_ext = Dir.glob("#{addons_dir.gsub('\\', '/')}/**/*.gdextension").size > 0
       if !has_ext
         abort "ERROR: Project '#{proj}' missing GDExtension manifest in addons/!"
       end

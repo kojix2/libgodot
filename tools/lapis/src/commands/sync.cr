@@ -36,31 +36,49 @@ module Lapis
         return unless Dir.exists?(src_addon)
         FileUtils.mkdir_p(dst_addon) unless Dir.exists?(dst_addon)
 
-        Dir.glob(src_addon.join("**/*").to_s).each do |file|
+        pattern = src_addon.to_s.gsub('\\', '/') + "/**/*"
+        Dir.glob(pattern).each do |file|
           next if Dir.exists?(file)
           # Skip bin directory inside addon (handled separately by bin sync)
           rel = Path.new(file).relative_to(src_addon)
-          next if rel.to_s.starts_with?("bin") || rel.to_s.starts_with?("bin/") || rel.to_s.starts_with?("bin\\")
+          rel_str = rel.to_s.gsub('\\', '/')
+          next if rel_str == "bin" || rel_str.starts_with?("bin/")
 
           dst_file = dst_addon.join(rel)
           safe_copy(file, dst_file)
         end
       end
 
-      # Ensure .godot/extension_list.cfg contains the crystal_integration extension
+      # Ensure .godot/extension_list.cfg contains all active GDExtension manifests
       def self.ensure_extension_list(project_dir : Path)
+        addons_dir = project_dir.join("addons")
+        return unless Dir.exists?(addons_dir)
+
         godot_dir = project_dir.join(".godot")
-        return unless Dir.exists?(godot_dir)
+        FileUtils.mkdir_p(godot_dir) unless Dir.exists?(godot_dir)
 
         ext_list = godot_dir.join("extension_list.cfg")
-        entry = "res://addons/crystal_integration/crystal_integration.gdextension"
+        existing_lines = File.exists?(ext_list) ? File.read(ext_list).lines.map(&.strip).reject(&.empty?) : [] of String
+        # Clean up legacy or wrong entries
+        existing_lines.reject! { |l| l.ends_with?("crystal_integration.gdextension") }
 
-        existing = File.exists?(ext_list) ? File.read(ext_list) : ""
-        unless existing.lines.map(&.strip).includes?(entry)
-          content = existing.empty? ? "#{entry}\n" : "#{existing.rstrip}\n#{entry}\n"
-          File.write(ext_list, content)
-          Core::Logger.debug("Updated extension_list.cfg in #{project_dir}")
+        pattern = addons_dir.to_s.gsub('\\', '/') + "/**/*.gdextension"
+        Dir.glob(pattern).sort.each do |gdext_path|
+          rel = Path.new(gdext_path).relative_to(project_dir).to_s.gsub('\\', '/')
+          entry = "res://#{rel}"
+          unless existing_lines.includes?(entry)
+            existing_lines << entry
+          end
         end
+
+        # Always ensure primary crystal extension if crystal_integration addon exists
+        primary_ext = "res://addons/crystal_integration/crystal.gdextension"
+        if Dir.exists?(addons_dir.join("crystal_integration")) && !existing_lines.includes?(primary_ext)
+          existing_lines.unshift(primary_ext)
+        end
+
+        File.write(ext_list, existing_lines.join("\n") + "\n")
+        Core::Logger.debug("Updated extension_list.cfg in #{project_dir}")
       end
 
       def self.print_help
@@ -181,6 +199,18 @@ HELP
               end
             end
           end
+
+          # Sync game binary to corresponding addons/crystal_integration/bin for consumer projects
+          game_file = Core::Env.game_file
+          ["test", "template", "performance"].each do |proj|
+            proj_dir = root.join(proj)
+            src_game = proj_dir.join("bin", game_file)
+            dst_game = proj_dir.join("addons/crystal_integration/bin", game_file)
+            if File.exists?(src_game)
+              safe_copy(src_game, dst_game)
+            end
+          end
+
           Core::Logger.step("Sync", "Binaries synchronized across #{target_dirs.size} destinations")
         end
 

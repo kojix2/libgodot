@@ -15,7 +15,7 @@ module Lapis
         proj_dir = proj_dir.parent if proj_dir.basename == "src"
 
         # Check for .gd files excluding addons, .godot, tools
-        gd_files = Dir.glob(proj_dir.join("**/*.gd").to_s).reject do |f|
+        gd_files = Dir.glob(proj_dir.to_s.gsub('\\', '/') + "/**/*.gd").reject do |f|
           f.includes?("/addons/") || f.includes?("\\addons\\") ||
             f.includes?("/.godot/") || f.includes?("\\.godot\\") ||
             f.includes?("/tools/") || f.includes?("\\tools\\") ||

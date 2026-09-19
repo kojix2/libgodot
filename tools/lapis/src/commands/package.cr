@@ -233,7 +233,7 @@ module Lapis
         all_exts = [] of String
         proj_addons_dir = proj_dir.join("addons")
         if Dir.exists?(proj_addons_dir)
-          Dir.glob(proj_addons_dir.join("**/*.gdextension").to_s).each do |gdext|
+          Dir.glob(proj_addons_dir.to_s.gsub('\\', '/') + "/**/*.gdextension").each do |gdext|
             rel = Path.new(gdext).relative_to(proj_dir).to_s.gsub('\\', '/')
             all_exts << "res://#{rel}"
           end
@@ -352,7 +352,7 @@ module Lapis
         # Compute SHA256 sums
         checksum_file = out_dir.join("checksums.txt")
         lines = [] of String
-        Dir.glob(out_dir.join("*.zip").to_s).sort.each do |zip|
+        Dir.glob(out_dir.to_s.gsub('\\', '/') + "/*.zip").sort.each do |zip|
           hash = sha256_file(Path.new(zip))
           lines << "#{hash}  #{Path.new(zip).basename}"
         end

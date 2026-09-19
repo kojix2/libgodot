@@ -1060,10 +1060,10 @@ module Godot
       end
     end
 
-    # 2. Gather candidate search paths for libgodot
+    # 2. Gather candidate search paths for lapis / libgodot
     extra_paths = [] of String
     ["../src", "../../src", "../../../src", "lib"].each do |candidate|
-      if File.exists?(File.join(candidate, "libgodot.cr")) || candidate == "lib"
+      if File.exists?(File.join(candidate, "lapis.cr")) || File.exists?(File.join(candidate, "libgodot.cr")) || candidate == "lib"
         full_path = File.expand_path(candidate)
         extra_paths << full_path unless extra_paths.includes?(full_path)
       end
@@ -1328,12 +1328,23 @@ module Godot
     {% end %}
 
     compiler_env = build_compiler_env
+    lapis_candidates = [
+      "bin/lapis.exe", "bin/lapis",
+      "../bin/lapis.exe", "../bin/lapis",
+      "../../bin/lapis.exe", "../../bin/lapis"
+    ]
+    lapis_bin = lapis_candidates.find { |p| File.exists?(p) } || Process.find_executable("lapis")
     build_script = ["scripts/build_crystal.ps1", "../scripts/build_crystal.ps1", "../../scripts/build_crystal.ps1"].find { |p| File.exists?(p) }
     pwsh_bin = Process.find_executable("pwsh") || Process.find_executable("powershell")
     out_io = IO::Memory.new
     err_io = IO::Memory.new
 
-    status = if build_script && pwsh_bin
+    status = if lapis_bin
+      lapis_args = ["build", "--entry", entry_file, "--output", out_dll, "--link-flags", link_flags]
+      lapis_args << "--release" if is_release
+      Godot.print("[CrystalIntegrationPlugin] Running: #{lapis_bin} #{lapis_args.join(" ")}")
+      Process.run(File.expand_path(lapis_bin), lapis_args, env: compiler_env, output: out_io, error: err_io)
+    elsif build_script && pwsh_bin
       script_args = ["-NoProfile", "-File", File.expand_path(build_script), "-Entry", entry_file, "-Output", out_dll, "-LinkFlags", link_flags]
       script_args << "-Release" if is_release
       Godot.print("[CrystalIntegrationPlugin] Running: #{pwsh_bin} #{script_args.join(" ")}")

@@ -2,7 +2,7 @@
 # LibGodot Performance Stress Benchmark - Main Application & CLI Router
 # =============================================================================
 
-require "../../src/libgodot"
+require "lapis"
 require "./framework/perf_metrics"
 require "./framework/perf_base"
 require "./framework/perf_registry"

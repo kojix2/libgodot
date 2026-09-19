@@ -5,7 +5,7 @@
 # Provides build controls, recompilable addon management, Crystal log output,
 # and an interactive unit test runner hooking into Crystal's spec framework.
 
-require "../libgodot"
+require "../lapis"
 
 module Godot
   @[Tool]

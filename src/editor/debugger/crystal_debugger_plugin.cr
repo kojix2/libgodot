@@ -6,7 +6,7 @@
 # sessions to running child instances, manages multi-session tabs for multiplayer,
 # and enforces lockstep pause/continue across peer instances.
 
-require "../../libgodot"
+require "../../lapis"
 require "./session_controller"
 
 module Godot

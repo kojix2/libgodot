@@ -200,9 +200,9 @@ module Godot
       c_name = class_name.empty? ? "NewNode" : class_name
       b_name = base_class_name.empty? ? "Node" : base_class_name
       if template == "tool"
-        "require \"libgodot\"\n\n@[Tool]\nnode #{c_name} < #{b_name} do\n  def _ready : Void\n  end\n\n  def _process(delta : Float64) : Void\n  end\nend\n"
+        "require \"lapis\"\n\n@[Tool]\nnode #{c_name} < #{b_name} do\n  def _ready : Void\n  end\n\n  def _process(delta : Float64) : Void\n  end\nend\n"
       else
-        "require \"libgodot\"\n\nnode #{c_name} < #{b_name} do\n  def _ready : Void\n  end\n\n  def _process(delta : Float64) : Void\n  end\nend\n"
+        "require \"lapis\"\n\nnode #{c_name} < #{b_name} do\n  def _ready : Void\n  end\n\n  def _process(delta : Float64) : Void\n  end\nend\n"
       end
     end
 
@@ -297,7 +297,7 @@ module Godot
           code = if !template.empty?
             template.gsub("_CLASS_", c_name).gsub("_BASE_", b_name)
           else
-            "require \"libgodot\"\n\n# #{c_name} node\nnode #{c_name} < #{b_name} do\n  def _ready : Void\n    Godot.print(\"#{c_name} initialized\")\n  end\n\n  def _process(delta : Float64) : Void\n  end\nend\n"
+            "require \"lapis\"\n\n# #{c_name} node\nnode #{c_name} < #{b_name} do\n  def _ready : Void\n    Godot.print(\"#{c_name} initialized\")\n  end\n\n  def _process(delta : Float64) : Void\n  end\nend\n"
           end
 
           script = Godot.create(Godot::CrystalScript)

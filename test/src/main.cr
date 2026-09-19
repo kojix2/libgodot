@@ -1,4 +1,4 @@
-require "../../src/libgodot"
+require "../../src/lapis"
 require "./generated/project_nodes/all_project_nodes"
 
 # =============================================================================

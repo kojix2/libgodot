@@ -1,4 +1,4 @@
-require "../../../src/libgodot"
+require "../../../src/lapis"
 
 # # Crystal LibGodot 4.8 Interactive Demo
 

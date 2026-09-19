@@ -2,7 +2,7 @@
 # LibGodot Performance Benchmark - Metrics Telemetry Sampler
 # =============================================================================
 
-require "../../../src/libgodot"
+require "lapis"
 
 {% if flag?(:windows) %}
 @[Link("kernel32")]

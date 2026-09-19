@@ -85,6 +85,7 @@ BIN_DIR          = bin
 TEST_BIN_DIR     = test/bin
 TEMPLATE_BIN_DIR = template/bin
 EXAMPLES_DIR     = examples
+LAPIS            = $(BIN_DIR)/lapis$(EXE_EXT)
 BRIDGE_LIB       = $(BIN_DIR)/crystal_bridge.$(SO_EXT)
 PLUGIN_LIB       = $(BIN_DIR)/plugin.$(SO_EXT)
 PLUGIN_ENTRY     ?= src/editor/plugin.cr
@@ -98,7 +99,14 @@ PLUGIN_DLL       = $(PLUGIN_LIB)
 GAME_DLL         = $(GAME_LIB)
 LIBGODOT_DLL     = $(LIBGODOT_LIB)
 
-.PHONY: all bridge plugin test_project test_standalone package_tests package-tests package_template package-template package_template_addon package-template-addon package_examples package-examples package_addon package-addon package_all package-all package_release package-release package_perf package-perf package_game package-game new_addon new-addon new_example new-example setup_dev setup-dev run_editor run-editor run_test run-test run_ci_local run-ci-local ci-local ci export_templates export-templates recompile_addons recompile-addons verify_editor verify-editor test_wsl test-wsl report_android report-android examples examples_exe template template_addon perf perf_standalone perf_run perf_editor game_dll game_exe android package_android generate dump_api project_bindings deps addons sync engine spec test tests docs run editor clean help
+.PHONY: all lapis bridge plugin test_project test_standalone package_tests package-tests package_template package-template package_template_addon package-template-addon package_examples package-examples package_addon package-addon package_all package-all package_release package-release package_perf package-perf package_game package-game new_addon new-addon new_example new-example setup_dev setup-dev run_editor run-editor run_test run-test run_ci_local run-ci-local ci-local ci export_templates export-templates recompile_addons recompile-addons verify_editor verify-editor test_wsl test-wsl report_android report-android examples examples_exe template template_addon perf perf_standalone perf_run perf_editor game_dll game_exe android package_android generate dump_api project_bindings deps addons sync engine spec test tests docs run editor clean help
+
+# Compile Lapis CLI toolchain if not present or source changed
+$(LAPIS): $(wildcard tools/lapis/src/**/*.cr) $(wildcard tools/lapis/src/*.cr)
+	@echo [Lapis] Compiling Lapis toolchain ($(LAPIS))...
+	@$(CRYSTAL) build tools/lapis/src/lapis.cr -o $(LAPIS)
+
+lapis: $(LAPIS)
 
 # Default target: compile bridge, plugin, test project, standalone runner, examples, template, template_addon, perf, sync DLLs, and run test suite
 all: dirs deps bridge plugin addons dummy_addons test_project test_standalone examples template template_addon perf perf_standalone sync test
@@ -108,8 +116,8 @@ all: dirs deps bridge plugin addons dummy_addons test_project test_standalone ex
 	@echo ===================================================================
 
 # Ensure output directories exist
-dirs:
-	@$(PWSH_FILE) scripts/ensure_dirs.ps1
+dirs: $(LAPIS)
+	@$(LAPIS) dirs
 
 # Compile C++ GDExtension bridge and sync to consumer projects
 bridge: dirs
@@ -119,17 +127,17 @@ ifeq ($(PLATFORM),macos)
 else
 	$(CXX) -shared $(CXXFLAGS) src/bridge/crystal_bridge.cpp -o $(BRIDGE_LIB)
 endif
-	@$(PWSH_FILE) scripts/sync_bins.ps1
+	@$(LAPIS) sync
 
 # Compile Crystal editor integration plugin library (plugin.dll)
 plugin: dirs deps bridge
 	@echo [Plugin] Compiling Crystal editor integration plugin $(PLUGIN_LIB)...
-	@$(PWSH_FILE) scripts/build_crystal.ps1 -Entry $(PLUGIN_ENTRY) -Output $(PLUGIN_LIB) -LinkFlags "$(LINK_FLAGS)" $(if $(filter 1,$(RELEASE)),-Release,) -Flags "-Dlibgodot_addon"
-	@$(PWSH_FILE) scripts/sync_bins.ps1
+	@$(LAPIS) build --entry $(PLUGIN_ENTRY) --output $(PLUGIN_LIB) --link-flags "$(LINK_FLAGS)" $(if $(filter 1,$(RELEASE)),--release,) --flags "-Dlibgodot_addon"
+	@$(LAPIS) sync
 
 # Synchronize addons across root, test, template, and examples
 addons: dirs
-	@$(PWSH_FILE) scripts/sync_addons.ps1
+	@$(LAPIS) sync --addons-only
 
 # Build dummy test addons for multi-addon isolation stress tests
 dummy_addons: dirs deps bridge
@@ -189,7 +197,7 @@ package_perf package-perf: perf_standalone
 # Package starter template project into template-project.zip
 package_template package-template: template
 	@echo [Package] Packaging starter template project...
-	@$(PWSH_FILE) scripts/package_template.ps1 $(if $(TARGET_DIR),-TargetDir "$(TARGET_DIR)",) $(if $(ZIP_NAME),-ZipName "$(ZIP_NAME)",) $(if $(filter 1,$(RELEASE)),-Release 1,) $(if $(or $(filter 1,$(BUNDLE)),$(filter 1,$(BUNDLE_BINARIES))),-BundleBinaries,) $(if $(filter 1,$(FORCE)),-Force,)
+	@$(LAPIS) package template $(if $(ZIP_NAME),-o "$(ZIP_NAME)",) $(if $(or $(filter 1,$(BUNDLE)),$(filter 1,$(BUNDLE_BINARIES))),--bundle-binaries,)
 
 # Package addon starter template into template-addon-project.zip
 package_template_addon package-template-addon: template_addon
@@ -204,7 +212,7 @@ package_examples package-examples: examples
 # Package official crystal_integration addon into godot-crystal-addon.zip
 package_addon package-addon: plugin bridge
 	@echo [Package] Packaging official Crystal integration addon...
-	@$(PWSH_FILE) scripts/package_addon.ps1 $(if $(TARGET_DIR),-TargetDir "$(TARGET_DIR)",) $(if $(ZIP_NAME),-ZipName "$(ZIP_NAME)",) $(if $(filter 1,$(FORCE)),-Force,)
+	@$(LAPIS) package addon $(if $(ZIP_NAME),-o "$(ZIP_NAME)",)
 
 # Package all release archives and checksums into bin/release_dist/
 package_all package-all package_release package-release:
@@ -289,12 +297,12 @@ project_bindings:
 # Copy Crystal runtime dependencies and libgodot to all bin dirs
 deps: dirs
 	@echo [Dependencies] Ensuring runtime libraries are available in bin/, test/bin/, and template/bin/...
-	@$(PWSH_FILE) scripts/ensure_deps.ps1
+	@$(LAPIS) deps
 
 # Synchronize compiled binaries and runtime dependencies to consumer projects
 sync: addons
 	@echo [Sync] Syncing runtime libraries and bridge to test/bin, template/bin, and examples...
-	@$(PWSH_FILE) scripts/sync_bins.ps1
+	@$(LAPIS) sync
 
 # Build Godot engine shared library from source (requires godot-src and scons)
 engine:

@@ -1,4 +1,4 @@
-require "libgodot"
+require "lapis"
 
 # =============================================================================
 # Crystal Addon - Custom Node Definition

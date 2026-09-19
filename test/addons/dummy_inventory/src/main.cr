@@ -1,4 +1,4 @@
-require "libgodot"
+require "lapis"
 
 # Grid container managing item slots, capacity limits, and inventory additions
 @[Tool]

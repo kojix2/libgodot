@@ -1,4 +1,4 @@
-require "libgodot"
+require "lapis"
 
 # Audio playback node implemented in Crystal for multi-addon audio testing
 @[Tool]

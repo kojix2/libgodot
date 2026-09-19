@@ -66,10 +66,11 @@ $onWindows = ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq '
 $sep = if ($onWindows) { ";" } else { ":" }
 $soExt = if ($onWindows) { "dll" } else { "so" }
 
-# Set CRYSTAL_PATH so require "libgodot" finds libgodot.cr
+# Set CRYSTAL_PATH so require "lapis" finds lapis.cr
 $origPath = crystal env CRYSTAL_PATH
 $srcCand = @(
     "../src",
+    "lib/lapis/src",
     "lib/libgodot/src",
     "lib"
 ) | Where-Object { Test-Path $_ } | Select-Object -First 1

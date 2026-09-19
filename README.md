@@ -1,17 +1,17 @@
-# LibGodot for Crystal
+# Lapis for Crystal
 
 [![Crystal](https://img.shields.io/badge/Crystal-1.20+-black.svg?style=flat&logo=crystal)](https://crystal-lang.org)
 [![Godot](https://img.shields.io/badge/Godot-4.8--dev5-blue.svg?style=flat&logo=godotengine)](https://godotengine.org)
-[![Docs](https://img.shields.io/badge/Docs-Online-blueviolet.svg?style=flat)](https://sol-vin.github.io/libgodot/)
+[![Docs](https://img.shields.io/badge/Docs-Online-blueviolet.svg?style=flat)](https://sol-vin.github.io/lapis/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**LibGodot for Crystal** provides high-performance Crystal bindings and a bidirectional runtime integration for **Godot Engine 4.8+**. It empowers game developers to write Godot games with native machine speed, complete compile-time type safety, and Ruby-like elegance. https://youtu.be/EKMw_zQjovc
+**Lapis for Crystal** provides high-performance Crystal bindings and a bidirectional runtime integration for **Godot Engine 4.8+** using LibGodot and GDExtension. It empowers game developers to write Godot games with native machine speed, complete compile-time type safety, and Ruby-like elegance. https://youtu.be/EKMw_zQjovc
 
 ---
 
 ## Architecture: Dual-Paradigm Integration
 
-LibGodot supports two distinct execution paradigms designed for both rapid in-editor iteration and lean standalone production shipping:
+Lapis supports two distinct execution paradigms designed for both rapid in-editor iteration and lean standalone production shipping:
 
 ```mermaid
 graph TD
@@ -64,7 +64,7 @@ graph TD
 - **Godot Engine**: 4.3+ or 4.4+ (Standard build, 64-bit)
 - **C++ Compiler**: GCC (`g++`) or Clang (for compiling the GDExtension loader bridge)
 - **Make**: GNU Make
-- **Powershell**: Used for support scripts and make process
+- **Lapis Toolchain**: Bundled native CLI tool (`bin/lapis`) compiled automatically by `Makefile`
 
 ### Native In-Editor Debugging Prerequisite (LLDB)
 For native in-editor debugging, breakpoint synchronization, and multiplayer lockstep inspection, install **LLDB**:
@@ -77,17 +77,31 @@ For native in-editor debugging, breakpoint synchronization, and multiplayer lock
 
 ## Documentation
 
-- **Official Online Documentation Site**: [https://sol-vin.github.io/libgodot/](https://sol-vin.github.io/libgodot/)
+- **Official Online Documentation Site**: [https://sol-vin.github.io/lapis/](https://sol-vin.github.io/lapis/)
 - **Architecture & Guides in `Docs` Module**: Complete guides covering architecture, build toolchains, memory management, and concurrency are contained in [`Docs`](src/libgodot/docs.cr) (such as [`Docs::I_CONCURRENCY_FIBERS_AND_THREAD_SAFETY`](src/libgodot/docs.cr)).
 - **Offline HTML API Documentation**: Generate complete API documentation locally with `make docs` (output at `docs/index.html`).
 - **In-Editor Help**: Class and method descriptions are harvested at compile time and accessible directly inside Godot via `F1` or Inspector tooltips.
 
 ---
 
+## Installation & Shard Configuration
+
+Add Lapis to your game's `shard.yml`:
+
+```yaml
+dependencies:
+  lapis:
+    github: sol-vin/lapis
+```
+
+Run `shards install` to fetch the dependency.
+
+---
+
 ## Quickstart
 
 ```crystal
-require "libgodot"
+require "lapis"
 
 # Player character with physics movement, health tracking, and signals
 node Player < CharacterBody3D do
@@ -163,7 +177,7 @@ end
 
 ## Comprehensive In-Code Documentation (`Docs` Module)
 
-LibGodot features an extensive in-code documentation suite under the `Docs` module. Each submodule details internal mechanics, macro pipelines, export options, and engine caveats:
+Lapis features an extensive in-code documentation suite under the `Docs` module. Each submodule details internal mechanics, macro pipelines, export options, and engine caveats:
 
 <table>
   <thead>
@@ -294,9 +308,60 @@ Build operations are orchestrated through the root `Makefile`.
 
 ---
 
-## Support & Toolchain Scripts (`scripts/`)
+## Unified Lapis CLI Toolchain (`bin/lapis`)
 
-LibGodot provides specialized automation scripts under `scripts/` to orchestrate builds, cross-compilation, asset synchronization, testing, code generation, and deployment:
+Lapis includes a high-performance, cross-platform compiled CLI tool written in Crystal (`bin/lapis` or `bin/lapis.exe` on Windows). The toolchain replaces platform-dependent scripting with instant sub-20ms execution across Windows, Linux, and macOS:
+
+<table>
+  <thead>
+    <tr>
+      <th align="left">Command</th>
+      <th align="left">Description &amp; Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>lapis build [target]</code></td>
+      <td>Compiles Crystal targets (<code>game</code>, <code>plugin</code>, <code>tests</code>, <code>bench</code>) with automatic <code>CRYSTAL_PATH</code> resolution and platform-specific linker flags.</td>
+    </tr>
+    <tr>
+      <td><code>lapis sync</code></td>
+      <td>Synchronizes compiled binaries, runtime DLLs (GC, iconv, PCRE2, LibGodot), and addon manifests across all workspace consumers.</td>
+    </tr>
+    <tr>
+      <td><code>lapis test</code></td>
+      <td>Unified multi-tier test runner: executes specs, headless in-editor <code>@tool</code> tests, runtime test suites, and standalone compiled tests.</td>
+    </tr>
+    <tr>
+      <td><code>lapis editor</code></td>
+      <td>Detects Godot installation, synchronizes assets, and launches the Godot Editor with automatic build hooks.</td>
+    </tr>
+    <tr>
+      <td><code>lapis scaffold &lt;type&gt; &lt;name&gt;</code></td>
+      <td>Interactive or CLI scaffolding for projects (<code>example</code>, <code>addon</code>, <code>project</code>), node templates (<code>node</code>, <code>tool</code>), and test suites.</td>
+    </tr>
+    <tr>
+      <td><code>lapis package [target]</code></td>
+      <td>Packages playable standalone game executables or distribution zip archives (<code>template</code>, <code>addon</code>).</td>
+    </tr>
+    <tr>
+      <td><code>lapis deps</code></td>
+      <td>Validates and synchronizes required runtime dynamic libraries and export templates across output folders.</td>
+    </tr>
+    <tr>
+      <td><code>lapis dirs</code></td>
+      <td>Verifies and creates all required build, output, and staging directories across the workspace.</td>
+    </tr>
+  </tbody>
+</table>
+
+Run `lapis --help` or `lapis <command> --help` for full parameter options and flags.
+
+---
+
+## Automation & Support Scripts (`scripts/`)
+
+In addition to the `lapis` CLI, specialized automation scripts under `scripts/` handle platform packaging, CI pipelines, and binding generation:
 
 ### Build & Compilation Scripts
 
@@ -462,7 +527,7 @@ When an object is freed on the Godot engine side or via GDScript (e.g. `queue_fr
   enemy.position = Vector2.new(...)
         |
         v
-  [ LibGodot check_alive! ]
+  [ Lapis check_alive! ]
         |
         +---> Query ObjectDB for 64-bit instance ID: ID is INVALID!
         |
@@ -472,13 +537,13 @@ When an object is freed on the Godot engine side or via GDScript (e.g. `queue_fr
               [ ZERO NATIVE CRASHES! ]
 ```
 
-### How LibGodot Guarantees Dead-Pointer Safety
+### How Lapis Guarantees Dead-Pointer Safety
 1. **Monotonic 64-bit Instance ID Tracking**:
    Every `Godot::Object` wrapper tracks its engine-assigned `instance_id`. Because Godot's `ObjectDB` generates monotonic 64-bit IDs, newly allocated heap objects will never collide with previously freed IDs.
 2. **Pre-Dispatch Liveness Check (`#check_alive!`)**:
-   Before executing method dispatches or reflection calls, LibGodot queries Godot's ObjectDB in O(1) time (`Bridge.is_instance_valid(instance_id)`).
+   Before executing method dispatches or reflection calls, Lapis queries Godot's ObjectDB in O(1) time (`Bridge.is_instance_valid(instance_id)`).
 3. **Graceful `DisposedObjectError` Exception**:
-   If an object was destroyed by GDScript, the engine, or Crystal, LibGodot marks the pointer null and immediately raises `Godot::DisposedObjectError`:
+   If an object was destroyed by GDScript, the engine, or Crystal, Lapis marks the pointer null and immediately raises `Godot::DisposedObjectError`:
    ```crystal
    begin
      enemy.position = Vector2.new(10.0, 20.0)
@@ -497,13 +562,13 @@ When an object is freed on the Godot engine side or via GDScript (e.g. `queue_fr
    ```
 
 ### Quantitative Zero-Leak Verification
-LibGodot's test suite integrates Godot's `Performance` singleton monitors (`OBJECT_COUNT`, `OBJECT_NODE_COUNT`, `MEMORY_STATIC`) and Crystal's `GC.collect` to mathematically verify that creating, reparenting, and destroying nodes across hundreds of iterations leaves **zero memory leaks** in both Godot's ObjectDB and Crystal's heap.
+Lapis's test suite integrates Godot's `Performance` singleton monitors (`OBJECT_COUNT`, `OBJECT_NODE_COUNT`, `MEMORY_STATIC`) and Crystal's `GC.collect` to mathematically verify that creating, reparenting, and destroying nodes across hundreds of iterations leaves **zero memory leaks** in both Godot's ObjectDB and Crystal's heap.
 
 ---
 
 ## Native In-Editor Debugging with LLDB
 
-LibGodot features first-class native debugging directly inside the Godot Editor using **LLDB**:
+Lapis features first-class native debugging directly inside the Godot Editor using **LLDB**:
 - **Gutter Breakpoint Sync**: Set red breakpoints directly in Godot's Script Editor gutter; breakpoints are translated and dispatched to LLDB instantly.
 - **Interactive In-Editor Panel**: Dedicated **Crystal LLDB** tab docked in the Godot Debugger panel featuring Continue (`F5`), Step Over (`F10`), Step Into (`F11`), Step Out (`Shift+F11`), call stack frame navigation, and live variable inspection.
 - **Multiplayer Multi-Session Support**: Distinct session tabs with automatic role identification (`[SERVER]`, `[CLIENT 1]`, etc.) for multiple instances launched from the editor.
@@ -544,26 +609,23 @@ LibGodot features first-class native debugging directly inside the Godot Editor 
 ## Repository Structure
 
 ```
-libgodot/
-├── src/                          # Reusable LibGodot library (STRICTLY decoupled)
-│   ├── libgodot.cr               # Library entry point
+lapis/
+├── src/                          # Reusable Lapis library (STRICTLY decoupled)
+│   ├── lapis.cr                  # Library root entry point (require "lapis")
 │   ├── bridge/crystal_bridge.cpp # C++ GDExtension loader bridge
-│   └── libgodot/
-│       ├── docs.cr               # Comprehensive Docs module (A-G guides)
-│       ├── macros.cr             # Node DSL, signal, export, and doc harvesting macros
-│       ├── bridge.cr             # C-API bindings & GDExtension interface table
-│       ├── core.cr               # Object, ClassDB, PropertyInfo, SignalInfo
-│       ├── doc_macro.cr          # EditorDocRegistry & XML loader
-│       ├── gdscript.cr           # GDScript interop bindings
-│       └── generated/            # Complete generated Godot engine class bindings
+│   └── libgodot/                 # Core engine C-API, macros, and generated bindings
+├── tools/                        # Built-in CLI toolchain
+│   └── lapis/                    # Compiled native CLI (bin/lapis)
 ├── test/                         # Dedicated verification and test project
 ├── examples/                     # Independent consumer showcase examples
 ├── template/                     # Clean starter template for new games
+├── template-addon/               # Starter template for redistributable addons
 ├── addons/crystal_integration/   # Godot editor extension manifest & build hook
 ├── bin/                          # Output binaries, bridge DLL, and dependencies
 ├── spec/                         # Automated unit specifications
 └── AGENTS.md                     # Agent development guidelines
 ```
+
 
 ---
 

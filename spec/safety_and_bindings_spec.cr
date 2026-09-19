@@ -1,4 +1,4 @@
-require "../src/libgodot"
+require "../src/lapis"
 require "./libgodot_spec"
 
 puts "=== Running Safety, Memory & Dynamic Scaling Specifications ==="

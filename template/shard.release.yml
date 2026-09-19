@@ -5,8 +5,8 @@ authors:
 license: MIT
 
 dependencies:
-  libgodot:
-    github: sol-vin/libgodot
+  lapis:
+    github: sol-vin/lapis
     branch: master
 
 targets:

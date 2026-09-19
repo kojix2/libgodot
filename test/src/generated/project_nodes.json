@@ -2750,14 +2750,6 @@
 					"type_name": "Callable"
 				},
 				{
-					"class_name": "Bool",
-					"hint": 0,
-					"hint_string": "",
-					"name": "tool_btn_fired",
-					"type": 1,
-					"type_name": "bool"
-				},
-				{
 					"class_name": "Callable",
 					"hint": 39,
 					"hint_string": "Proc Method Pointer Button,Action",

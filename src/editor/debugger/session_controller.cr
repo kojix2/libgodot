@@ -5,7 +5,7 @@
 # Coordinates breakpoint synchronization, script editor line highlighting,
 # and multiplayer lockstep break/resume across peer sessions.
 
-require "../../libgodot"
+require "../../lapis"
 require "../../libgodot/debugger/lldb_driver"
 require "./debugger_session_tab"
 

@@ -2,7 +2,7 @@
 # LibGodot Performance Benchmark - Interactive Selection Menu
 # =============================================================================
 
-require "../../../src/libgodot"
+require "lapis"
 require "../framework/perf_registry"
 require "../framework/perf_hud"
 

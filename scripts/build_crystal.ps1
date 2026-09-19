@@ -9,15 +9,42 @@ param(
     [string]$Flags = ""
 )
 
-$RootDir = Split-Path -Parent $PSScriptRoot
+$curr = $PSScriptRoot
+$repoRoot = $null
+while ($curr) {
+    if ((Test-Path (Join-Path $curr "src/lapis.cr")) -or (Test-Path (Join-Path $curr "src/libgodot.cr"))) {
+        $repoRoot = $curr
+        break
+    }
+    $parent = Split-Path -Parent $curr
+    if ($parent -eq $curr) { break }
+    $curr = $parent
+}
+if (-not $repoRoot) {
+    $repoRoot = Split-Path -Parent $PSScriptRoot
+}
+$RootDir = $repoRoot
+
+$sep = if ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';') { ";" } else { ":" }
+$existingCrystalPath = $env:CRYSTAL_PATH
+
 if ([string]::IsNullOrWhiteSpace($SourcePath)) {
-    $SourcePath = Join-Path $RootDir "src"
+    $srcCandidates = @(
+        (Join-Path $RootDir "src"),
+        (Join-Path (Get-Location) "src"),
+        (Join-Path (Get-Location) "lib"),
+        (Join-Path (Get-Location) "lib/lapis/src")
+    ) | Where-Object { Test-Path $_ } | Select-Object -Unique
+    $SourcePath = ($srcCandidates) -join $sep
 }
 
 # Set CRYSTAL_PATH
 $baseCrystalPath = crystal env CRYSTAL_PATH
-$sep = if ($env:OS -eq "Windows_NT" -or [System.IO.Path]::PathSeparator -eq ';') { ";" } else { ":" }
-$env:CRYSTAL_PATH = "$SourcePath$sep$baseCrystalPath"
+$pathParts = [System.Collections.Generic.List[string]]::new()
+if (-not [string]::IsNullOrWhiteSpace($SourcePath)) { $pathParts.Add($SourcePath) }
+if (-not [string]::IsNullOrWhiteSpace($existingCrystalPath)) { $pathParts.Add($existingCrystalPath) }
+if (-not [string]::IsNullOrWhiteSpace($baseCrystalPath)) { $pathParts.Add($baseCrystalPath) }
+$env:CRYSTAL_PATH = ($pathParts -join $sep)
 
 # Automatically generate project bindings if custom GDScript files are present
 $entryDir = Split-Path -Parent $Entry

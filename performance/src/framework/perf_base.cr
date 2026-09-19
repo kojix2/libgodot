@@ -1,4 +1,4 @@
-require "../../../src/libgodot"
+require "lapis"
 require "./perf_metrics"
 
 module PerfFramework

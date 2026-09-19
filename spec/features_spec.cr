@@ -1,4 +1,4 @@
-require "../src/libgodot"
+require "../src/lapis"
 
 puts "=== Running New Features Verification (Docs, GDScript, Enums, Singletons) ==="
 
@@ -436,7 +436,7 @@ root_dir = File.expand_path(".")
 test_compile_error = ->(source : String, expected_err : String) {
   tmp_path = File.join(root_dir, "spec", "temp_tb_err.cr")
   begin
-    File.write(tmp_path, %(require "../src/libgodot"\n#{source}))
+    File.write(tmp_path, %(require "../src/lapis"\n#{source}))
     output = IO::Memory.new
     status = Process.run("crystal", ["build", "--no-codegen", tmp_path], output: output, error: output)
     abort "Failed: expected compile error but compilation succeeded!" if status.success?
@@ -505,7 +505,7 @@ end
 # Verify valid Proc literal compiles cleanly without error
 tmp_good = File.join(root_dir, "spec", "temp_good_tb.cr")
 begin
-  File.write(tmp_good, %(require "../src/libgodot"
+  File.write(tmp_good, %(require "../src/lapis"
 node GoodNodeProc < Node do
   @[ExportToolButton("Build Map", "CollisionShape3D")]
   property build_button = ->{ print "my proc" }

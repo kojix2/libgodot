@@ -6,7 +6,7 @@
 # Provides interactive LLDB console, execution stepping controls, call stack tree,
 # role identification (Server / Client), and multiplayer lockstep break toggle.
 
-require "../../libgodot"
+require "../../lapis"
 require "../../libgodot/debugger/lldb_driver"
 
 module Godot

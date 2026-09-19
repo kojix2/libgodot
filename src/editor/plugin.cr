@@ -1,4 +1,4 @@
-require "../libgodot"
+require "../lapis"
 require "../libgodot/editor"
 require "./crystal_panel"
 require "./debugger/debugger_session_tab"

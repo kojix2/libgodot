@@ -1,2 +1,2 @@
-require "../libgodot"
+require "../lapis"
 require "./generated/classes/all_classes"

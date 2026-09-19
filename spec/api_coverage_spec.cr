@@ -1,5 +1,5 @@
 require "json"
-require "../src/libgodot"
+require "../src/lapis"
 
 puts "=== Running API Definition & Class Coverage Specifications ==="
 

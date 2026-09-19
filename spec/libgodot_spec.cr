@@ -1,4 +1,4 @@
-require "../src/libgodot"
+require "../src/lapis"
 
 # Define test nodes
 node CameraRig do

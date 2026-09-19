@@ -715,7 +715,7 @@ inline void generic_class_call_virtual_with_data(
                 if (script_obj) {
                     char script_source[1024];
                     snprintf(script_source, sizeof(script_source),
-                        "require \"libgodot\"\n\n# %s node\nnode %s < %s do\n  def _ready : Void\n    Godot.print(\"%s initialized\")\n  end\n\n  def _process(delta : Float64) : Void\n  end\nend\n",
+                        "require \"lapis\"\n\n# %s node\nnode %s < %s do\n  def _ready : Void\n    Godot.print(\"%s initialized\")\n  end\n\n  def _process(delta : Float64) : Void\n  end\nend\n",
                         class_name_buf, class_name_buf, base_name_buf, class_name_buf);
 
                     static GDExtensionMethodBindPtr mb_set_source_code = nullptr;

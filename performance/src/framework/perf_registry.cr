@@ -2,7 +2,7 @@
 # LibGodot Performance Benchmark - Test Registry Catalog
 # =============================================================================
 
-require "../../../src/libgodot"
+require "lapis"
 require "./perf_base"
 
 module PerfFramework

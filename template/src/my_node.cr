@@ -1,4 +1,4 @@
-require "libgodot"
+require "lapis"
 
 # my_node node
 node MyCrystalNode < Node do

@@ -1,4 +1,4 @@
-require "libgodot"
+require "lapis"
 
 # Interactive dialogue box UI control rendering narrator and character dialogue
 @[Tool]

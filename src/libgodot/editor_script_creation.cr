@@ -671,8 +671,8 @@ module Godot
         if File.exists?(main_cr_path)
           main_content = File.read(main_cr_path)
           unless main_content.includes?(%(require "./**"))
-            updated_content = if main_content.includes?(%(require "libgodot"))
-              main_content.sub(%(require "libgodot"), %(require "libgodot"\nrequire "./**"))
+            updated_content = if main_content.includes?(%(require "lapis"))
+              main_content.sub(%(require "lapis"), %(require "lapis"\nrequire "./**"))
             else
               %(require "./**"\n) + main_content
             end
@@ -709,7 +709,7 @@ module Godot
       case tmpl_idx
       when 1 # Physics Movement
         <<-CRYSTAL
-        require "libgodot"
+        require "lapis"
 
         # #{class_name} character with physics movement
         node #{class_name} < #{base_type} do
@@ -727,7 +727,7 @@ module Godot
         CRYSTAL
       when 2 # Tool Script
         <<-CRYSTAL
-        require "libgodot"
+        require "lapis"
 
         # In-editor tool script #{class_name}
         @[Tool]
@@ -743,14 +743,14 @@ module Godot
         CRYSTAL
       when 3 # Empty Class
         <<-CRYSTAL
-        require "libgodot"
+        require "lapis"
 
         node #{class_name} < #{base_type} do
         end
         CRYSTAL
       else # Standard Node
         <<-CRYSTAL
-        require "libgodot"
+        require "lapis"
 
         # #{class_name} node
         node #{class_name} < #{base_type} do

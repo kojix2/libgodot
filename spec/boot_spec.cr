@@ -1,4 +1,4 @@
-require "../src/libgodot"
+require "../src/lapis"
 
 puts "=== Verifying LibGodot DLL Loading ==="
 

@@ -1,5 +1,5 @@
 require "spec"
-require "../../src/libgodot"
+require "../../src/lapis"
 
 # Common test fixtures and helpers for Crystal-side Godot specs
 node SpecPlayer < CharacterBody3D do

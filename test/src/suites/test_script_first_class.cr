@@ -73,7 +73,7 @@ end
 
 test_script_first_class "CrystalScript AST reflection and Inspector property extraction" do
   source = <<-CRYSTAL
-	require "libgodot"
+	require "lapis"
 
 	# Hero player character
 	node HeroPlayer < CharacterBody2D do
@@ -142,7 +142,7 @@ test_script_first_class "ResourceFormatLoader and ResourceFormatSaver for .cr fi
   # Test dynamic script saving and loading end-to-end in sandbox
   test_path = "user://test_dynamic_script.cr"
   test_code = <<-CRYSTAL
-  require "libgodot"
+  require "lapis"
 
   node DynamicPlayer < CharacterBody2D do
     @[Export]
@@ -200,7 +200,7 @@ test_script_first_class "ResourceSaver engine singleton round-trip via GDExtensi
     fs_path = Godot::ResourceFormatSaverCrystal.resolve_save_path(test_path)
 
     sample_code = <<-CRYSTAL
-    require "libgodot"
+    require "lapis"
 
     node EngineTestNode < Node do
       @[Export]
@@ -252,7 +252,7 @@ test_script_first_class "Editor ScriptEditor lifecycle: set_source_code, save, r
   fs_path = Godot::ResourceFormatSaverCrystal.resolve_save_path(test_path)
 
   initial_code = <<-CRYSTAL
-  require "libgodot"
+  require "lapis"
 
   # Initial version of player script
   @[Tool]
@@ -296,7 +296,7 @@ test_script_first_class "Editor ScriptEditor lifecycle: set_source_code, save, r
 
       # 3. Simulate Editor modification: user edits code in script editor and presses Ctrl+S
       updated_code = <<-CRYSTAL
-      require "libgodot"
+      require "lapis"
 
       # Updated version of player script with new properties
       @[Tool]
@@ -482,7 +482,7 @@ test_script_first_class "ScriptEditor save simulation: unsaved script without pa
     fs_path = Godot::ResourceFormatSaverCrystal.resolve_save_path(test_path)
 
     code = <<-CRYSTAL
-    require "libgodot"
+    require "lapis"
 
     node UnsavedToSavedNode < Node2D do
       @[Export]

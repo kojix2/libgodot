@@ -148,7 +148,7 @@ func _run_in_editor_tool_tests():
 		var new_script = ClassDB.instantiate("CrystalScript")
 		if new_script:
 			var test_save_path = "res://bin/test_editor_created_script.cr"
-			var test_source = "require \"libgodot\"\n\nnode EditorSavedNode < Node do\n  def _ready : Void\n  end\nend\n"
+			var test_source = "require \"lapis\"\n\nnode EditorSavedNode < Node do\n  def _ready : Void\n  end\nend\n"
 			new_script.set("source_code", test_source)
 			new_script.resource_path = test_save_path
 			var new_save_err = ResourceSaver.save(new_script, test_save_path)

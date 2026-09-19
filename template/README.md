@@ -40,7 +40,7 @@ cd my_game
 Edit `src/main.cr` to define your custom Godot nodes:
 
 ```crystal
-require "libgodot"
+require "lapis"
 
 # Root node for your game scene
 node MainNode < Node3D do

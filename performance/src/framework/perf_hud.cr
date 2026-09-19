@@ -2,7 +2,7 @@
 # LibGodot Performance Benchmark - Standardized Visual Performance Monitor
 # =============================================================================
 
-require "../../../src/libgodot"
+require "lapis"
 require "./perf_metrics"
 require "./perf_base"
 

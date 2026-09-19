@@ -1,4 +1,9 @@
 $RootDir = Split-Path -Parent $PSScriptRoot
+$lapisExe = Join-Path $RootDir "bin/lapis.exe"
+if (Test-Path $lapisExe) {
+    & $lapisExe dirs
+    exit $LASTEXITCODE
+}
 $dirs = @(
     (Join-Path $RootDir "bin"),
     (Join-Path $RootDir "addons/crystal_integration/bin"),

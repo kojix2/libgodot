@@ -227,18 +227,18 @@ jobs:
         with:
           repo: godotengine/godot-builds
           version: ${{ env.GODOT_VERSION }}
-          enable_cache: true
+          enable_cache: false
 
       - name: Configure Godot Executable
         shell: bash
         run: |
-          if [ -n "$GODOT4" ] && [ -f "$GODOT4" ]; then
+          if [ -n "$GODOT4" ] && [ -f "$GODOT4" ] && file -b "$GODOT4" | grep -q "ELF.*x86-64"; then
             cp "$GODOT4" ./godot
             chmod +x ./godot
-          elif [ -n "$GODOT4_BIN" ] && [ -f "$GODOT4_BIN" ]; then
+          elif [ -n "$GODOT4_BIN" ] && [ -f "$GODOT4_BIN" ] && file -b "$GODOT4_BIN" | grep -q "ELF.*x86-64"; then
             cp "$GODOT4_BIN" ./godot
             chmod +x ./godot
-          elif command -v godot >/dev/null 2>&1; then
+          elif command -v godot >/dev/null 2>&1 && file -b "$(command -v godot)" | grep -q "ELF.*x86-64"; then
             cp "$(command -v godot)" ./godot
             chmod +x ./godot
           else

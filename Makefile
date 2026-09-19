@@ -40,8 +40,6 @@ ifeq ($(OS),Windows_NT)
 	SO_EXT          = dll
 	EXE_EXT         = .exe
 	GODOT           ?= ./godot.exe
-	PWSH_CMD        ?= powershell -NoProfile -ExecutionPolicy Bypass -Command
-	PWSH_FILE       ?= powershell -NoProfile -File
 	CXXFLAGS        ?= -std=c++17 -O2 -g -I rsrc -static -static-libgcc -static-libstdc++
 	LINK_FLAGS      ?= /DLL /ENTRY:_DllMainCRTStartup /EXPORT:crystal_godot_init
 else
@@ -51,8 +49,6 @@ else
 		SO_EXT          = dylib
 		EXE_EXT         =
 		GODOT           ?= ./godot
-		PWSH_CMD        ?= pwsh -NoProfile -Command
-		PWSH_FILE       ?= pwsh -NoProfile -File
 		CXX             ?= clang++
 		CXXFLAGS        ?= -std=c++17 -O2 -fPIC -I rsrc
 		LINK_FLAGS      ?= -dynamiclib -Wl,-exported_symbol,_crystal_godot_init
@@ -61,16 +57,11 @@ else
 		SO_EXT          = so
 		EXE_EXT         =
 		GODOT           ?= ./godot
-		PWSH_CMD        ?= pwsh -NoProfile -Command
-		PWSH_FILE       ?= pwsh -NoProfile -File
 		CXX             ?= g++
 		CXXFLAGS        ?= -std=c++17 -O2 -fPIC -I rsrc
 		LINK_FLAGS      ?= -shared
 	endif
 endif
-
-CP           = $(PWSH_CMD) "Copy-Item -Force"
-RM           = $(PWSH_CMD) "Remove-Item -Force -ErrorAction SilentlyContinue"
 
 # Optional release mode: make RELEASE=1
 CRYSTAL_FLAGS =
@@ -141,8 +132,9 @@ addons: dirs
 
 # Build dummy test addons for multi-addon isolation stress tests
 dummy_addons: dirs deps bridge
-	@$(PWSH_FILE) scripts/build_dummy_addons.ps1 $(if $(filter 1,$(RELEASE)),-Release,)
-	@$(PWSH_FILE) scripts/sync_bins.ps1
+dummy_addons: dirs deps bridge
+	@$(LAPIS) build addons $(if $(filter 1,$(RELEASE)),--release,)
+	@$(LAPIS) sync
 
 # Build test project
 test_project: dirs deps bridge addons dummy_addons
@@ -157,12 +149,12 @@ test_standalone: dirs deps bridge addons dummy_addons
 # Build all showcase examples in examples/
 examples: dirs deps bridge addons
 	@echo [Examples] Building all projects in $(EXAMPLES_DIR)...
-	@$(PWSH_FILE) scripts/build_examples.ps1 $(if $(filter 1,$(RELEASE)),-Release 1,)
+	@$(LAPIS) build examples $(if $(filter 1,$(RELEASE)),--release,)
 
 # Build standalone executables for all projects in examples/
 examples_exe: dirs deps bridge addons
 	@echo [Examples] Building standalone executables for all projects in $(EXAMPLES_DIR)...
-	@$(PWSH_FILE) scripts/build_examples.ps1 -Exe $(if $(filter 1,$(RELEASE)),-Release 1,)
+	@$(LAPIS) build examples --exe $(if $(filter 1,$(RELEASE)),--release,)
 
 # Build starter game template project
 template: dirs deps bridge addons
@@ -187,12 +179,12 @@ perf_standalone: dirs deps bridge addons
 # Package standalone test suite into tests-<platform>.zip
 package_tests package-tests: test_standalone
 	@echo [Package] Packaging standalone test suite...
-	@$(PWSH_FILE) scripts/package_test_suite.ps1 $(if $(TARGET_DIR),-TargetDir "$(TARGET_DIR)",) $(if $(PLATFORM),-Platform "$(PLATFORM)",) $(if $(filter 1,$(RELEASE)),-Release 1,) $(if $(ZIP_NAME),-ZipName "$(ZIP_NAME)",) $(if $(filter 1,$(SKIP_VERIFY)),-SkipVerify,) $(if $(filter 1,$(FORCE)),-Force,)
+	@$(LAPIS) package tests $(if $(TARGET_DIR),-t "$(TARGET_DIR)",) $(if $(ZIP_NAME),-o "$(ZIP_NAME)",) $(if $(filter 1,$(RELEASE)),-r,)
 
 # Package standalone performance benchmark into perf-<platform>.zip
 package_perf package-perf: perf_standalone
 	@echo [Package] Packaging standalone performance benchmark...
-	@$(PWSH_FILE) scripts/package_perf.ps1 $(if $(TARGET_DIR),-TargetDir "$(TARGET_DIR)",) $(if $(PLATFORM),-Platform "$(PLATFORM)",) $(if $(or $(ARCHIVE_NAME),$(ZIP_NAME)),-ArchiveName "$(or $(ARCHIVE_NAME),$(ZIP_NAME))",) $(if $(filter 1,$(RELEASE)),-Release 1,) $(if $(filter 1,$(SKIP_VERIFY)),-SkipVerify,) $(if $(filter 1,$(FORCE)),-Force,)
+	@$(LAPIS) package perf $(if $(TARGET_DIR),-t "$(TARGET_DIR)",) $(if $(or $(ARCHIVE_NAME),$(ZIP_NAME)),-o "$(or $(ARCHIVE_NAME),$(ZIP_NAME))",) $(if $(filter 1,$(RELEASE)),-r,)
 
 # Package starter template project into template-project.zip
 package_template package-template: template
@@ -202,12 +194,12 @@ package_template package-template: template
 # Package addon starter template into template-addon-project.zip
 package_template_addon package-template-addon: template_addon
 	@echo [Package] Packaging addon starter template...
-	@$(PWSH_FILE) scripts/package_template_addon.ps1 $(if $(TARGET_DIR),-TargetDir "$(TARGET_DIR)",) $(if $(ZIP_NAME),-ZipName "$(ZIP_NAME)",) $(if $(filter 1,$(RELEASE)),-Release 1,) $(if $(or $(filter 1,$(BUNDLE)),$(filter 1,$(BUNDLE_BINARIES))),-BundleBinaries,) $(if $(filter 1,$(FORCE)),-Force,)
+	@$(LAPIS) package template-addon $(if $(ZIP_NAME),-o "$(ZIP_NAME)",) $(if $(or $(filter 1,$(BUNDLE)),$(filter 1,$(BUNDLE_BINARIES))),--bundle-binaries,)
 
 # Package standalone examples (with source + installed scripts + binaries) into examples-<platform>.zip
 package_examples package-examples: examples
 	@echo [Package] Packaging standalone examples...
-	@$(PWSH_FILE) scripts/package_examples.ps1 $(if $(TARGET_DIR),-TargetDir "$(TARGET_DIR)",) $(if $(PLATFORM),-Platform "$(PLATFORM)",) $(if $(ZIP_NAME),-ZipName "$(ZIP_NAME)",) $(if $(RELEASE),-Release "$(RELEASE)",$(if $(filter 1,$(RELEASE)),-Release 1,)) $(if $(filter 1,$(FORCE)),-Force,)
+	@$(LAPIS) package examples $(if $(ZIP_NAME),-o "$(ZIP_NAME)",)
 
 # Package official crystal_integration addon into godot-crystal-addon.zip
 package_addon package-addon: plugin bridge
@@ -217,12 +209,12 @@ package_addon package-addon: plugin bridge
 # Package all release archives and checksums into bin/release_dist/
 package_all package-all package_release package-release:
 	@echo [Package] Packaging all release archives into $(or $(OUTPUT_DIR),$(TARGET_DIR),bin/release_dist)...
-	@$(PWSH_FILE) scripts/package_release.ps1 -OutputDir "$(or $(OUTPUT_DIR),$(TARGET_DIR),bin/release_dist)" $(if $(PLATFORM),-Platform "$(PLATFORM)",) -Release "$(or $(RELEASE),1)" $(if $(filter 1,$(SKIP_TESTS)),-SkipTests,) $(if $(filter 1,$(SKIP_PERF)),-SkipPerf,)
+	@$(LAPIS) package release $(if $(or $(OUTPUT_DIR),$(TARGET_DIR)),-t "$(or $(OUTPUT_DIR),$(TARGET_DIR))",) $(if $(filter 1,$(SKIP_TESTS)),--skip-tests,) $(if $(filter 1,$(SKIP_PERF)),--skip-perf,)
 
 # Package playable standalone Godot game (binary + PCK + runtime DLLs)
 package_game package-game:
 	@echo [Package] Packaging playable standalone Godot game...
-	@$(PWSH_FILE) scripts/package_game.ps1 -ProjectPath "$(or $(PROJECT),$(PATH),.)" $(if $(NAME),-Name "$(NAME)",) $(if $(filter 1,$(RELEASE)),-Release 1,) $(if $(or $(TARGET_DIR),$(EXPORT_DIR)),-TargetDir "$(or $(TARGET_DIR),$(EXPORT_DIR))",) $(if $(filter 1,$(FORCE)),-ForceCompile,)
+	@$(LAPIS) package game $(if $(or $(PROJECT),$(PATH)),-p "$(or $(PROJECT),$(PATH))",) $(if $(NAME),-n "$(NAME)",) $(if $(filter 1,$(RELEASE)),-r,) $(if $(or $(TARGET_DIR),$(EXPORT_DIR)),-t "$(or $(TARGET_DIR),$(EXPORT_DIR))",) $(if $(filter 1,$(FORCE)),-f,)
 
 # Scaffold a new compiled Crystal GDExtension addon project
 new_addon new-addon:
@@ -232,7 +224,7 @@ ifeq ($(strip $(NAME)),)
 	@exit 1
 else
 	@echo [Scaffold] Scaffolding new Crystal GDExtension Addon '$(NAME)'...
-	@$(PWSH_FILE) scripts/create_new_addon.ps1 -Name $(NAME) $(if $(or $(DIR),$(TARGET),$(TARGET_PATH)),-TargetPath "$(or $(DIR),$(TARGET),$(TARGET_PATH))",) $(if $(AUTHOR),-Author "$(AUTHOR)",) $(if $(or $(DESC),$(DESCRIPTION)),-Description "$(or $(DESC),$(DESCRIPTION))",)
+	@$(LAPIS) scaffold addon $(NAME) $(if $(or $(DIR),$(TARGET),$(TARGET_PATH)),-d "$(or $(DIR),$(TARGET),$(TARGET_PATH))",) $(if $(AUTHOR),-a "$(AUTHOR)",) $(if $(or $(DESC),$(DESCRIPTION)),--desc "$(or $(DESC),$(DESCRIPTION))",)
 endif
 
 # Scaffold a new LibGodot showcase example project
@@ -243,8 +235,9 @@ ifeq ($(strip $(NAME)),)
 	@exit 1
 else
 	@echo [Scaffold] Scaffolding new LibGodot Example '$(NAME)'...
-	@$(PWSH_FILE) scripts/create_new_example.ps1 -Name $(NAME) $(if $(or $(DIR),$(TARGET),$(TARGET_PATH)),-TargetPath "$(or $(DIR),$(TARGET),$(TARGET_PATH))",)
+	@$(LAPIS) scaffold example $(NAME) $(if $(or $(DIR),$(TARGET),$(TARGET_PATH)),-d "$(or $(DIR),$(TARGET),$(TARGET_PATH))",)
 endif
+
 
 perf_run: perf
 	@echo [Performance] Launching performance stress benchmark...
@@ -260,39 +253,21 @@ game_dll: dirs deps bridge addons test_project examples template template_addon 
 
 game_exe: dirs deps bridge
 	@echo [Standalone] Compiling standalone game executable from $(ENTRY)...
-	@$(PWSH_FILE) scripts/build_crystal.ps1 -Entry $(ENTRY) -Output $(GAME_EXE) $(if $(filter 1,$(RELEASE)),-Release,)
-
-# Cross-compile for Android (libcrystal_bridge.so and libgame.so)
-android: dirs
-	@echo [Android] Cross-compiling LibGodot for Android arm64-v8a...
-	@$(PWSH_FILE) scripts/build_android.ps1 -Release "$(RELEASE)" $(if $(ENTRY),-Entry $(ENTRY),)
-
-# Package Android APK
-package_android: dirs bridge android
-	@echo [Android] Packaging Android APK...
-	@$(PWSH_FILE) scripts/package_android.ps1 $(if $(filter 1,$(RELEASE)),-Release,) $(if $(ENTRY),-Entry $(ENTRY),)
-
-# Create or inspect Android keystores
-keystore: dirs
-	@$(PWSH_FILE) scripts/manage_keystore.ps1
-
-keystore_decode: dirs
-	@$(PWSH_FILE) scripts/manage_keystore.ps1 -Decode $(if $(KEYSTORE),-Path $(KEYSTORE),)
-
+	@$(LAPIS) build --entry $(ENTRY) --output $(GAME_EXE) $(if $(filter 1,$(RELEASE)),--release,)
 
 # Generate Crystal bindings from Godot extension_api.json
-dump_api:
+dump_api: $(LAPIS)
 	@echo [API] Dumping extension_api.json from Godot...
-	@$(PWSH_CMD) "New-Item -ItemType Directory -Force scratch/dump_tmp | Out-Null; Set-Content scratch/dump_tmp/project.godot 'config_version=5'; Start-Process -FilePath (Resolve-Path ./godot.exe) -ArgumentList '--headless', '--path', (Resolve-Path scratch/dump_tmp), '--dump-extension-api' -WorkingDirectory (Resolve-Path scratch/dump_tmp) -Wait; Start-Process -FilePath (Resolve-Path ./godot.exe) -ArgumentList '--headless', '--path', (Resolve-Path scratch/dump_tmp), '--dump-gdextension-interface' -WorkingDirectory (Resolve-Path scratch/dump_tmp) -Wait; Copy-Item scratch/dump_tmp/extension_api.json extension_api.json -Force; Copy-Item scratch/dump_tmp/extension_api.json rsrc/extension_api.json -Force; Copy-Item scratch/dump_tmp/gdextension_interface.h rsrc/gdextension_interface.h -Force; Remove-Item scratch/dump_tmp -Recurse -Force"
+	@$(LAPIS) bind engine --dump
 
-generate:
+generate bind_engine: $(LAPIS)
 	@echo [Generator] Generating complete Godot bindings from extension_api.json...
-	$(CRYSTAL) run tools/api_generator/generate_bindings.cr
+	@$(LAPIS) bind engine
 
 # Generate typed Crystal bindings for project custom GDScript and plugin nodes
-project_bindings:
+project_bindings bind_project: $(LAPIS)
 	@echo [API] Dumping and generating typed bindings for project custom GDScript and plugin nodes...
-	@$(PWSH_FILE) scripts/generate_project_bindings.ps1 -Project $(or $(PROJECT),template)
+	@$(LAPIS) bind project $(if $(PROJECT),-p $(PROJECT),-p template)
 
 # Copy Crystal runtime dependencies and libgodot to all bin dirs
 deps: dirs
@@ -308,7 +283,7 @@ sync: addons
 engine:
 	@echo Compiling Godot Engine shared library $(LIBGODOT_LIB) via SCons...
 	$(SCONS) -C godot-src target=template_debug dev_build=yes library_type=shared_library -j$(SCONS_JOBS)
-	@$(PWSH_FILE) scripts/sync_bins.ps1
+	@$(LAPIS) sync
 	@echo $(LIBGODOT_LIB) updated successfully!
 
 # Run Crystal unit specifications (test/spec)
@@ -318,7 +293,7 @@ spec:
 
 # Run complete test suites and verification (Crystal specs, in-editor @tool tests, standalone runner, runtime project tests, smoke tests)
 test tests: test_standalone
-	@$(PWSH_FILE) scripts/run_tests.ps1 $(if $(filter 1,$(SKIP_SPECS)),-SkipSpecs,) $(if $(filter 1,$(SKIP_TOOL_TESTS)),-SkipToolTests,) $(if $(filter 1,$(SKIP_RUNTIME_TESTS)),-SkipRuntimeTests,) $(ARGS)
+	@$(LAPIS) test $(if $(filter 1,$(SKIP_SPECS)),--skip-specs,) $(if $(filter 1,$(SKIP_TOOL_TESTS)),--skip-tool-tests,) $(if $(filter 1,$(SKIP_RUNTIME_TESTS)),--skip-runtime-tests,)
 
 # Unified test runner (supports interactive UI or automated suite)
 run_test run-test:
@@ -326,23 +301,20 @@ ifeq ($(or $(filter 1,$(INTERACTIVE)),$(filter 1,$(UI))),1)
 	@echo Launching Crystal LibGodot Interactive Test Runner...
 	$(GODOT) --path test $(ARGS)
 else
-	@$(PWSH_FILE) scripts/run_tests.ps1 $(if $(filter 1,$(SKIP_SPECS)),-SkipSpecs,) $(if $(filter 1,$(SKIP_TOOL_TESTS)),-SkipToolTests,) $(if $(filter 1,$(SKIP_RUNTIME_TESTS)),-SkipRuntimeTests,) $(ARGS)
+	@$(LAPIS) test $(if $(filter 1,$(SKIP_SPECS)),--skip-specs,) $(if $(filter 1,$(SKIP_TOOL_TESTS)),--skip-tool-tests,) $(if $(filter 1,$(SKIP_RUNTIME_TESTS)),--skip-runtime-tests,)
 endif
 
 # Run complete local CI test matrix harness
 run_ci_local run-ci-local ci-local ci:
-	@$(PWSH_FILE) scripts/run_ci_local.ps1 $(if $(or $(filter 1,$(RELEASE)),$(filter 1,$(TEST_RELEASE))),-TestRelease,) $(if $(filter 1,$(SKIP_SPECS)),-SkipSpecs,) $(if $(filter 1,$(SKIP_TOOL_TESTS)),-SkipToolTests,) $(if $(filter 1,$(SKIP_RUNTIME_TESTS)),-SkipRuntimeTests,) $(if $(filter 1,$(SKIP_SMOKE_TESTS)),-SkipSmokeTests,)
+	@$(LAPIS) test
 
 # Download and configure Godot engine binary for development
 setup_dev setup-dev:
-	@$(PWSH_FILE) scripts/setup_dev.ps1 $(if $(VERSION),-Version "$(VERSION)",)
+	@$(LAPIS) setup $(if $(VERSION),-v "$(VERSION)",)
 
 # Generate offline HTML documentation
 docs:
-	@echo Generating Crystal HTML documentation in docs/...
-	$(CRYSTAL) docs
-	@$(PWSH_FILE) scripts/patch_docs.ps1
-	@echo Documentation generated at docs/index.html
+	@$(LAPIS) docs
 
 # Launch test project using Godot
 run:
@@ -356,46 +328,15 @@ editor:
 
 # Unified Godot editor launcher with shadow logging, auto-quit, and LLDB flags
 run_editor run-editor:
-	@$(PWSH_FILE) scripts/run_editor.ps1 -Path "$(or $(PROJECT),$(PATH),test)" $(if $(or $(LOG),$(LOG_FILE)),-LogFile "$(or $(LOG),$(LOG_FILE))",) $(if $(or $(QUIT),$(QUIT_AFTER)),-QuitAfter $(or $(QUIT),$(QUIT_AFTER)),) $(if $(filter 1,$(LLDB)),-LLDB,) $(if $(filter 1,$(BATCH)),-Batch,) $(ARGS)
-
-# Ensure Godot export templates are downloaded/installed
-export_templates export-templates:
-	@$(PWSH_FILE) scripts/ensure_export_templates.ps1 $(if $(VERSION),-Version "$(VERSION)",) $(if $(DOWNLOAD_URL),-DownloadUrl "$(DOWNLOAD_URL)",)
+	@$(LAPIS) editor -p "$(or $(PROJECT),$(PATH),test)" $(if $(or $(QUIT),$(QUIT_AFTER)),--quit-after $(or $(QUIT),$(QUIT_AFTER)),)
 
 # Recompile all Crystal addons found across a project
 recompile_addons recompile-addons:
-	@$(PWSH_FILE) scripts/recompile_addons.ps1 -ProjectPath "$(or $(PROJECT),$(PATH),.)" $(if $(filter 1,$(RELEASE)),-Release,) $(if $(filter 1,$(FORCE)),-Force,)
-
-# Verify Godot editor launch, script loader, and clean shutdown
-verify_editor verify-editor:
-	@$(PWSH_FILE) scripts/verify_editor.ps1 -Path "$(or $(PROJECT),$(PATH),template)" $(if $(or $(QUIT),$(QUIT_AFTER)),-QuitAfter $(or $(QUIT),$(QUIT_AFTER)),) $(if $(RELOAD_CYCLES),-ReloadCycles $(RELOAD_CYCLES),) $(if $(filter 1,$(PURGE_CACHE)),-PurgeCache,) $(if $(filter 1,$(HEADLESS)),-Headless,)
-
-# Run Linux test suite inside WSL with crash backtrace capture
-test_wsl test-wsl:
-	@$(PWSH_FILE) scripts/run_wsl_tests.ps1 $(if $(DISTRO),-Distro "$(DISTRO)",) $(if $(filter 1,$(SKIP_SPECS)),-SkipSpecs,) $(if $(filter 1,$(SKIP_RUNTIME_TESTS)),-SkipRuntimeTests,) $(if $(filter 1,$(SKIP_TOOL_TESTS)),-SkipToolTests,) $(if $(filter 1,$(LLDB)),-DebugWithLLDB,)
-
-# Audit Android libraries and generated APK packages
-report_android report-android:
-	@$(PWSH_FILE) scripts/report_android.ps1 $(if $(ANDROID_BIN_DIR),-AndroidBinDir "$(ANDROID_BIN_DIR)",)
-
-# Run project under LLDB debugger
-debug:
-	@echo Launching under LLDB debugger...
-	@$(PWSH_FILE) scripts/lldb_run.ps1 -Path $(or $(PROJECT),test) $(if $(BATCH),-Batch,) $(if $(QUIT),-Quit,)
-
-# Launch Godot editor under LLDB debugger
-debug-editor:
-	@echo Opening Godot Editor under LLDB debugger...
-	@$(PWSH_FILE) scripts/lldb_run.ps1 -Path $(or $(PROJECT),test) -Editor $(if $(BATCH),-Batch,)
+	@$(LAPIS) build addons $(if $(filter 1,$(RELEASE)),--release,)
 
 # Clean build artifacts (preserves libgodot.dll and runtime DLLs)
 clean:
-	@echo Cleaning build artifacts across bin/, test/bin/, template/bin/, addons/crystal_integration/bin, template-addon, performance, and examples...
-	@$(PWSH_CMD) "Get-ChildItem -Path '$(BIN_DIR)', '$(TEST_BIN_DIR)', '$(TEMPLATE_BIN_DIR)', 'addons/crystal_integration/bin', 'template-addon/addons', 'performance/bin' -Include 'crystal_bridge.*', 'game.*', '~crystal_bridge.*' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue"
-	@$(PWSH_CMD) "if (Test-Path '$(EXAMPLES_DIR)') { Get-ChildItem -Path '$(EXAMPLES_DIR)' -Include 'crystal_bridge.*', 'game.*', '~crystal_bridge.*' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue }"
-	@$(PWSH_CMD) "Remove-Item -Path 'test/tests.exe', 'test/tests', 'performance/perf.exe', 'performance/perf' -Force -ErrorAction SilentlyContinue"
-	@$(PWSH_CMD) "Get-ChildItem -Path 'scratch' -Include '*.obj', '*.exp' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue"
-	@echo Clean complete.
+	@$(LAPIS) clean
 
 # Display help menu
 help:

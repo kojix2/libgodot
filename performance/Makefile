@@ -7,8 +7,6 @@ ifeq ($(OS),Windows_NT)
 	SO_EXT          = dll
 	EXE_EXT         = .exe
 	GODOT           ?= ../godot.exe
-	PWSH_CMD        ?= powershell -NoProfile -ExecutionPolicy Bypass -Command
-	PWSH_FILE       ?= powershell -NoProfile -ExecutionPolicy Bypass -File
 	LINK_FLAGS      ?= /DLL /ENTRY:_DllMainCRTStartup /EXPORT:crystal_godot_init
 else
 	UNAME_S := $(shell uname -s 2>/dev/null)
@@ -17,28 +15,22 @@ else
 		SO_EXT          = dylib
 		EXE_EXT         =
 		GODOT           ?= ../godot
-		PWSH_CMD        ?= pwsh -NoProfile -Command
-		PWSH_FILE       ?= pwsh -NoProfile -File
 		LINK_FLAGS      ?= -dynamiclib
 	else
 		PLATFORM        = linux
 		SO_EXT          = so
 		EXE_EXT         =
 		GODOT           ?= ../godot
-		PWSH_CMD        ?= pwsh -NoProfile -Command
-		PWSH_FILE       ?= pwsh -NoProfile -File
 		LINK_FLAGS      ?= -shared
 	endif
 endif
 
 ENTRY        ?= src/main.cr
+LAPIS        ?= ../bin/lapis$(EXE_EXT)
 
 BIN_DIR       = bin
 GAME_LIB      = $(BIN_DIR)/game.$(SO_EXT)
 BRIDGE_SRC    = ../bin/crystal_bridge.$(SO_EXT)
-
-CP           = $(PWSH_CMD) "Copy-Item -Force"
-RM           = $(PWSH_CMD) "Remove-Item -Force -ErrorAction SilentlyContinue"
 
 CRYSTAL_FLAGS =
 ifeq ($(RELEASE), 1)
@@ -53,36 +45,36 @@ all: dirs deps bridge extension_list addons game_dll
 	@echo ===================================================================
 
 dirs:
-	@$(PWSH_CMD) "if (-not (Test-Path '$(BIN_DIR)')) { New-Item -ItemType Directory -Force -Path '$(BIN_DIR)' | Out-Null }"
+	@$(LAPIS) dirs
 
 deps: dirs
-	@$(PWSH_FILE) ../scripts/ensure_deps.ps1
+	@$(LAPIS) deps -t $(BIN_DIR)
 
 bridge: dirs
-	@$(PWSH_CMD) "if (Test-Path '$(BRIDGE_SRC)') { Copy-Item '$(BRIDGE_SRC)' '$(BIN_DIR)/crystal_bridge.$(SO_EXT)' -Force -ErrorAction SilentlyContinue }"
+	@$(LAPIS) sync
 
 extension_list: dirs
-	@$(PWSH_FILE) ../scripts/ensure_extension_list.ps1 -ProjectPath .
+	@$(LAPIS) sync
 
 addons:
-	@$(PWSH_FILE) ../scripts/sync_addons.ps1 -Source ../addons -Destinations addons
+	@$(LAPIS) sync --addons-only
 
 game_dll game-dll: dirs deps bridge extension_list addons
 	@echo [Performance] Compiling game.$(SO_EXT) from $(ENTRY)...
-	@$(PWSH_FILE) ../scripts/build_crystal.ps1 -Entry $(ENTRY) -Output $(GAME_LIB) -LinkFlags '$(LINK_FLAGS)' $(if $(filter 1,$(RELEASE)),-Release,) -SourcePath ../src
-	@$(PWSH_CMD) "if (Test-Path '$(GAME_LIB)') { try { Copy-Item '$(GAME_LIB)' 'addons/crystal_integration/bin/game.$(SO_EXT)' -Force } catch {} }"
+	@$(LAPIS) build -e $(ENTRY) -o $(GAME_LIB) -l '$(LINK_FLAGS)' $(if $(filter 1,$(RELEASE)),-r,) -s ../src
+	@$(LAPIS) sync
 
 standalone game_exe game-exe: dirs deps bridge extension_list addons game_dll
 	@echo [Performance] Packaging standalone benchmark executable...
-	@$(PWSH_FILE) ../scripts/package_game.ps1 -ProjectPath . -Name "perf" $(if $(filter 1,$(RELEASE)),-Release 1,) -ForceCompile
+	@$(LAPIS) package game -p . -n "perf" $(if $(filter 1,$(RELEASE)),-r,) -f
 
 package package_perf package-perf: standalone
 	@echo [Performance] Packaging standalone benchmark archive...
-	@$(PWSH_FILE) ../scripts/package_perf.ps1 $(if $(TARGET_DIR),-TargetDir "$(TARGET_DIR)",) $(if $(PLATFORM),-Platform "$(PLATFORM)",) $(if $(or $(ARCHIVE_NAME),$(ZIP_NAME)),-ArchiveName "$(or $(ARCHIVE_NAME),$(ZIP_NAME))",) $(if $(filter 1,$(RELEASE)),-Release 1,) $(if $(filter 1,$(SKIP_VERIFY)),-SkipVerify,) $(if $(filter 1,$(FORCE)),-Force,)
+	@$(LAPIS) package perf $(if $(TARGET_DIR),-t "$(TARGET_DIR)",) $(if $(or $(ARCHIVE_NAME),$(ZIP_NAME)),-o "$(or $(ARCHIVE_NAME),$(ZIP_NAME))",) $(if $(filter 1,$(RELEASE)),-r,)
 
 package_game package-game: dirs deps bridge extension_list addons game_dll
 	@echo [Performance] Packaging standalone benchmark game...
-	@$(PWSH_FILE) ../scripts/package_game.ps1 -ProjectPath . -Name "perf" $(if $(filter 1,$(RELEASE)),-Release 1,) $(if $(or $(TARGET_DIR),$(EXPORT_DIR)),-TargetDir "$(or $(TARGET_DIR),$(EXPORT_DIR))",) -ForceCompile
+	@$(LAPIS) package game -p . -n "perf" $(if $(filter 1,$(RELEASE)),-r,) $(if $(or $(TARGET_DIR),$(EXPORT_DIR)),-t "$(or $(TARGET_DIR),$(EXPORT_DIR))",) -f
 
 run: all
 	@echo [Performance] Running Performance Stress Benchmark...
@@ -93,11 +85,10 @@ editor: all
 	$(GODOT) --editor --path .
 
 run_editor run-editor: all
-	@$(PWSH_FILE) ../scripts/run_editor.ps1 -Path . $(if $(or $(LOG),$(LOG_FILE)),-LogFile "$(or $(LOG),$(LOG_FILE))",) $(if $(or $(QUIT),$(QUIT_AFTER)),-QuitAfter $(or $(QUIT),$(QUIT_AFTER)),) $(if $(filter 1,$(LLDB)),-LLDB,) $(if $(filter 1,$(BATCH)),-Batch,) $(ARGS)
+	@$(LAPIS) editor -p . $(if $(or $(QUIT),$(QUIT_AFTER)),--quit-after $(or $(QUIT),$(QUIT_AFTER)),)
 
 clean:
-	@$(RM) $(BIN_DIR)/*
-	@$(PWSH_CMD) "Remove-Item -Path 'perf.exe', 'perf', 'perf.console.exe', 'game.exe', 'game' -Recurse -Force -ErrorAction SilentlyContinue"
+	@$(LAPIS) clean
 
 help:
 	@echo ===================================================================

@@ -1,5 +1,6 @@
 require "../core/env"
 require "../core/logger"
+require "./deps"
 require "file_utils"
 require "option_parser"
 
@@ -11,24 +12,198 @@ module Lapis
 \e[35m=== Lapis: Project Scaffolding Tool ===\e[0m
 
 Usage:
-  lapis scaffold <addon|example> <name> [options]
-  lapis new <addon|example> <name> [options]
+  lapis scaffold <game|addon|example> [name] [options]
+  lapis new <game|addon|example> [name] [options]
 
 Subcommands:
+  game [name]            Scaffold a complete new game from template in DIR or CWD
   example <name>         Scaffold a self-contained showcase example project in examples/<name>
   addon <name>           Scaffold a redistributable GDExtension addon in addons/<name>
 
 Options:
   -t, --target=DIR       Explicit target output directory
+  -n, --name=NAME        Explicit project name
+  -f, --force            Overwrite existing files in non-empty target directory
+  -l, --local            Use local relative path for lapis dependency in shard.yml
   -a, --author=NAME      Author name for shard.yml (addons only)
   -d, --desc=TEXT        Description for shard.yml (addons only)
   -h, --help             Show this help screen
 
 Examples:
-  lapis scaffold example platformer_demo
+  lapis new game                     # Scaffold in current working directory
+  lapis new game my_game             # Scaffold into ./my_game
+  lapis new game --target path/game  # Scaffold into specified directory
   lapis scaffold addon my_inventory -a "Sol-Vin" -d "Inventory system for Godot"
-  lapis new example 3d_fps --target custom/path/fps
+  lapis new example 3d_fps
 HELP
+      end
+
+      # Recursively copy template directory with exclusions and customizations
+      private def self.copy_template_dir(
+        src_dir : Path,
+        dst_dir : Path,
+        proj_title : String,
+        proj_slug : String,
+        root : Path,
+        local_dep : Bool
+      ) : Void
+        excludes = [
+          ".godot", ".git", ".uid", "crash_dump",
+          "test_ext.log", "template_ext.log",
+          "bin", "lib", "dist"
+        ]
+
+        pattern = src_dir.to_s.gsub('\\', '/') + "/**/*"
+        Dir.glob(pattern).each do |item|
+          rel = Path.new(item).relative_to(src_dir).to_s.gsub('\\', '/')
+          next if excludes.any? { |ex| rel == ex || rel.starts_with?("#{ex}/") || rel.ends_with?(".log") }
+
+          target_item = dst_dir.join(rel)
+
+          if Dir.exists?(item)
+            FileUtils.mkdir_p(target_item)
+          else
+            FileUtils.mkdir_p(target_item.parent)
+
+            # Customizations for key files
+            case rel
+            when "project.godot"
+              content = File.read(item)
+              content = content.gsub(/config\/name="[^"]*"/, "config/name=\"#{proj_title}\"")
+              File.write(target_item, content)
+            when "shard.yml"
+              dest_expanded = dst_dir.expand.to_s.gsub('\\', '/')
+              root_expanded = root.expand.to_s.gsub('\\', '/')
+
+              if local_dep || (dest_expanded.starts_with?(root_expanded) && !dest_expanded.includes?(".."))
+                rel_root = Path.new(root).relative_to(dst_dir).to_s.gsub('\\', '/')
+                rel_root = "./#{rel_root}" unless rel_root.starts_with?(".")
+                dep_str = "  lapis:\n    path: #{rel_root}"
+              else
+                dep_str = "  lapis:\n    github: sol-vin/lapis\n    branch: master"
+              end
+
+              shard_content = <<-YAML
+name: #{proj_slug}
+version: 0.1.0
+authors:
+  - Developer <developer@example.com>
+license: MIT
+
+dependencies:
+#{dep_str}
+
+targets:
+  game:
+    main: src/main.cr
+YAML
+              File.write(target_item, shard_content)
+            when "README.md"
+              readme_content = <<-MD
+# #{proj_title}
+
+A Godot 4.8 + Crystal game built with [Lapis](https://github.com/sol-vin/lapis).
+
+## Development
+
+```bash
+# Compile game library
+lapis build game
+
+# Open in Godot Editor
+lapis editor
+```
+MD
+              File.write(target_item, readme_content)
+            else
+              FileUtils.cp(item, target_item.to_s)
+            end
+          end
+        end
+      end
+
+      def self.scaffold_game(
+        name : String?,
+        target_dir : Path?,
+        force : Bool = false,
+        local_dep : Bool = false
+      ) : Int32
+        root = Core::Env::ROOT_DIR
+
+        # 1. Resolve destination directory
+        dest = if target_dir
+          target_dir.expand
+        elsif name && name != "." && name != "./"
+          Path.new(Dir.current).join(name).expand
+        else
+          Path.new(Dir.current).expand
+        end
+
+        # 2. Resolve project title and slug
+        raw_name = if name && name != "." && name != "./"
+          name
+        else
+          dest.basename
+        end
+        raw_name = "MyGame" if raw_name.empty? || raw_name == "."
+
+        proj_slug = raw_name.underscore
+        proj_title = raw_name.split(/[-_]/).map(&.capitalize).join(" ")
+
+        # 3. Locate template source
+        template_dir = root.join("template")
+        unless Dir.exists?(template_dir)
+          if (exe = Process.executable_path)
+            cand = Path.new(exe).parent.parent.join("template")
+            template_dir = cand if Dir.exists?(cand)
+          end
+        end
+
+        unless Dir.exists?(template_dir)
+          Core::Logger.error("Starter template directory not found: #{template_dir}")
+          return 1
+        end
+
+        # 4. Check target directory emptiness
+        if Dir.exists?(dest)
+          entries = Dir.children(dest).reject { |c| c.starts_with?(".") }
+          if !entries.empty? && !force
+            Core::Logger.error("Target directory '#{dest}' is not empty (#{entries.size} files/directories found). Use --force to proceed.")
+            return 1
+          end
+        else
+          FileUtils.mkdir_p(dest)
+        end
+
+        Core::Logger.step("Scaffold", "Creating new Lapis game '#{proj_title}' at #{dest}...")
+
+        # 5. Copy and customize template files
+        copy_template_dir(template_dir, dest, proj_title, proj_slug, root, local_dep)
+
+        # 6. Synchronize runtime dependencies into bin/
+        game_bin = dest.join("bin")
+        FileUtils.mkdir_p(game_bin)
+        Commands::Deps.run(["-t", game_bin.to_s])
+
+        bridge_src = root.join("bin", Core::Env.bridge_file)
+        if File.exists?(bridge_src)
+          Commands::Deps.safe_copy(bridge_src, game_bin.join(Core::Env.bridge_file))
+          addon_bin = dest.join("addons/crystal_integration/bin")
+          if Dir.exists?(addon_bin)
+            Commands::Deps.safe_copy(bridge_src, addon_bin.join(Core::Env.bridge_file))
+          end
+        end
+
+        Core::Logger.success("New Lapis game '#{proj_title}' created successfully at #{dest}!")
+        puts
+        puts "\e[32mNext steps:\e[0m"
+        if dest != Path.new(Dir.current).expand
+          puts "  cd #{dest}"
+        end
+        puts "  lapis build game          # Compile game library (bin/#{Core::Env.game_file})"
+        puts "  lapis editor              # Launch in Godot Editor"
+        puts
+        0
       end
 
       def self.scaffold_example(name : String, target_dir : Path?) : Int32
@@ -160,37 +335,56 @@ CR
         end
 
         kind = args[0]
-        if args.size < 2
-          Core::Logger.error("Name is required: lapis scaffold #{kind} <name>")
-          puts
-          print_help
-          return 1
-        end
-
-        name = args[1]
         target_path : String? = nil
+        explicit_name : String? = nil
+        force : Bool = false
+        local_dep : Bool = false
         author : String? = nil
         desc : String? = nil
 
         parser = OptionParser.new do |opts|
-          opts.banner = "Usage: lapis scaffold #{kind} <name> [options]"
+          opts.banner = "Usage: lapis scaffold #{kind} [name] [options]"
           opts.on("-t DIR", "--target=DIR", "Explicit target directory") { |d| target_path = d }
+          opts.on("-n NAME", "--name=NAME", "Explicit project name") { |n| explicit_name = n }
+          opts.on("-f", "--force", "Overwrite existing files in non-empty target directory") { force = true }
+          opts.on("-l", "--local", "Use local relative path for lapis dependency in shard.yml") { local_dep = true }
           opts.on("-a NAME", "--author=NAME", "Addon author name") { |a| author = a }
           opts.on("-d TEXT", "--desc=TEXT", "Addon description") { |text| desc = text }
           opts.on("-h", "--help", "Show help") { print_help; exit 0 }
         end
 
-        parser.parse(args[2..])
+        remaining_args = [] of String
+        parser.unknown_args do |rest|
+          remaining_args = rest
+        end
 
+        parser.parse(args[1..])
+
+        # Positional name from remaining args
+        name = explicit_name || (remaining_args.empty? ? nil : remaining_args[0])
         target_dir = (tp = target_path) ? Path.new(tp).expand : nil
 
         case kind
+        when "game"
+          scaffold_game(name, target_dir, force: force, local_dep: local_dep)
         when "example"
+          if name.nil?
+            Core::Logger.error("Name is required: lapis scaffold example <name>")
+            puts
+            print_help
+            return 1
+          end
           scaffold_example(name, target_dir)
         when "addon"
+          if name.nil?
+            Core::Logger.error("Name is required: lapis scaffold addon <name>")
+            puts
+            print_help
+            return 1
+          end
           scaffold_addon(name, target_dir, author, desc)
         else
-          Core::Logger.error("Unknown scaffold type: '#{kind}'. Expected 'addon' or 'example'.")
+          Core::Logger.error("Unknown scaffold type: '#{kind}'. Expected 'game', 'addon', or 'example'.")
           puts
           print_help
           1

@@ -8,8 +8,6 @@ ifeq ($(OS),Windows_NT)
 	SO_EXT          = dll
 	EXE_EXT         = .exe
 	GODOT           ?= ../godot.exe
-	PWSH_CMD        ?= powershell -NoProfile -ExecutionPolicy Bypass -Command
-	PWSH_FILE       ?= powershell -NoProfile -ExecutionPolicy Bypass -File
 	LINK_FLAGS      ?= /DLL /ENTRY:_DllMainCRTStartup /EXPORT:crystal_godot_init
 else
 	UNAME_S := $(shell uname -s 2>/dev/null)
@@ -18,21 +16,18 @@ else
 		SO_EXT          = dylib
 		EXE_EXT         =
 		GODOT           ?= ../godot
-		PWSH_CMD        ?= pwsh -NoProfile -Command
-		PWSH_FILE       ?= pwsh -NoProfile -File
 		LINK_FLAGS      ?= -dynamiclib
 	else
 		PLATFORM        = linux
 		SO_EXT          = so
 		EXE_EXT         =
 		GODOT           ?= ../godot
-		PWSH_CMD        ?= pwsh -NoProfile -Command
-		PWSH_FILE       ?= pwsh -NoProfile -File
 		LINK_FLAGS      ?= -shared
 	endif
 endif
 
 ENTRY        ?= src/main.cr
+LAPIS        ?= ../bin/lapis$(EXE_EXT)
 
 BIN_DIR       = bin
 GAME_LIB      = $(BIN_DIR)/game.$(SO_EXT)
@@ -42,9 +37,6 @@ BRIDGE_SRC    = ../bin/crystal_bridge.$(SO_EXT)
 # Backward-compatibility alias
 GAME_DLL      = $(GAME_LIB)
 GAME_EXE      = $(TESTS_EXE)
-
-CP           = $(PWSH_CMD) "Copy-Item -Force"
-RM           = $(PWSH_CMD) "Remove-Item -Force -ErrorAction SilentlyContinue"
 
 CRYSTAL_FLAGS =
 ifeq ($(RELEASE), 1)
@@ -60,29 +52,27 @@ all: dirs deps bridge extension_list addons game_dll
 
 bindings project_bindings project-bindings:
 	@echo [API] Updating test project node bindings...
-	@$(PWSH_CMD) "if (Test-Path 'src/generated/project_nodes') { Get-ChildItem 'src/generated/project_nodes' -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue }"
-	$(GODOT) --headless -s ../tools/api_generator/dump_project_nodes.gd -- --output src/generated/project_nodes.json
-	crystal run ../tools/api_generator/generate_project_bindings.cr -- src/generated/project_nodes.json src/generated/project_nodes
+	@$(LAPIS) bind project -p .
 
 dirs:
-	@$(PWSH_CMD) "if (-not (Test-Path '$(BIN_DIR)')) { New-Item -ItemType Directory -Force -Path '$(BIN_DIR)' | Out-Null }"
+	@$(LAPIS) dirs
 
 deps: dirs
-	@$(PWSH_FILE) ../scripts/ensure_deps.ps1
+	@$(LAPIS) deps -t $(BIN_DIR)
 
 bridge: dirs
-	@$(PWSH_CMD) "if (Test-Path '$(BRIDGE_SRC)') { Copy-Item '$(BRIDGE_SRC)' '$(BIN_DIR)/crystal_bridge.$(SO_EXT)' -Force -ErrorAction SilentlyContinue }"
+	@$(LAPIS) sync
 
 extension_list: dirs
-	@$(PWSH_FILE) ../scripts/ensure_extension_list.ps1 -ProjectPath .
+	@$(LAPIS) sync
 
 addons:
-	@$(PWSH_FILE) ../scripts/sync_addons.ps1 -Source ../addons -Destinations addons
+	@$(LAPIS) sync --addons-only
 
 game_dll game-dll: dirs deps bridge extension_list addons
 	@echo [Test] Compiling game.$(SO_EXT) from $(ENTRY)...
-	@$(PWSH_FILE) ../scripts/build_crystal.ps1 -Entry $(ENTRY) -Output $(GAME_LIB) -LinkFlags '$(LINK_FLAGS)' $(if $(filter 1,$(RELEASE)),-Release,) -SourcePath ../src
-	@$(PWSH_CMD) "Copy-Item '$(GAME_LIB)' '../bin/game.$(SO_EXT)' -Force -ErrorAction SilentlyContinue"
+	@$(LAPIS) build -e $(ENTRY) -o $(GAME_LIB) -l '$(LINK_FLAGS)' $(if $(filter 1,$(RELEASE)),-r,) -s ../src
+	@$(LAPIS) sync
 
 spec:
 	@echo [Spec] Running Crystal specifications in spec/...
@@ -90,15 +80,15 @@ spec:
 
 standalone game_exe game-exe: dirs deps bridge extension_list addons game_dll
 	@echo [Test] Packaging standalone test runner executable...
-	@$(PWSH_FILE) ../scripts/package_game.ps1 -ProjectPath . $(if $(NAME),-Name "$(NAME)",-Name tests) $(if $(filter 1,$(RELEASE)),-Release 1,) -ForceCompile
+	@$(LAPIS) package game -p . -n tests $(if $(filter 1,$(RELEASE)),-r,) -f
 
 package_game package-game: dirs deps bridge extension_list addons game_dll
 	@echo [Test] Packaging playable standalone test suite...
-	@$(PWSH_FILE) ../scripts/package_game.ps1 -ProjectPath . $(if $(NAME),-Name "$(NAME)",-Name tests) $(if $(filter 1,$(RELEASE)),-Release 1,) $(if $(or $(TARGET_DIR),$(EXPORT_DIR)),-TargetDir "$(or $(TARGET_DIR),$(EXPORT_DIR))",) -ForceCompile
+	@$(LAPIS) package game -p . -n tests $(if $(filter 1,$(RELEASE)),-r,) $(if $(or $(TARGET_DIR),$(EXPORT_DIR)),-t "$(or $(TARGET_DIR),$(EXPORT_DIR))",) -f
 
 package_tests package-tests: standalone
 	@echo [Test] Packaging standalone test runner archive...
-	@$(PWSH_FILE) ../scripts/package_test_suite.ps1 $(if $(TARGET_DIR),-TargetDir "$(TARGET_DIR)",) $(if $(PLATFORM),-Platform "$(PLATFORM)",) $(if $(filter 1,$(RELEASE)),-Release 1,) $(if $(ZIP_NAME),-ZipName "$(ZIP_NAME)",) $(if $(filter 1,$(SKIP_VERIFY)),-SkipVerify,) $(if $(filter 1,$(FORCE)),-Force,)
+	@$(LAPIS) package tests $(if $(TARGET_DIR),-t "$(TARGET_DIR)",) $(if $(ZIP_NAME),-o "$(ZIP_NAME)",) $(if $(filter 1,$(RELEASE)),-r,)
 
 run: all
 	@echo [Test] Running test suite with Godot...
@@ -109,29 +99,28 @@ editor: all
 	$(GODOT) --editor --path .
 
 run_editor run-editor: all
-	@$(PWSH_FILE) ../scripts/run_editor.ps1 -Path . $(if $(or $(LOG),$(LOG_FILE)),-LogFile "$(or $(LOG),$(LOG_FILE))",) $(if $(or $(QUIT),$(QUIT_AFTER)),-QuitAfter $(or $(QUIT),$(QUIT_AFTER)),) $(if $(filter 1,$(LLDB)),-LLDB,) $(if $(filter 1,$(BATCH)),-Batch,) $(ARGS)
+	@$(LAPIS) editor -p . $(if $(or $(QUIT),$(QUIT_AFTER)),--quit-after $(or $(QUIT),$(QUIT_AFTER)),)
 
 run_test run-test: all
 ifeq ($(or $(filter 1,$(INTERACTIVE)),$(filter 1,$(UI))),1)
 	@echo Launching Crystal LibGodot Interactive Test Runner...
 	$(GODOT) --path . $(ARGS)
 else
-	@$(PWSH_FILE) ../scripts/run_tests.ps1 $(if $(filter 1,$(SKIP_SPECS)),-SkipSpecs,) $(if $(filter 1,$(SKIP_TOOL_TESTS)),-SkipToolTests,) $(if $(filter 1,$(SKIP_RUNTIME_TESTS)),-SkipRuntimeTests,) $(ARGS)
+	@$(LAPIS) test $(if $(filter 1,$(SKIP_SPECS)),--skip-specs,) $(if $(filter 1,$(SKIP_TOOL_TESTS)),--skip-tool-tests,) $(if $(filter 1,$(SKIP_RUNTIME_TESTS)),--skip-runtime-tests,)
 endif
 
 clean:
-	@$(RM) $(BIN_DIR)/*
-	@$(PWSH_CMD) "Remove-Item -Path 'tests.exe', 'tests', 'game.exe', 'game', 'export', 'test_report.md', 'test_report.json', '.tool_tests_passed', '.tool_tests_failed', '.runtime_tests_passed', '.runtime_tests_failed', '.runtime_test_results.txt' -Recurse -Force -ErrorAction SilentlyContinue"
+	@$(LAPIS) clean
 
 rebuild: clean all
 
 export: all
 	@echo [Test] Exporting test project to export/ directory...
-	@$(PWSH_FILE) ../scripts/package_game.ps1 -ProjectPath . -Name tests -TargetDir $(or $(TARGET_DIR),export) -ForceCompile
+	@$(LAPIS) package game -p . -n tests -t $(or $(TARGET_DIR),export) -f
 
 export_release export-release: dirs deps bridge extension_list addons
 	@echo [Test] Exporting optimized release test project to export/ directory...
-	@$(PWSH_FILE) ../scripts/package_game.ps1 -ProjectPath . -Name tests -TargetDir $(or $(TARGET_DIR),export) -Release 1 -ForceCompile
+	@$(LAPIS) package game -p . -n tests -t $(or $(TARGET_DIR),export) -r -f
 
 help:
 	@echo ===================================================================
@@ -139,15 +128,14 @@ help:
 	@echo ===================================================================
 	@echo   make                Build test project and dependencies
 	@echo   make rebuild        Clean and rebuild all artifacts
-	@echo   make game-dll       Compile test game shared library (game.$(SO_EXT))
-	@echo   make standalone     Package standalone test executable runner
-	@echo   make package-game   Package standalone test game [TARGET_DIR=...]
-	@echo   make package-tests  Package standalone test runner archive (.zip)
-	@echo   make export         Export standalone playable test suite to export/
-	@echo   make export-release Export release optimized test suite to export/
-	@echo   make run            Launch test suite with Godot
+	@echo   make game-dll       Compile test shared library (game.$(SO_EXT))
+	@echo   make standalone     Package standalone test runner into bin/
+	@echo   make package-tests  Package standalone test runner archive
+	@echo   make export         Export standalone test package to export/
+	@echo   make export-release Export release optimized test package to export/
+	@echo   make run            Launch test suite in Godot
 	@echo   make editor         Open test suite in Godot Editor
-	@echo   make run-editor     Launch editor [LOG=...] [QUIT=...] [LLDB=1]
-	@echo   make run-test       Run test suite [UI=1] [SKIP_SPECS=1]
-	@echo   make clean          Remove all built artifacts and test reports
+	@echo   make run-test       Execute test suite
+	@echo   make spec           Run Crystal specifications in spec/
+	@echo   make clean          Remove built binaries and export directories
 	@echo ===================================================================

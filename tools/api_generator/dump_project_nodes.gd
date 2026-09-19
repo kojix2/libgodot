@@ -187,6 +187,17 @@ func inspect_gdscript(cls_name: String, script_path: String, base_hint: String) 
 	if not script_res:
 		return {}
 
+	var global_name = script_res.get_global_name()
+	if not global_name.is_empty():
+		cls_name = global_name
+	else:
+		var src = script_res.get_source_code()
+		var regex = RegEx.new()
+		if regex.compile("class_name\\s+([A-Za-z0-9_]+)") == OK:
+			var match = regex.search(src)
+			if match:
+				cls_name = match.get_string(1)
+
 	var base_type = script_res.get_instance_base_type()
 	if base_type.is_empty():
 		base_type = base_hint

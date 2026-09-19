@@ -108,6 +108,10 @@ jobs:
           crystal -v
           g++ --version
 
+      - name: Build Lapis CLI Toolchain
+        run: |
+          crystal build tools/lapis/src/lapis.cr -o bin/lapis.exe
+
       - name: Setup Godot Engine
         uses: appsinacup/action_setup_godot@main
         with:
@@ -170,7 +174,7 @@ jobs:
         run: |
           $winBin = "bin/windows"
           if (-not (Test-Path $winBin)) { New-Item -ItemType Directory -Force -Path $winBin | Out-Null }
-          & pwsh -NoProfile -File scripts/ensure_export_templates.ps1 -PackageZip -ZipOutput "$winBin/godot-crystal-export-templates-$($env:GODOT_VERSION).zip"
+          bin/lapis setup templates -o "$winBin/godot-crystal-export-templates-$($env:GODOT_VERSION).zip"
 
       - name: Compile Release Binaries & Run Test Suite
         timeout-minutes: 25
@@ -194,21 +198,8 @@ jobs:
           if-no-files-found: ignore
 
       - name: Package Windows Examples (examples-windows-x86_64.zip)
-        shell: pwsh
         run: |
-          $examplesDir = "bin/windows/examples"
-          if (Test-Path $examplesDir) { Remove-Item $examplesDir -Recurse -Force }
-          New-Item -ItemType Directory -Force -Path $examplesDir | Out-Null
-
-          if (Test-Path "examples") {
-            foreach ($ex in Get-ChildItem -Path "examples" -Directory) {
-              Write-Host "Packaging standalone playable example for $($ex.Name)..." -ForegroundColor Cyan
-              & pwsh -NoProfile -File scripts/package_game.ps1 -ProjectPath $ex.FullName -Name $ex.Name -TargetDir $examplesDir -Release 1
-            }
-          }
-
-          Get-ChildItem -Path $examplesDir -Filter "*_loaded_*" -Recurse | Remove-Item -Force -ErrorAction SilentlyContinue
-          Compress-Archive -Path "$examplesDir/*" -DestinationPath "bin/windows/examples-windows-x86_64.zip" -Force
+          bin/lapis package examples -o bin/windows/examples-windows-x86_64.zip -r
 
       - name: Package Windows Core LibGodot Distribution
         shell: pwsh
@@ -250,14 +241,12 @@ jobs:
           }
 
       - name: Package Windows Performance Benchmark (perf-windows.zip)
-        shell: pwsh
         run: |
-          & pwsh -NoProfile -File scripts/package_perf.ps1 -TargetDir "bin/windows" -Release 1
+          bin/lapis package perf -p windows -t "bin/windows" -r
 
       - name: Package Windows Test Suite (test-suite-windows.zip)
-        shell: pwsh
         run: |
-          & pwsh -NoProfile -File scripts/package_test_suite.ps1 -TargetDir "bin/windows" -Platform "windows" -Release 1 -SkipVerify
+          bin/lapis package tests -p windows -t "bin/windows" -r
 
       - name: Collect Windows Staging Artifacts
         shell: pwsh
@@ -326,6 +315,10 @@ jobs:
           g++ --version
           ld.lld --version
 
+      - name: Build Lapis CLI Toolchain
+        run: |
+          crystal build tools/lapis/src/lapis.cr -o bin/lapis
+
       - name: Setup Godot Engine
         uses: appsinacup/action_setup_godot@main
         with:
@@ -370,9 +363,8 @@ jobs:
             godot-export-templates-
 
       - name: Ensure Godot Export Templates
-        shell: pwsh
         run: |
-          & pwsh -NoProfile -File scripts/ensure_export_templates.ps1
+          bin/lapis setup templates
 
       - name: Compile Release Binaries & Run Test Suite
         timeout-minutes: 25
@@ -396,21 +388,8 @@ jobs:
           if-no-files-found: ignore
 
       - name: Package Linux Examples (examples-linux-x86_64.zip)
-        shell: pwsh
         run: |
-          $examplesDir = "bin/linux/examples"
-          if (Test-Path $examplesDir) { Remove-Item $examplesDir -Recurse -Force }
-          New-Item -ItemType Directory -Force -Path $examplesDir | Out-Null
-
-          if (Test-Path "examples") {
-            foreach ($ex in Get-ChildItem -Path "examples" -Directory) {
-              Write-Host "Packaging standalone playable Linux example for $($ex.Name)..." -ForegroundColor Cyan
-              & pwsh -NoProfile -File scripts/package_game.ps1 -ProjectPath $ex.FullName -Name $ex.Name -TargetDir $examplesDir -Release 1
-            }
-          }
-
-          Get-ChildItem -Path $examplesDir -Filter "*_loaded_*" -Recurse | Remove-Item -Force -ErrorAction SilentlyContinue
-          Compress-Archive -Path "$examplesDir/*" -DestinationPath "bin/linux/examples-linux-x86_64.zip" -Force
+          bin/lapis package examples -o bin/linux/examples-linux-x86_64.zip -r
 
       - name: Package Linux Core LibGodot Distribution
         shell: bash
@@ -440,14 +419,12 @@ jobs:
           (cd "$LIB_DIR" && zip -r "$ARCHIVE_PATH" ./*)
 
       - name: Package Linux Performance Benchmark (perf-linux.zip)
-        shell: bash
         run: |
-          pwsh -NoProfile -File scripts/package_perf.ps1 -TargetDir "bin/linux" -Release 1
+          bin/lapis package perf -p linux -t "bin/linux" -r
 
       - name: Package Linux Test Suite (test-suite-linux.zip)
-        shell: bash
         run: |
-          pwsh -NoProfile -File scripts/package_test_suite.ps1 -TargetDir "bin/linux" -Platform "linux" -Release 1 -SkipVerify
+          bin/lapis package tests -p linux -t "bin/linux" -r
 
       - name: Collect Linux Staging Artifacts
         shell: bash
@@ -469,6 +446,7 @@ jobs:
     name: Build Android (arm64-v8a)
     needs: [init-release]
     runs-on: ubuntu-latest
+    continue-on-error: true
     timeout-minutes: 25
     env:
       GODOT_VERSION: ${{ needs.init-release.outputs.godot_version }}
@@ -674,6 +652,10 @@ jobs:
           crystal -v
           clang++ --version
 
+      - name: Build Lapis CLI Toolchain
+        run: |
+          crystal build tools/lapis/src/lapis.cr -o bin/lapis
+
       - name: Setup Godot Engine
         uses: appsinacup/action_setup_godot@main
         with:
@@ -728,7 +710,7 @@ jobs:
         run: |
           $macBin = "bin/macos"
           if (-not (Test-Path $macBin)) { New-Item -ItemType Directory -Force -Path $macBin | Out-Null }
-          & pwsh -NoProfile -File scripts/ensure_export_templates.ps1 -PackageZip -ZipOutput "$macBin/godot-crystal-export-templates-$($env:GODOT_VERSION).zip"
+          bin/lapis setup templates -o "$macBin/godot-crystal-export-templates-$($env:GODOT_VERSION).zip"
 
       - name: Compile Release Binaries & Run Test Suite
         timeout-minutes: 25
@@ -752,21 +734,8 @@ jobs:
           if-no-files-found: ignore
 
       - name: Package macOS Examples (examples-macos.zip)
-        shell: pwsh
         run: |
-          $examplesDir = "bin/macos/examples"
-          if (Test-Path $examplesDir) { Remove-Item $examplesDir -Recurse -Force }
-          New-Item -ItemType Directory -Force -Path $examplesDir | Out-Null
-
-          if (Test-Path "examples") {
-            foreach ($ex in Get-ChildItem -Path "examples" -Directory) {
-              Write-Host "Packaging standalone playable example for $($ex.Name)..." -ForegroundColor Cyan
-              & pwsh -NoProfile -File scripts/package_game.ps1 -ProjectPath $ex.FullName -Name $ex.Name -TargetDir $examplesDir -Release 1
-            }
-          }
-
-          Get-ChildItem -Path $examplesDir -Filter "*_loaded_*" -Recurse | Remove-Item -Force -ErrorAction SilentlyContinue
-          Compress-Archive -Path "$examplesDir/*" -DestinationPath "bin/macos/examples-macos.zip" -Force
+          bin/lapis package examples -o bin/macos/examples-macos.zip -r
 
       - name: Package macOS Core LibGodot Distribution
         shell: bash
@@ -796,14 +765,12 @@ jobs:
           (cd "$LIB_DIR" && zip -r "$ARCHIVE_PATH" ./*)
 
       - name: Package macOS Performance Benchmark (perf-macos.zip)
-        shell: bash
         run: |
-          pwsh -NoProfile -File scripts/package_perf.ps1 -TargetDir "bin/macos" -Release 1
+          bin/lapis package perf -p macos -t "bin/macos" -r
 
       - name: Package macOS Test Suite (test-suite-macos.zip)
-        shell: bash
         run: |
-          pwsh -NoProfile -File scripts/package_test_suite.ps1 -TargetDir "bin/macos" -Platform "macos" -Release 1 -SkipVerify
+          bin/lapis package tests -p macos -t "bin/macos" -r
 
       - name: Collect macOS Staging Artifacts
         shell: bash

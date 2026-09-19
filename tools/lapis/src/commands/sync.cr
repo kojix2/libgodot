@@ -184,6 +184,18 @@ HELP
           Core::Logger.step("Sync", "Binaries synchronized across #{target_dirs.size} destinations")
         end
 
+        # 3. Ensure .gdignore in bin/ and lib/ across all targets
+        ["test", "template", "template-addon", "performance", "examples/basic_demo"].each do |proj|
+          proj_dir = root.join(proj)
+          next unless Dir.exists?(proj_dir)
+          bin_gd = proj_dir.join("bin/.gdignore")
+          File.write(bin_gd, "") if Dir.exists?(proj_dir.join("bin")) && !File.exists?(bin_gd)
+          lib_gd = proj_dir.join("lib/.gdignore")
+          if Dir.exists?(proj_dir.join("lib")) && !File.exists?(lib_gd)
+            File.write(lib_gd, "")
+          end
+        end
+
         0
       end
     end

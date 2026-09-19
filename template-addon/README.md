@@ -16,10 +16,8 @@ Compiled addons built with this template can be distributed to **any standard va
    - `plugin.gd`: 2-line GDScript stub extending the registered Crystal `EditorPlugin`.
    - `crystal_addon.gdextension`: Configures Godot to load the native bridge from `res://addons/crystal_addon/bin/`.
    - `bin/`: Contains compiled native binaries (`crystal_bridge.dll`, `game.dll`, `gc.dll`, etc.).
-3. **`Makefile` & `build.ps1`**:
+3. **`Makefile`**:
    - Build system for compiling the Crystal code and linking with the LibGodot GDExtension bridge.
-4. **`package.ps1`**:
-   - Compresses `addons/crystal_addon/` into a standalone `.zip` distribution file ready to share with Godot users.
 
 ---
 
@@ -28,8 +26,6 @@ Compiled addons built with this template can be distributed to **any standard va
 ### 1. Build the Addon
 ```bash
 make
-# or on Windows PowerShell:
-.\build.ps1
 ```
 
 ### 2. Test Live in the Godot Editor
@@ -46,8 +42,6 @@ Compiled Crystal GDExtension is running without Crystal installed.
 To create a clean release `.zip` for non-Crystal users:
 ```bash
 make package RELEASE=1
-# or
-powershell -File package.ps1
 ```
 This generates `dist/crystal_addon.zip`.
 

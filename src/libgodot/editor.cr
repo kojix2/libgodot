@@ -1138,16 +1138,20 @@ module Godot
 
       if needs_recompile
         Godot.print("[CrystalIntegrationPlugin] Recompiling modified addon: #{entry}...")
-        build_script = ["scripts/build_crystal.ps1", "../scripts/build_crystal.ps1", "../../scripts/build_crystal.ps1"].find { |p| File.exists?(p) }
-        pwsh_bin = Process.find_executable("pwsh") || Process.find_executable("powershell")
+        lapis_candidates = [
+          "bin/lapis.exe", "bin/lapis",
+          "../bin/lapis.exe", "../bin/lapis",
+          "../../bin/lapis.exe", "../../bin/lapis"
+        ]
+        lapis_bin = lapis_candidates.find { |p| File.exists?(p) } || Process.find_executable("lapis")
         out_io = IO::Memory.new
         err_io = IO::Memory.new
         compiler_env = build_compiler_env
 
-        status = if build_script && pwsh_bin
-          script_args = ["-NoProfile", "-File", File.expand_path(build_script), "-Entry", main_cr, "-Output", target_bin, "-LinkFlags", link_flags, "-Flags", "-Dlibgodot_addon"]
-          Godot.print("[CrystalIntegrationPlugin] Running: #{pwsh_bin} #{script_args.join(" ")}")
-          Process.run(pwsh_bin, script_args, env: compiler_env, output: out_io, error: err_io)
+        status = if lapis_bin
+          lapis_args = ["build", "--entry", main_cr, "--output", target_bin, "--link-flags", link_flags, "--flags", "-Dlibgodot_addon"]
+          Godot.print("[CrystalIntegrationPlugin] Running: #{lapis_bin} #{lapis_args.join(" ")}")
+          Process.run(File.expand_path(lapis_bin), lapis_args, env: compiler_env, output: out_io, error: err_io)
         else
           args = ["build", "--link-flags", link_flags]
           {% unless flag?(:windows) %}
@@ -1334,8 +1338,6 @@ module Godot
       "../../bin/lapis.exe", "../../bin/lapis"
     ]
     lapis_bin = lapis_candidates.find { |p| File.exists?(p) } || Process.find_executable("lapis")
-    build_script = ["scripts/build_crystal.ps1", "../scripts/build_crystal.ps1", "../../scripts/build_crystal.ps1"].find { |p| File.exists?(p) }
-    pwsh_bin = Process.find_executable("pwsh") || Process.find_executable("powershell")
     out_io = IO::Memory.new
     err_io = IO::Memory.new
 
@@ -1344,11 +1346,6 @@ module Godot
       lapis_args << "--release" if is_release
       Godot.print("[CrystalIntegrationPlugin] Running: #{lapis_bin} #{lapis_args.join(" ")}")
       Process.run(File.expand_path(lapis_bin), lapis_args, env: compiler_env, output: out_io, error: err_io)
-    elsif build_script && pwsh_bin
-      script_args = ["-NoProfile", "-File", File.expand_path(build_script), "-Entry", entry_file, "-Output", out_dll, "-LinkFlags", link_flags]
-      script_args << "-Release" if is_release
-      Godot.print("[CrystalIntegrationPlugin] Running: #{pwsh_bin} #{script_args.join(" ")}")
-      Process.run(pwsh_bin, script_args, env: compiler_env, output: out_io, error: err_io)
     else
       args = ["build", "--link-flags", link_flags]
       {% unless flag?(:windows) %}

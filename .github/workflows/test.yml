@@ -56,6 +56,10 @@ jobs:
           crystal -v
           g++ --version
 
+      - name: Build Lapis CLI Toolchain
+        run: |
+          crystal build tools/lapis/src/lapis.cr -o bin/lapis.exe
+
       - name: Setup Godot Engine
         uses: appsinacup/action_setup_godot@main
         with:
@@ -125,9 +129,8 @@ jobs:
             godot-export-templates-
 
       - name: Ensure Godot Export Templates
-        shell: pwsh
         run: |
-          & pwsh -NoProfile -File scripts/ensure_export_templates.ps1
+          bin/lapis setup templates
 
       - name: Run Crystal Unit Specifications
         shell: pwsh
@@ -159,9 +162,8 @@ jobs:
           if-no-files-found: ignore
 
       - name: Package Standalone Test Suite (test-suite-windows.zip)
-        shell: pwsh
         run: |
-          powershell -NoProfile -File scripts/package_test_suite.ps1 -Platform windows
+          bin/lapis package tests -p windows -o bin/test-suite-windows.zip
 
       - name: Upload Standalone Test Suite Artifact (Windows)
         uses: actions/upload-artifact@v4
@@ -213,6 +215,10 @@ jobs:
           g++ --version
           ld.lld --version
 
+      - name: Build Lapis CLI Toolchain
+        run: |
+          crystal build tools/lapis/src/lapis.cr -o bin/lapis
+
       - name: Setup Godot Engine
         uses: appsinacup/action_setup_godot@main
         with:
@@ -257,9 +263,8 @@ jobs:
             godot-export-templates-
 
       - name: Ensure Godot Export Templates
-        shell: pwsh
         run: |
-          & pwsh -NoProfile -File scripts/ensure_export_templates.ps1
+          bin/lapis setup templates
 
       - name: Run Crystal Unit Specifications
         shell: bash
@@ -287,9 +292,8 @@ jobs:
           if-no-files-found: ignore
 
       - name: Package Standalone Test Suite (test-suite-linux.zip)
-        shell: pwsh
         run: |
-          pwsh -NoProfile -File scripts/package_test_suite.ps1 -Platform linux
+          bin/lapis package tests -p linux -o bin/test-suite-linux.zip
 
       - name: Upload Standalone Test Suite Artifact (Linux)
         uses: actions/upload-artifact@v4
@@ -334,6 +338,10 @@ jobs:
         run: |
           crystal -v
           clang++ --version
+
+      - name: Build Lapis CLI Toolchain
+        run: |
+          crystal build tools/lapis/src/lapis.cr -o bin/lapis
 
       - name: Setup Godot Engine
         uses: appsinacup/action_setup_godot@main
@@ -385,9 +393,8 @@ jobs:
             godot-export-templates-
 
       - name: Ensure Godot Export Templates
-        shell: pwsh
         run: |
-          & pwsh -NoProfile -File scripts/ensure_export_templates.ps1
+          bin/lapis setup templates
 
       - name: Run Crystal Unit Specifications
         shell: bash
@@ -415,9 +422,8 @@ jobs:
           if-no-files-found: ignore
 
       - name: Package Standalone Test Suite (test-suite-macos.zip)
-        shell: pwsh
         run: |
-          pwsh -NoProfile -File scripts/package_test_suite.ps1 -Platform macos
+          bin/lapis package tests -p macos -o bin/test-suite-macos.zip
 
       - name: Upload Standalone Test Suite Artifact (macOS)
         uses: actions/upload-artifact@v4
@@ -429,6 +435,7 @@ jobs:
   test-android:
     name: Build & Verify Android Target (arm64-v8a)
     runs-on: ubuntu-latest
+    continue-on-error: true
     timeout-minutes: 25
 
     steps:

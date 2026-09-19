@@ -11,8 +11,6 @@ ifeq ($(OS),Windows_NT)
 	SO_EXT          = dll
 	EXE_EXT         = .exe
 	GODOT           ?= $(if $(wildcard ./godot.exe),./godot.exe,$(if $(wildcard ../godot.exe),../godot.exe,godot.exe))
-	PWSH_CMD        ?= powershell -NoProfile -ExecutionPolicy Bypass -Command
-	PWSH_FILE       ?= powershell -NoProfile -ExecutionPolicy Bypass -File
 	LINK_FLAGS      ?= /DLL /ENTRY:_DllMainCRTStartup /EXPORT:crystal_godot_init
 else
 	UNAME_S := $(shell uname -s 2>/dev/null)
@@ -21,27 +19,21 @@ else
 		SO_EXT          = dylib
 		EXE_EXT         =
 		GODOT           ?= $(if $(wildcard ./godot),./godot,$(if $(wildcard ../godot),../godot,godot))
-		PWSH_CMD        ?= pwsh -NoProfile -Command
-		PWSH_FILE       ?= pwsh -NoProfile -File
 		LINK_FLAGS      ?= -dynamiclib
 	else
 		PLATFORM        = linux
 		SO_EXT          = so
 		EXE_EXT         =
 		GODOT           ?= $(if $(wildcard ./godot),./godot,$(if $(wildcard ../godot),../godot,godot))
-		PWSH_CMD        ?= pwsh -NoProfile -Command
-		PWSH_FILE       ?= pwsh -NoProfile -File
 		LINK_FLAGS      ?= -shared
 	endif
 endif
 
 ENTRY           ?= src/main.cr
+LAPIS           ?= $(if $(wildcard ../bin/lapis$(EXE_EXT)),../bin/lapis$(EXE_EXT),lapis$(EXE_EXT))
 GAME_LIB        = $(ADDON_BIN_DIR)/game.$(SO_EXT)
 BRIDGE_SRC      = ../bin/crystal_bridge.$(SO_EXT)
-SCRIPTS_DIR     = $(if $(wildcard scripts),scripts,../scripts)
 SOURCE_DIR      = $(if $(wildcard ../src),../src,lib)
-
-RM              = $(PWSH_CMD) "Remove-Item -Force -ErrorAction SilentlyContinue"
 
 CRYSTAL_FLAGS   =
 ifeq ($(RELEASE), 1)
@@ -57,33 +49,34 @@ all: dirs deps bridge extension_list addons project_bindings build
 	@echo ===================================================================
 
 dirs:
-	@$(PWSH_CMD) "if (-not (Test-Path '$(ADDON_BIN_DIR)')) { New-Item -ItemType Directory -Force -Path '$(ADDON_BIN_DIR)' | Out-Null }"
+	@$(LAPIS) dirs
 
 deps: dirs
-	@$(PWSH_FILE) $(SCRIPTS_DIR)/ensure_deps.ps1 -TargetBin '$(ADDON_BIN_DIR)'
+	@$(LAPIS) deps -t $(ADDON_BIN_DIR)
 
 bridge: dirs
-	@$(PWSH_CMD) "if (Test-Path '$(BRIDGE_SRC)') { Copy-Item '$(BRIDGE_SRC)' '$(ADDON_BIN_DIR)/crystal_bridge.$(SO_EXT)' -Force -ErrorAction SilentlyContinue }"
+	@$(LAPIS) sync
 
 extension_list: dirs
-	@$(PWSH_CMD) "if (-not (Test-Path '.godot')) { New-Item -ItemType Directory -Force -Path '.godot' | Out-Null }; Set-Content -Path '.godot/extension_list.cfg' -Value @('res://$(ADDON_DIR)/crystal_addon.gdextension', 'res://addons/crystal_integration/crystal.gdextension') -Force"
+	@$(LAPIS) sync
 
 addons: dirs
-	@$(PWSH_FILE) $(SCRIPTS_DIR)/sync_addons.ps1 -Source ../addons -Destinations addons
+	@$(LAPIS) sync --addons-only
 
 project_bindings project-bindings: dirs
 	@echo [Addon] Dumping project custom GDScript and plugin nodes...
-	@$(PWSH_FILE) $(SCRIPTS_DIR)/generate_project_bindings.ps1
+	@$(LAPIS) bind project -p .
 
 bindings: project_bindings
 
 build: dirs deps bridge extension_list addons project_bindings
 	@echo [Addon] Compiling $(GAME_LIB) from $(ENTRY)...
-	@$(PWSH_FILE) $(SCRIPTS_DIR)/build_crystal.ps1 -Entry $(ENTRY) -Output $(GAME_LIB) -LinkFlags '$(LINK_FLAGS)' $(if $(filter 1,$(RELEASE)),-Release,) -SourcePath $(SOURCE_DIR) -Flags '-Dlibgodot_addon'
+	@$(LAPIS) build -e $(ENTRY) -o $(GAME_LIB) -l '$(LINK_FLAGS)' $(if $(filter 1,$(RELEASE)),-r,) -s $(SOURCE_DIR) --flags '-Dlibgodot_addon'
+	@$(LAPIS) sync
 
 package package_addon package-addon: all
 	@echo [Addon] Packaging distributable zip for '$(ADDON_NAME)'...
-	@$(PWSH_FILE) $(SCRIPTS_DIR)/package.ps1 -AddonName $(ADDON_NAME) $(if $(TARGET_DIR),-TargetDir "$(TARGET_DIR)",)
+	@$(LAPIS) package addon -p . -n $(ADDON_NAME) $(if $(TARGET_DIR),-t "$(TARGET_DIR)",)
 
 export: package
 
@@ -102,14 +95,13 @@ run: all
 	$(GODOT) --path .
 
 run_editor run-editor: all
-	@$(PWSH_FILE) $(SCRIPTS_DIR)/run_editor.ps1 -Path . $(if $(or $(LOG),$(LOG_FILE)),-LogFile "$(or $(LOG),$(LOG_FILE))",) $(if $(or $(QUIT),$(QUIT_AFTER)),-QuitAfter $(or $(QUIT),$(QUIT_AFTER)),) $(if $(filter 1,$(LLDB)),-LLDB,) $(if $(filter 1,$(BATCH)),-Batch,) $(ARGS)
+	@$(LAPIS) editor -p . $(if $(or $(QUIT),$(QUIT_AFTER)),--quit-after $(or $(QUIT),$(QUIT_AFTER)),)
 
 setup_dev setup-dev:
-	@$(PWSH_FILE) $(SCRIPTS_DIR)/setup_dev.ps1 $(if $(VERSION),-Version "$(VERSION)",)
+	@$(LAPIS) setup $(if $(VERSION),-v "$(VERSION)",)
 
 clean:
-	@$(RM) $(ADDON_BIN_DIR)/*
-	@$(RM) dist/*
+	@$(LAPIS) clean
 
 help:
 	@echo ===================================================================
@@ -118,14 +110,10 @@ help:
 	@echo   make                Build addon library and sync dependencies
 	@echo   make build          Compile addon Crystal library (game.$(SO_EXT))
 	@echo   make project-bindings Generate typed Crystal wrappers for GDScript nodes
-	@echo   make rebuild        Clean and rebuild all addon artifacts
-	@echo   make package        Package redistributable zip archive into dist/
-	@echo   make package-addon  Alias for 'make package'
-	@echo   make export         Alias for 'make package'
-	@echo   make export-release Package release optimized zip into dist/
-	@echo   make run            Run test project with addon in Godot
-	@echo   make editor         Launch Godot Editor to test addon
-	@echo   make run-editor     Launch editor [LOG=...] [QUIT=...] [LLDB=1]
-	@echo   make setup-dev      Download/setup Godot engine binary [VERSION=...]
-	@echo   make clean          Remove compiled addon binaries and dist/
+	@echo   make package        Create redistributable zip in dist/
+	@echo   make export-release Build optimized release zip in dist/
+	@echo   make editor         Launch Godot Editor with addon loaded
+	@echo   make run            Run local project with Godot
+	@echo   make setup-dev      Download and install Godot engine
+	@echo   make clean          Remove built binaries and distribution zips
 	@echo ===================================================================

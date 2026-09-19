@@ -2,11 +2,9 @@
 # Script Path: res://scripts/gdscript_inherits_crystal.gd
 module Godot
   class GdscriptInheritsCrystal < Godot::CharacterBody2D
-    # Wrap a native pointer to an existing GdscriptInheritsCrystal instance
     def initialize(pointer : Void* = Pointer(Void).null)
       super(pointer)
     end
-    # Helper to wrap any Godot node into a typed GdscriptInheritsCrystal
     def self.from(node : Godot::Object) : self
       new(node.pointer)
     end

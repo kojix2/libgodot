@@ -580,14 +580,19 @@ module Godot
 
     def on_package_game : Void
       log_info("Packaging standalone game executable...")
-      package_script = File.exists?("scripts/package_game.ps1") ? "scripts/package_game.ps1" : "../scripts/package_game.ps1"
-      if !File.exists?(package_script)
-        log_error("package_game.ps1 not found.")
+      lapis_candidates = [
+        "bin/lapis.exe", "bin/lapis",
+        "../bin/lapis.exe", "../bin/lapis",
+        "../../bin/lapis.exe", "../../bin/lapis"
+      ]
+      lapis_bin = lapis_candidates.find { |p| File.exists?(p) } || Process.find_executable("lapis")
+      if !lapis_bin
+        log_error("lapis toolchain not found.")
         return
       end
 
       output_io = IO::Memory.new
-      status = Process.run("powershell", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", package_script, "-ProjectPath", ".", "-ForceCompile"], output: output_io, error: output_io)
+      status = Process.run(File.expand_path(lapis_bin), ["package", "game", "-p", ".", "-f"], output: output_io, error: output_io)
       output_io.to_s.each_line { |l| append_log("  #{l}") }
 
       if status.success?
@@ -698,14 +703,19 @@ module Godot
 
     def on_recompile_all_addons : Void
       log_info("Recompiling all recompilable addons...")
-      recompile_script = File.exists?("scripts/recompile_addons.ps1") ? "scripts/recompile_addons.ps1" : "../scripts/recompile_addons.ps1"
-      if !File.exists?(recompile_script)
-        log_error("scripts/recompile_addons.ps1 not found.")
+      lapis_candidates = [
+        "bin/lapis.exe", "bin/lapis",
+        "../bin/lapis.exe", "../bin/lapis",
+        "../../bin/lapis.exe", "../../bin/lapis"
+      ]
+      lapis_bin = lapis_candidates.find { |p| File.exists?(p) } || Process.find_executable("lapis")
+      if !lapis_bin
+        log_error("lapis toolchain not found.")
         return
       end
 
       output_io = IO::Memory.new
-      status = Process.run("powershell", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", recompile_script, "-ProjectPath", ".", "-Force"], output: output_io, error: output_io)
+      status = Process.run(File.expand_path(lapis_bin), ["build", "addons"], output: output_io, error: output_io)
       output_io.to_s.each_line { |l| append_log("  #{l}") }
 
       if status.success?
@@ -720,11 +730,16 @@ module Godot
     end
 
     def recompile_modified_addons_silent : Void
-      recompile_script = File.exists?("scripts/recompile_addons.ps1") ? "scripts/recompile_addons.ps1" : "../scripts/recompile_addons.ps1"
-      return unless File.exists?(recompile_script)
+      lapis_candidates = [
+        "bin/lapis.exe", "bin/lapis",
+        "../bin/lapis.exe", "../bin/lapis",
+        "../../bin/lapis.exe", "../../bin/lapis"
+      ]
+      lapis_bin = lapis_candidates.find { |p| File.exists?(p) } || Process.find_executable("lapis")
+      return unless lapis_bin
 
       output_io = IO::Memory.new
-      Process.run("powershell", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", recompile_script, "-ProjectPath", "."], output: output_io, error: output_io)
+      Process.run(File.expand_path(lapis_bin), ["build", "addons"], output: output_io, error: output_io)
     rescue
     end
 

@@ -89,19 +89,18 @@ end
 # -------------------------------------------------------------
 puts "[Spec 3] Verifying automation scripts enforce .gdignore..."
 
-sync_bins_path = File.join(root_dir, "scripts/sync_bins.ps1")
-if File.exists?(sync_bins_path)
-  content = File.read(sync_bins_path)
+sync_tool_path = File.join(root_dir, "tools/lapis/src/commands/sync.cr")
+if File.exists?(sync_tool_path)
+  content = File.read(sync_tool_path)
   if !content.includes?(".gdignore")
-    abort "ERROR: scripts/sync_bins.ps1 does not contain logic to automatically create .gdignore in lib/ directories!"
+    abort "ERROR: tools/lapis/src/commands/sync.cr does not contain logic to automatically create .gdignore in lib/ directories!"
   end
-  puts "  ✓ scripts/sync_bins.ps1 enforces .gdignore placement"
+  puts "  ✓ tools/lapis/src/commands/sync.cr enforces .gdignore placement"
 end
 
-create_example_path = File.exists?(File.join(root_dir, "scripts/create_new_example.ps1")) ? File.join(root_dir, "scripts/create_new_example.ps1") : File.join(root_dir, "create-new-example.ps1")
-if File.exists?(create_example_path)
-  content = File.read(create_example_path)
-  puts "  ✓ create_new_example.ps1 verified"
+scaffold_tool_path = File.join(root_dir, "tools/lapis/src/commands/scaffold.cr")
+if File.exists?(scaffold_tool_path)
+  puts "  ✓ tools/lapis/src/commands/scaffold.cr verified"
 end
 
 puts "=== All Project Scaffolding & Directory Integrity Specifications Passed! ==="

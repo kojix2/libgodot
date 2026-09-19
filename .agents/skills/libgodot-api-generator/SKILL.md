@@ -11,36 +11,35 @@ This skill outlines how to dump the Godot GDExtension specification and regenera
 
 ---
 
-## 1. Dumping `extension_api.json`
+## 1. Dumping `extension_api.json` & Regenerating Engine Bindings
 
-Whenever Godot is updated or new engine modules are added, dump the API definition:
+Whenever Godot is updated or new engine modules are added, regenerate the API bindings using `lapis`:
+```bash
+lapis bind engine --dump
+```
+Or via Makefile:
 ```bash
 make dump_api
-```
-Or directly:
-```bash
-./godot.exe --headless --dump-extension-api
-```
-This writes `extension_api.json` in the root repository directory (~12 MB).
-
----
-
-## 2. Regenerating Crystal Bindings
-
-To run the binding code generator:
-```bash
 make generate
 ```
-Or directly:
-```bash
-crystal run tools/api_generator/generate_bindings.cr
-```
-
-This generates:
+This automatically dumps `extension_api.json` from the Godot engine and generates:
 - `src/libgodot/generated/global_enums.cr`: Global engine enums (`Error`, `Key`, `MouseButton`, etc.).
 - `src/libgodot/generated/singletons.cr`: Engine singletons (`Engine`, `Input`, `AudioServer`, etc.).
 - `src/libgodot/generated/classes/*.cr`: Topologically sorted Godot engine class definitions with typed method bindings, doc comments, and properties.
 - `src/libgodot/generated/classes/all_classes.cr`: Manifest requiring all generated classes in topological dependency order.
+
+---
+
+## 2. Generating Project GDScript Node Bindings
+
+To inspect custom GDScript nodes in a project and generate typed Crystal wrapper classes:
+```bash
+lapis bind project [project_dir]
+```
+Or via Makefile:
+```bash
+make project_bindings [PROJECT=path]
+```
 
 ---
 

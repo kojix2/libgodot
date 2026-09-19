@@ -2,6 +2,7 @@ require "../core/env"
 require "../core/logger"
 require "../core/process_runner"
 require "../core/godot_finder"
+require "./bind/project"
 require "file_utils"
 require "option_parser"
 
@@ -24,39 +25,175 @@ module Lapis
         return if gd_files.empty?
 
         Core::Logger.info("Detected custom GDScript files in #{proj_dir.basename}, generating project bindings...")
+        Bind::Project.generate(project_path: proj_dir)
+      end
 
-        dump_script = [
-          proj_dir.join("scripts/dump_project_nodes.gd"),
-          proj_dir.join("tools/api_generator/dump_project_nodes.gd"),
-          root.join("tools/api_generator/dump_project_nodes.gd"),
-        ].find { |p| File.exists?(p) }
+      # Core compilation function for a single Crystal binary
+      def self.compile_binary(
+        entry_path : Path,
+        output_path : Path,
+        link_flags : String? = nil,
+        flags : String? = nil,
+        release : Bool = false,
+        source_path : String? = nil
+      ) : Int32
+        root = Core::Env::ROOT_DIR
+        FileUtils.mkdir_p(output_path.parent) unless Dir.exists?(output_path.parent)
 
-        gen_script = [
-          proj_dir.join("scripts/generate_project_bindings.cr"),
-          proj_dir.join("tools/api_generator/generate_project_bindings.cr"),
-          root.join("tools/api_generator/generate_project_bindings.cr"),
-        ].find { |p| File.exists?(p) }
+        check_and_generate_project_bindings(entry_path, root)
 
-        godot_exe = Core::GodotFinder.resolve
+        src_dir = if sp = source_path
+          Path.new(sp).expand
+        else
+          root.join("src")
+        end
+        base_crystal_path = Core::ProcessRunner.capture("crystal", ["env", "CRYSTAL_PATH"])[:output].strip
+        full_crystal_path = "#{src_dir}#{Core::Env.path_sep}#{base_crystal_path}"
 
-        if dump_script && gen_script && godot_exe
-          # 1. Run Godot dump
-          Core::ProcessRunner.run(
-            godot_exe,
-            ["--headless", "--path", proj_dir.to_s, "--script", dump_script.to_s],
-            chdir: proj_dir.to_s
-          )
+        cmd_args = ["build", entry_path.to_s, "-o", output_path.to_s]
+        cmd_args << "--release" if release
 
-          # 2. Run generator
-          out_json = proj_dir.join("src/generated/project_nodes.json")
-          out_dir = proj_dir.join("src/generated/project_nodes")
-          if File.exists?(out_json)
-            Core::ProcessRunner.run(
-              "crystal",
-              ["run", gen_script.to_s, "--", out_json.to_s, out_dir.to_s],
-              chdir: root.to_s
-            )
+        if (lf = link_flags) && !lf.empty?
+          cmd_args << "--link-flags"
+          cmd_args << lf
+        end
+
+        if (fl = flags) && !fl.empty?
+          fl.split(' ').each do |f|
+            cmd_args << f unless f.empty?
           end
+        end
+
+        env = {"CRYSTAL_PATH" => full_crystal_path}
+
+        Core::Logger.step("Build", "Compiling #{output_path.basename}...")
+        status = Core::ProcessRunner.run(
+          "crystal",
+          cmd_args,
+          env: env,
+          chdir: root.to_s
+        )
+
+        if status.success?
+          Core::Logger.success("#{output_path.basename} built successfully!")
+          0
+        else
+          Core::Logger.error("Build failed with exit code #{status.exit_code}")
+          status.exit_code
+        end
+      end
+
+      def self.build_addons(args : Array(String)) : Int32
+        release = false
+        parser = OptionParser.new do |opts|
+          opts.banner = "Usage: lapis build addons [options]"
+          opts.on("-r", "--release", "Compile in release mode with optimizations") { release = true }
+          opts.on("-h", "--help", "Show help") do
+            puts opts
+            exit 0
+          end
+        end
+        parser.parse(args)
+
+        root = Core::Env::ROOT_DIR
+        test_addons = root.join("test/addons")
+        return 0 unless Dir.exists?(test_addons)
+
+        ext = Core::Env.dll_ext
+        link_flags = Core::Env.link_flags
+
+        failed = 0
+        Dir.each_child(test_addons) do |name|
+          addon_dir = test_addons.join(name)
+          next unless Dir.exists?(addon_dir) && (name.starts_with?("dummy_") || File.exists?(addon_dir.join("src/main.cr")))
+
+          main_cr = addon_dir.join("src/main.cr")
+          next unless File.exists?(main_cr)
+
+          bin_dir = addon_dir.join("bin")
+          FileUtils.mkdir_p(bin_dir) unless Dir.exists?(bin_dir)
+          out_lib = bin_dir.join("#{name}.#{ext}")
+
+          Core::Logger.step("DummyAddon", "Compiling #{name} -> #{out_lib.basename}...")
+          code = compile_binary(
+            entry_path: main_cr,
+            output_path: out_lib,
+            link_flags: link_flags,
+            flags: "-Dlibgodot_addon",
+            release: release
+          )
+          failed += 1 if code != 0
+        end
+
+        if failed == 0
+          Core::Logger.success("All test addons built successfully!")
+          0
+        else
+          Core::Logger.error("#{failed} addon(s) failed to build.")
+          1
+        end
+      end
+
+      def self.build_examples(args : Array(String)) : Int32
+        release = false
+        exe = false
+
+        parser = OptionParser.new do |opts|
+          opts.banner = "Usage: lapis build examples [options]"
+          opts.on("-r", "--release", "Compile in release mode with optimizations") { release = true }
+          opts.on("-x", "--exe", "Compile standalone executable target (game_exe)") { exe = true }
+          opts.on("-h", "--help", "Show help") do
+            puts opts
+            exit 0
+          end
+        end
+        parser.parse(args)
+
+        root = Core::Env::ROOT_DIR
+        examples_dir = root.join("examples")
+        return 0 unless Dir.exists?(examples_dir)
+
+        failed = 0
+        Dir.each_child(examples_dir) do |name|
+          ex_dir = examples_dir.join(name)
+          next unless Dir.exists?(ex_dir)
+
+          makefile = ex_dir.join("Makefile")
+          if File.exists?(makefile)
+            target = exe ? "game_exe" : "all"
+            make_args = [target]
+            make_args << "RELEASE=1" if release
+
+            Core::Logger.step("Examples", "Building #{target} for #{name}...")
+            status = Core::ProcessRunner.run("make", make_args, chdir: ex_dir.to_s)
+            failed += 1 unless status.success?
+          elsif File.exists?(ex_dir.join("src/main.cr"))
+            bin_dir = ex_dir.join("bin")
+            FileUtils.mkdir_p(bin_dir) unless Dir.exists?(bin_dir)
+            out_file = if exe
+              bin_dir.join("game#{Core::Env.exe_ext}")
+            else
+              bin_dir.join("game.#{Core::Env.dll_ext}")
+            end
+            link_flags = exe ? nil : Core::Env.link_flags
+
+            Core::Logger.step("Examples", "Building #{name} -> #{out_file.basename}...")
+            code = compile_binary(
+              entry_path: ex_dir.join("src/main.cr"),
+              output_path: out_file,
+              link_flags: link_flags,
+              release: release
+            )
+            failed += 1 if code != 0
+          end
+        end
+
+        if failed == 0
+          Core::Logger.success("All examples built successfully!")
+          0
+        else
+          Core::Logger.error("#{failed} example(s) failed to build.")
+          1
         end
       end
 
@@ -64,20 +201,30 @@ module Lapis
         puts <<-HELP
 \e[35m=== Lapis: Crystal Game & Plugin Compiler ===\e[0m
 
-Usage: lapis build --entry <path.cr> --output <path.dll|path.exe> [options]
+Usage:
+  lapis build [options]
+  lapis build addons [options]
+  lapis build examples [options]
 
-Options:
-  -e, --entry=PATH      Entry source file (.cr) [Required]
-  -o, --output=PATH     Output binary path (.dll, .so, .dylib, or .exe) [Required]
+Subcommands:
+  addons                Build all test/dummy addons in test/addons/
+  examples              Build all showcase examples in examples/
+
+Options for single binary build:
+  -e, --entry=PATH      Entry source file (.cr) [Required for direct build]
+  -o, --output=PATH     Output binary path (.dll, .so, .dylib, or .exe) [Required for direct build]
   -r, --release         Compile in release mode with optimizations (-O3)
   -l, --link-flags=FLAGS Linker flags passed to crystal build
   -f, --flags=FLAGS     Extra Crystal compiler flags (e.g. -Dlibgodot_addon)
   -s, --source-path=DIR Source path prepended to CRYSTAL_PATH
+  -x, --exe             Target executable instead of library (for examples)
   -h, --help            Show this help screen
 
 Examples:
   lapis build -e src/editor/plugin.cr -o bin/plugin.dll --flags "-Dlibgodot_addon"
   lapis build -e template/src/main.cr -o template/bin/game.dll --release
+  lapis build addons --release
+  lapis build examples
 HELP
       end
 
@@ -85,6 +232,12 @@ HELP
         if args.empty? || args.includes?("-h") || args.includes?("--help")
           print_help
           return 0
+        end
+
+        if args[0] == "addons"
+          return build_addons(args[1..])
+        elsif args[0] == "examples"
+          return build_examples(args[1..])
         end
 
         entry : String? = nil
@@ -114,58 +267,14 @@ HELP
           return 1
         end
 
-        root = Core::Env::ROOT_DIR
-        entry_path = Path.new(entry.not_nil!).expand
-        output_path = Path.new(output.not_nil!).expand
-
-        # Ensure output directory exists
-        FileUtils.mkdir_p(output_path.parent) unless Dir.exists?(output_path.parent)
-
-        # Check and auto-dump project bindings if applicable
-        check_and_generate_project_bindings(entry_path, root)
-
-        # Determine CRYSTAL_PATH
-        src_dir = if sp = source_path
-          Path.new(sp).expand
-        else
-          root.join("src")
-        end
-        base_crystal_path = Core::ProcessRunner.capture("crystal", ["env", "CRYSTAL_PATH"])[:output].strip
-        full_crystal_path = "#{src_dir}#{Core::Env.path_sep}#{base_crystal_path}"
-
-        # Construct crystal build command
-        cmd_args = ["build", entry_path.to_s, "-o", output_path.to_s]
-        cmd_args << "--release" if release
-
-        if (lf = link_flags) && !lf.empty?
-          cmd_args << "--link-flags"
-          cmd_args << lf
-        end
-
-        if (fl = flags) && !fl.empty?
-          fl.split(' ').each do |f|
-            cmd_args << f unless f.empty?
-          end
-        end
-
-        # Override CRYSTAL_PATH while inheriting other environment variables
-        env = {"CRYSTAL_PATH" => full_crystal_path}
-
-        Core::Logger.step("Build", "Compiling #{output_path.basename}...")
-        status = Core::ProcessRunner.run(
-          "crystal",
-          cmd_args,
-          env: env,
-          chdir: root.to_s
+        compile_binary(
+          entry_path: Path.new(entry.not_nil!).expand,
+          output_path: Path.new(output.not_nil!).expand,
+          link_flags: link_flags,
+          flags: flags,
+          release: release,
+          source_path: source_path
         )
-
-        if status.success?
-          Core::Logger.success("#{output_path.basename} built successfully!")
-          0
-        else
-          Core::Logger.error("Build failed with exit code #{status.exit_code}")
-          status.exit_code
-        end
       end
     end
   end

@@ -19,9 +19,6 @@ template/
 ├── src/
 │   └── main.cr             # Game entry point and custom nodes
 ├── Makefile                # Cross-platform build configuration (Windows & Linux)
-├── build.ps1               # PowerShell build script
-├── run.ps1                 # PowerShell run script
-└── run-editor.ps1          # PowerShell editor launcher script
 ```
 
 ---
@@ -80,12 +77,6 @@ make run      # Launch with Godot
 make editor   # Open in Godot Editor
 ```
 
-Or run via PowerShell scripts:
-
-```powershell
-.\build.ps1
-.\run.ps1
-```
 
 ---
 

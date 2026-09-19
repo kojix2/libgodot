@@ -4,19 +4,34 @@ require "path"
 module Lapis
   module Core
     module Env
-      # Find project root by searching upwards for shard.yml or Makefile
+      # Find project root by searching upwards for the main workspace root (containing src/libgodot.cr or tools/lapis),
+      # or fallback to first directory with shard.yml or Makefile.
       def self.find_root : Path
         current = Path.new(Dir.current).expand
+        # 1. Search upwards for true repository / workspace root
+        cursor = current
         loop do
-          if File.exists?(current.join("shard.yml")) && File.exists?(current.join("Makefile"))
-            return current
+          if File.exists?(cursor.join("src/libgodot.cr")) || Dir.exists?(cursor.join("tools/lapis"))
+            return cursor
           end
-          parent = current.parent
-          break if parent == current
-          current = parent
+          parent = cursor.parent
+          break if parent == cursor
+          cursor = parent
         end
+
+        # 2. If outside the main repo (e.g. standalone user project), search for shard.yml / Makefile
+        cursor = current
+        loop do
+          if File.exists?(cursor.join("shard.yml")) && File.exists?(cursor.join("Makefile"))
+            return cursor
+          end
+          parent = cursor.parent
+          break if parent == cursor
+          cursor = parent
+        end
+
         # Fallback to current working directory
-        Path.new(Dir.current).expand
+        current
       end
 
       ROOT_DIR = find_root
@@ -57,6 +72,16 @@ module Lapis
 
       def self.exe_ext : String
         windows? ? ".exe" : ""
+      end
+
+      def self.link_flags : String
+        if windows?
+          "/DLL /ENTRY:_DllMainCRTStartup /EXPORT:crystal_godot_init"
+        elsif macos?
+          "-dynamiclib"
+        else
+          "-shared"
+        end
       end
 
       def self.path_sep : String

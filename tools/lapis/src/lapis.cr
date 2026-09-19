@@ -8,6 +8,10 @@ require "./commands/test"
 require "./commands/editor"
 require "./commands/scaffold"
 require "./commands/package"
+require "./commands/bind"
+require "./commands/clean"
+require "./commands/docs"
+require "./commands/setup"
 
 module Lapis
   VERSION = "0.1.0"
@@ -27,14 +31,18 @@ Usage:
   deps                  Verify and copy Crystal runtime dependencies & libgodot DLLs
   sync                  Synchronize binaries, addons, and manifests across all targets
   build                 Compile Crystal game libraries, plugins, or standalone executables
+  bind, generate        Generate typed bindings for Godot engine or project custom nodes
+  clean                 Remove compiled game and bridge binaries (safely preserves runtime DLLs)
 
 \e[36mTesting & Development Commands:\e[0m
   test                  Run unit specs, in-editor tool tests, and runtime test projects
   editor                Launch Godot Editor with log monitoring, auto-quit, and LLDB attachment
+  setup                 Download and configure targeted Godot engine binary
 
 \e[36mScaffolding & Distribution Commands:\e[0m
-  scaffold, new         Scaffold a new addon or showcase example ('lapis scaffold <addon|example> <name>')
-  package               Create native .zip distribution archives ('lapis package <template|addon>')
+  scaffold, new         Scaffold a new game, addon, or example ('lapis new game [name]')
+  package               Create native .zip distribution archives or playable standalone game
+  docs                  Generate and patch HTML API documentation
 
 \e[36mGlobal Options:\e[0m
   -v, --version         Show Lapis toolchain version
@@ -46,12 +54,14 @@ Usage:
   lapis dirs
   lapis deps
   lapis sync
+  lapis new game my_game
+  lapis bind engine                     # Generate LibGodot engine class bindings
+  lapis bind project                    # Generate wrappers for custom GDScript nodes
   lapis build -e src/editor/plugin.cr -o bin/plugin.dll --flags "-Dlibgodot_addon"
-  lapis test --skip-specs
+  lapis test
   lapis editor -p test --quit-after 5
-  lapis scaffold example my_rpg
-  lapis scaffold addon custom_particles -a "Developer"
-  lapis package template -o dist/template.zip
+  lapis package game -p template -r
+  lapis clean
 
 For detailed help on any subcommand, run:
   lapis help <subcommand>   or   lapis <subcommand> --help
@@ -69,14 +79,22 @@ HELP
       Commands::Sync.run(["--help"])
     when "build"
       Commands::Build.run(["--help"])
+    when "bind", "generate", "bindings"
+      Commands::Bind.run(["--help"])
+    when "clean"
+      Commands::Clean.run(["--help"])
     when "test"
       Commands::Test.run(["--help"])
     when "editor"
       Commands::Editor.run(["--help"])
+    when "setup"
+      Commands::Setup.run(["--help"])
     when "scaffold", "new"
       Commands::Scaffold.print_help
     when "package"
       Commands::Package.run(["--help"])
+    when "docs"
+      Commands::Docs.run(["--help"])
     else
       Core::Logger.error("Unknown command for help: '#{subcommand}'")
       puts
@@ -137,14 +155,22 @@ HELP
       Commands::Sync.run(sub_args)
     when "build"
       Commands::Build.run(sub_args)
+    when "bind", "generate", "bindings"
+      Commands::Bind.run(sub_args)
+    when "clean"
+      Commands::Clean.run(sub_args)
     when "test"
       Commands::Test.run(sub_args)
     when "editor"
       Commands::Editor.run(sub_args)
+    when "setup"
+      Commands::Setup.run(sub_args)
     when "scaffold", "new"
       Commands::Scaffold.run(sub_args)
     when "package"
       Commands::Package.run(sub_args)
+    when "docs"
+      Commands::Docs.run(sub_args)
     else
       Core::Logger.error("Unknown command: '#{subcommand}'")
       puts

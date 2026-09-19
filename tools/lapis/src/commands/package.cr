@@ -152,6 +152,8 @@ module Lapis
             src_f = test_bin.join(f)
             if File.file?(src_f)
               safe_copy(src_f, stage_dir.join(f))
+            elsif Dir.exists?(src_f) && (f == "addons" || f == ".godot")
+              FileUtils.cp_r(src_f.to_s, stage_dir.join(f).to_s)
             end
           end
         end
@@ -242,6 +244,35 @@ module Lapis
           all_exts << "res://addons/crystal_integration/crystal.gdextension"
         end
         File.write(ext_list_file, all_exts.join("\n") + "\n")
+
+        # Also copy extension_list.cfg and addons to bin_dir for standalone runner
+        bin_godot = bin_dir.join(".godot")
+        FileUtils.mkdir_p(bin_godot) unless Dir.exists?(bin_godot)
+        safe_copy(ext_list_file, bin_godot.join("extension_list.cfg"))
+
+        if Dir.exists?(proj_addons_dir)
+          dst_addons = bin_dir.join("addons")
+          FileUtils.mkdir_p(dst_addons) unless Dir.exists?(dst_addons)
+          Dir.each_child(proj_addons_dir) do |addon_name|
+            src_addon_dir = proj_addons_dir.join(addon_name)
+            next unless Dir.exists?(src_addon_dir)
+            dst_addon_dir = dst_addons.join(addon_name)
+            FileUtils.mkdir_p(dst_addon_dir) unless Dir.exists?(dst_addon_dir)
+            Sync.sync_addon_directory(src_addon_dir, dst_addon_dir)
+            src_addon_bin = src_addon_dir.join("bin")
+            if Dir.exists?(src_addon_bin)
+              dst_addon_bin = dst_addon_dir.join("bin")
+              FileUtils.mkdir_p(dst_addon_bin) unless Dir.exists?(dst_addon_bin)
+              Dir.each_child(src_addon_bin) do |b_file|
+                next if b_file.starts_with?("~") || b_file.ends_with?(".log")
+                safe_copy(src_addon_bin.join(b_file), dst_addon_bin.join(b_file))
+              end
+            end
+            Dir.glob(src_addon_dir.to_s.gsub('\\', '/') + "/*.gdextension").each do |gdext|
+              safe_copy(Path.new(gdext), dst_addon_dir.join(Path.new(gdext).basename))
+            end
+          end
+        end
 
         # 4. Copy runtime dependencies
         Deps.run(["-t", bin_dir.to_s])

@@ -197,6 +197,13 @@ jobs:
             test/.tool_tests_failed
             test/.runtime_tests_passed
             test/.runtime_tests_failed
+            test/bin/test_report.md
+            test/bin/test_report.json
+            test/bin/.runtime_test_results.txt
+            test/bin/.tool_tests_passed
+            test/bin/.tool_tests_failed
+            test/bin/.runtime_tests_passed
+            test/bin/.runtime_tests_failed
           if-no-files-found: ignore
 
       - name: Package Windows Examples (examples-windows-x86_64.zip)
@@ -388,6 +395,13 @@ jobs:
             test/.tool_tests_failed
             test/.runtime_tests_passed
             test/.runtime_tests_failed
+            test/bin/test_report.md
+            test/bin/test_report.json
+            test/bin/.runtime_test_results.txt
+            test/bin/.tool_tests_passed
+            test/bin/.tool_tests_failed
+            test/bin/.runtime_tests_passed
+            test/bin/.runtime_tests_failed
           if-no-files-found: ignore
 
       - name: Package Linux Examples (examples-linux-x86_64.zip)
@@ -708,6 +722,13 @@ jobs:
             test/.tool_tests_failed
             test/.runtime_tests_passed
             test/.runtime_tests_failed
+            test/bin/test_report.md
+            test/bin/test_report.json
+            test/bin/.runtime_test_results.txt
+            test/bin/.tool_tests_passed
+            test/bin/.tool_tests_failed
+            test/bin/.runtime_tests_passed
+            test/bin/.runtime_tests_failed
           if-no-files-found: ignore
 
       - name: Package macOS Examples (examples-macos.zip)
